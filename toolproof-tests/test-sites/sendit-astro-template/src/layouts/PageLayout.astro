@@ -1,0 +1,21 @@
+---
+import Page from "@shared/page";
+import Layout, { SEOProps } from "./Layout.astro";
+
+type Props = {
+  frontmatter: {
+    title: string;
+    content_blocks: Array<Record<string, any>>;
+    seo?: SEOProps;
+  };
+};
+
+if (!Astro.props.frontmatter) {
+  throw new Error("Page frontmatter must be defined");
+}
+const props = Astro.props.frontmatter;
+---
+
+<Layout {...props}>
+  <Page bookshop:live contentBlocks={props.content_blocks} />
+</Layout>

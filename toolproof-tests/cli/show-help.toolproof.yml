@@ -1,0 +1,9 @@
+name: CLI shows help
+
+steps:
+  - I run "cp -R %test_sites%/vonge-jekyll src"
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure -h"
+  - stdout should contain "USAGE"
+  - stdout should contain "detect-ssg"
+  - stdout should contain "generate"

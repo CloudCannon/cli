@@ -1,0 +1,7 @@
+name: CLI ssg override flag
+
+steps:
+  - I run "cp -R %test_sites%/sendit-astro-template src"
+  - ref: ./../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-source src --ssg eleventy"
+  - stdout should contain "eleventy"

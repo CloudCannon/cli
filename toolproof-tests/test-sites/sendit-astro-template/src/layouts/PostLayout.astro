@@ -1,0 +1,102 @@
+---
+import Layout, { SEOProps } from "@layouts/Layout.astro";
+import PostSummary from "@components/posts/summary";
+import { getCollection } from "astro:content";
+import type { MarkdownLayoutProps } from "astro";
+
+type Props =
+  | {
+      title: string;
+      date: Date;
+      featured_image: {
+        image: string;
+        image_alt: string;
+      };
+      author: string;
+      seo?: SEOProps;
+      body: string;
+    }
+  | MarkdownLayoutProps<{
+      title: string;
+      date: Date;
+      featured_image: {
+        image: string;
+        image_alt: string;
+      };
+      author: string;
+      seo?: SEOProps;
+    }>;
+
+const props = Astro.props.frontmatter ?? Astro.props;
+const { title, date, featured_image, author } = props;
+const content = Astro.props.body ?? Astro.props.rawContent();
+const wordCount = content.split(" ").length;
+const readingTime = Math.floor(wordCount / 183);
+
+const posts = await getCollection("blog");
+---
+
+<Layout {...props}>
+  <section class="blog-details">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <article class="blog-single">
+            <div class="inner-blog-details">
+              <h2 class="w-xxl-70 w-xl-80 w-100">{title}</h2>
+              <div class="inner-blog-details-meta">
+                <ul class="list-unstyled">
+                  <li class="list-inline-item">
+                    <p>
+                      {
+                        date.toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      }
+                    </p>
+                  </li>
+                  <li class="list-inline-item">
+                    <p>{author}</p>
+                  </li>
+                  <li class="list-inline-item">
+                    <p>{readingTime} <span>minutes</span></p>
+                  </li>
+                  <li class="list-inline-item">
+                    <p>{wordCount} <span>words</span></p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="rounded-box mb-xxl-11 mb-8">
+              <img
+                src={featured_image.image}
+                class="w-100"
+                alt={featured_image.image_alt}
+              />
+            </div>
+            <div style={{ "max-width": "900px", margin: "0 auto" }}>
+              <slot />
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-related position-relative">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="blog-section">
+            <h2 class="blog-section-title">Recent Blog</h2>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        {posts.slice(0, 3).map((post, i) => <PostSummary post={post} />)}
+      </div>
+    </div>
+  </section>
+</Layout>
