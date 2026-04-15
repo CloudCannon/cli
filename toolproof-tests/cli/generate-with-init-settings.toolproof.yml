@@ -1,9 +1,9 @@
-name: CLI generate auto with init-settings
+name: CLI generate auto with initial-site-settings
 
 steps:
   - I run "cp -R %test_sites%/sendit-hugo-template src"
   - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure generate src --auto --init-settings"
+  - I run "npm -s run cloudcannon -- configure generate src --auto --initial-site-settings"
   - I run "cat src/cloudcannon.config.yml"
   - stdout should contain "collections_config"
   - I run "cat src/.cloudcannon/initial-site-settings.json"

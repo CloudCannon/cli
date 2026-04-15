@@ -1,9 +1,9 @@
-name: CLI generate json outputs to stdout
+name: CLI generate dry-run
 
 steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
   - ref: ./../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure generate src --auto --json"
+  - I run "npm -s run cloudcannon -- configure generate src --auto --dry-run"
   - stdout should contain "astro"
   - stdout should contain "collections_config"
   - stdout should contain "collections"
