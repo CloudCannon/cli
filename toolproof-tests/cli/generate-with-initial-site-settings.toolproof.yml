@@ -1,0 +1,67 @@
+name: generate with initial site settings
+
+steps:
+  - I run "cp -R %test_sites%/sendit-hugo-template src"
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate src --auto --initial-site-settings"
+  - I run "cat src/cloudcannon.config.yml"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎paths:
+      ╎  static: static
+      ╎  uploads: static/uploads
+      ╎timezone: Pacific/Auckland
+      ╎markdown:
+      ╎  engine: commonmark
+      ╎  options:
+      ╎    gfm: true
+      ╎    linkify: false
+      ╎    table: false
+      ╎    strikethrough: false
+      ╎    subscript: false
+      ╎    superscript: false
+      ╎    heading_ids: false
+      ╎    breaks: false
+      ╎    xhtml: false
+      ╎    attributes: false
+      ╎    typographer: false
+      ╎    treat_indentation_as_code: true
+      ╎_snippets_imports:
+      ╎  hugo:
+      ╎    exclude:
+      ╎      - hugo_instagram
+      ╎collections_config:
+      ╎  pages:
+      ╎    path: content
+      ╎    icon: wysiwyg
+      ╎  blog:
+      ╎    path: content/blog
+      ╎    icon: event_available
+      ╎    glob:
+      ╎      - '!_index.md'
+      ╎  data:
+      ╎    path: data
+      ╎    icon: data_usage
+      ╎    disable_url: true
+      ╎    disable_add: true
+      ╎    disable_add_folder: true
+      ╎    disable_file_actions: true
+  - I run "cat src/.cloudcannon/initial-site-settings.json"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "ssg": "hugo",
+      ╎  "mode": "hosted",
+      ╎  "build": {
+      ╎    "install_command": "npm i",
+      ╎    "build_command": "npm run build",
+      ╎    "output_path": "public",
+      ╎    "environment_variables": [
+      ╎      {
+      ╎        "key": "HUGO_CACHEDIR",
+      ╎        "value": "/usr/local/__site/src/.hugo_cache/"
+      ╎      }
+      ╎    ],
+      ╎    "preserved_paths": "node_modules/,resources/,.hugo_cache/"
+      ╎  }
+      ╎}

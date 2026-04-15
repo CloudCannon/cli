@@ -1,8 +1,8 @@
-name: CLI detect-source subcommand
+name: detect source
 
 steps:
   - I run "cp -R %test_sites%/vonge-jekyll src"
-  - ref: ./../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - I run "npm -s run cloudcannon -- configure detect-source src"
   - snapshot: stdout
     snapshot_content: |-

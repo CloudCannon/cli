@@ -1,0 +1,89 @@
+name: generate with source
+
+steps:
+  - I run "cp -R %test_sites%/vonge-jekyll src"
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate src --auto --source site"
+  - I run "cat src/cloudcannon.config.yml"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎paths:
+      ╎  static: ''
+      ╎  uploads: uploads
+      ╎timezone: Pacific/Auckland
+      ╎markdown:
+      ╎  engine: kramdown
+      ╎  options:
+      ╎    heading_ids: false
+      ╎    gfm: false
+      ╎    breaks: false
+      ╎    typographer: false
+      ╎    attributes: true
+      ╎    attribute_elements:
+      ╎      inline: right
+      ╎      block: below
+      ╎      tr: none
+      ╎      td: none
+      ╎      li: right-of-prefix
+      ╎    treat_indentation_as_code: true
+      ╎source: site
+      ╎_snippets_imports:
+      ╎  jekyll: true
+      ╎collections_config:
+      ╎  pages:
+      ╎    path: collections/_pages
+      ╎    icon: wysiwyg
+      ╎  drafts:
+      ╎    path: collections/_drafts
+      ╎    icon: event
+      ╎    create:
+      ╎      publish_to: posts
+      ╎    _inputs:
+      ╎      categories:
+      ╎        type: multiselect
+      ╎        options:
+      ╎          values: collections.posts[*].categories
+      ╎          allow_create: true
+      ╎      tags:
+      ╎        type: multiselect
+      ╎        options:
+      ╎          values: collections.posts[*].tags
+      ╎          allow_create: true
+      ╎  posts:
+      ╎    path: collections/_posts
+      ╎    icon: event_available
+      ╎    create:
+      ╎      path: '[relative_base_path]/{date|year}-{date|month}-{date|day}-{title|slugify}.[ext]'
+      ╎    _inputs:
+      ╎      categories:
+      ╎        type: multiselect
+      ╎        options:
+      ╎          values: collections.posts[*].categories
+      ╎          allow_create: true
+      ╎      tags:
+      ╎        type: multiselect
+      ╎        options:
+      ╎          values: collections.posts[*].tags
+      ╎          allow_create: true
+      ╎    add_options:
+      ╎      - name: Add Post
+      ╎      - name: Add Draft
+      ╎        collection: drafts
+      ╎  projects:
+      ╎    path: collections/_projects
+      ╎    icon: eject
+      ╎  source:
+      ╎    path: ''
+      ╎    icon: package_2
+      ╎    disable_url: true
+      ╎  data:
+      ╎    path: _data
+      ╎    icon: data_usage
+      ╎    disable_url: true
+      ╎    disable_add: true
+      ╎    disable_add_folder: true
+      ╎    disable_file_actions: true
+      ╎  testimonials:
+      ╎    path: collections/_testimonials
+      ╎    icon: festival
+      ╎    disable_url: true

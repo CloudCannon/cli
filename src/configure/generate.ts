@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import * as p from '@clack/prompts';
 import type {
 	CollectionConfig,
@@ -258,7 +258,8 @@ async function confirmAndWrite(path: string, content: string, dryRun: boolean): 
 
 async function writeOrLog(path: string, content: string, dryRun: boolean): Promise<void> {
 	if (dryRun) {
-		console.log(path, content);
+		console.log(em(basename(path)));
+		console.log(content);
 	} else {
 		await writeFileAndFolder(path, content);
 		console.log(`${success('Wrote:')} ${path}`);
@@ -274,8 +275,8 @@ async function generateInteractive(
 		'dry-run'?: boolean;
 		output?: string;
 		mode?: Mode;
-		'initial-build-settings'?: boolean;
-		'initial-build-settings-only'?: boolean;
+		'initial-site-settings'?: boolean;
+		'initial-site-settings-only'?: boolean;
 		'install-command'?: string;
 		'build-command'?: string;
 		'output-path'?: string;
@@ -302,7 +303,7 @@ async function generateInteractive(
 
 	const selectedCollectionKeys = await promptCollections(result.collections);
 
-	if (!options?.['initial-build-settings-only']) {
+	if (!options?.['initial-site-settings-only']) {
 		const config = { ...result.config };
 		if (selectedCollectionKeys.length > 0) {
 			const selectedSet = new Set(selectedCollectionKeys);
@@ -320,8 +321,8 @@ async function generateInteractive(
 	}
 
 	const wantInitSettings =
-		options?.['initial-build-settings'] ??
-		options?.['initial-build-settings-only'] ??
+		options?.['initial-site-settings'] ??
+		options?.['initial-site-settings-only'] ??
 		(await p.confirm({
 			message: `Generate ${em('.cloudcannon/initial-site-settings.json')}?`,
 			initialValue: true,
@@ -368,8 +369,8 @@ async function generateAuto(
 		format: Format;
 		output?: string;
 		mode?: Mode;
-		'initial-build-settings'?: boolean;
-		'initial-build-settings-only'?: boolean;
+		'initial-site-settings'?: boolean;
+		'initial-site-settings-only'?: boolean;
 		'install-command'?: string;
 		'build-command'?: string;
 		'output-path'?: string;
@@ -391,7 +392,7 @@ async function generateAuto(
 		config.collections_config = ssgs[ssg].sortCollectionsConfig(suggested);
 	}
 
-	if (!options['initial-build-settings-only']) {
+	if (!options['initial-site-settings-only']) {
 		const content = stringify(config, options.format);
 		const path =
 			options.output ??
@@ -400,7 +401,7 @@ async function generateAuto(
 		await writeOrLog(path, content, !!options['dry-run']);
 	}
 
-	if (options['initial-build-settings'] || options['initial-build-settings-only']) {
+	if (options['initial-site-settings'] || options['initial-site-settings-only']) {
 		const buildCommands = await generateBuildCommands(filePaths, {
 			config: options.source ? { source: options.source } : undefined,
 			buildConfig: ssg ? { ssg } : undefined,
@@ -449,12 +450,12 @@ const args = {
 		description: 'Output file path',
 		valueHint: 'path',
 	},
-	'initial-build-settings': {
+	'initial-site-settings': {
 		type: 'boolean',
 		default: false,
 		description: `Also generate ${em('initial-site-settings.json')} file`,
 	},
-	'initial-build-settings-only': {
+	'initial-site-settings-only': {
 		type: 'boolean',
 		default: false,
 		description: `Only generate ${em('initial-site-settings.json')} file`,
@@ -492,8 +493,8 @@ export const generateCommand = defineCommand({
 			mode: checkMode(ctx.args.mode),
 			format: checkFormat(ctx.args.format) ?? DEFAULT_FORMAT,
 			output: ctx.args.output,
-			'initial-build-settings': ctx.args['initial-build-settings'],
-			'initial-build-settings-only': ctx.args['initial-build-settings-only'],
+			'initial-site-settings': ctx.args['initial-site-settings'],
+			'initial-site-settings-only': ctx.args['initial-site-settings-only'],
 			'install-command': ctx.args['install-command'],
 			'build-command': ctx.args['build-command'],
 			'output-path': ctx.args['output-path'],

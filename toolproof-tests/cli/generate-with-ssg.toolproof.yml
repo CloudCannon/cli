@@ -1,0 +1,35 @@
+name: generate with ssg
+
+steps:
+  - I run "cp -R %test_sites%/sendit-astro-template src"
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate src --auto --ssg jekyll"
+  - I run "cat src/cloudcannon.config.yml"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎paths:
+      ╎  static: ''
+      ╎  uploads: uploads
+      ╎timezone: Pacific/Auckland
+      ╎markdown:
+      ╎  engine: kramdown
+      ╎  options:
+      ╎    heading_ids: false
+      ╎    gfm: false
+      ╎    breaks: false
+      ╎    typographer: false
+      ╎    attributes: true
+      ╎    attribute_elements:
+      ╎      inline: right
+      ╎      block: below
+      ╎      tr: none
+      ╎      td: none
+      ╎      li: right-of-prefix
+      ╎    treat_indentation_as_code: true
+      ╎_snippets_imports:
+      ╎  jekyll: true
+      ╎collections_config:
+      ╎  source:
+      ╎    path: ''
+      ╎    icon: package_2
+      ╎    disable_url: true

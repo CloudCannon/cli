@@ -1,8 +1,44 @@
-name: CLI generate auto format json
+name: generate auto json
 
 steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
   - ref: ../core/run-cli.toolproof.yml
   - I run "npm -s run cloudcannon -- configure generate src --auto --format json"
   - I run "cat src/cloudcannon.config.json"
-  - stdout should contain "collections_config"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "paths": {
+      ╎    "static": "public",
+      ╎    "uploads": "public/uploads"
+      ╎  },
+      ╎  "timezone": "Pacific/Auckland",
+      ╎  "markdown": {
+      ╎    "engine": "commonmark",
+      ╎    "options": {
+      ╎      "gfm": true
+      ╎    }
+      ╎  },
+      ╎  "collections_config": {
+      ╎    "pages": {
+      ╎      "path": "src/pages",
+      ╎      "icon": "wysiwyg"
+      ╎    },
+      ╎    "blog": {
+      ╎      "path": "src/content/blog",
+      ╎      "icon": "event_available"
+      ╎    },
+      ╎    "changelogs": {
+      ╎      "path": "src/changelogs",
+      ╎      "icon": "change_history"
+      ╎    },
+      ╎    "content_pages": {
+      ╎      "path": "src/content/pages",
+      ╎      "icon": "contact_page"
+      ╎    },
+      ╎    "data": {
+      ╎      "path": "data",
+      ╎      "icon": "data_usage"
+      ╎    }
+      ╎  }
+      ╎}
