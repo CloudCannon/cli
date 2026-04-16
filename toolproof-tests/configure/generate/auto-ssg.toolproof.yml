@@ -4,13 +4,15 @@ steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
   - ref: ../../core/run-cli.toolproof.yml
   - I run "npm -s run cloudcannon -- configure generate src --auto --ssg jekyll"
-  - I run "cat src/cloudcannon.config.yml"
+  - step: I run {command}
+    command: |
+      cat src/cloudcannon.config.yml | sed 's/timezone: .*/timezone: UTC/'
   - snapshot: stdout
     snapshot_content: |-
       ╎paths:
       ╎  static: ''
       ╎  uploads: uploads
-      ╎timezone: Pacific/Auckland
+      ╎timezone: UTC
       ╎markdown:
       ╎  engine: kramdown
       ╎  options:

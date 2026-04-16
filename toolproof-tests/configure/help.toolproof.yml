@@ -2,7 +2,7 @@ name: cloudcannon configure --help
 
 steps:
   - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure -h"
+  - I run "npm -s run cloudcannon -- configure -h | sed 's/[[:space:]]*$//'"
   - snapshot: stdout
     snapshot_content: |-
       ╎Generate CloudCannon configuration files. (cloudcannon configure v0.0.0)
@@ -11,10 +11,10 @@ steps:
       ╎
       ╎COMMANDS
       ╎
-      ╎  detect-build-commands    Show build command suggestions.          
-      ╎     detect-collections    List detected collections.               
-      ╎          detect-source    Detect the source folder.                
-      ╎             detect-ssg    Detect the static site generator.        
+      ╎  detect-build-commands    Show build command suggestions.
+      ╎     detect-collections    List detected collections.
+      ╎          detect-source    Detect the source folder.
+      ╎             detect-ssg    Detect the static site generator.
       ╎               generate    Generate CloudCannon configuration files.
       ╎
       ╎Use cloudcannon configure <command> --help for more information about a command.

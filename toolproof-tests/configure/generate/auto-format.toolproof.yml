@@ -4,7 +4,9 @@ steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
   - ref: ../../core/run-cli.toolproof.yml
   - I run "npm -s run cloudcannon -- configure generate src --auto --format json"
-  - I run "cat src/cloudcannon.config.json"
+  - step: I run {command}
+    command: |
+      cat src/cloudcannon.config.json | sed 's/"timezone": ".*"/"timezone": "UTC"/'
   - snapshot: stdout
     snapshot_content: |-
       ╎{
@@ -12,7 +14,7 @@ steps:
       ╎    "static": "public",
       ╎    "uploads": "public/uploads"
       ╎  },
-      ╎  "timezone": "Pacific/Auckland",
+      ╎  "timezone": "UTC",
       ╎  "markdown": {
       ╎    "engine": "commonmark",
       ╎    "options": {
