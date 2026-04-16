@@ -1,14 +1,14 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { styleText } from 'node:util';
-import type { CollectionConfig, SsgKey } from '@cloudcannon/configuration-types';
-import type { CollectionConfigTree } from '@cloudcannon/gadget';
+import type { SsgKey } from '@cloudcannon/configuration-types';
 import { ssgs } from '@cloudcannon/gadget';
-import type Ssg from '@cloudcannon/gadget/dist/ssgs/ssg.js';
 import { stringify as stringifyYaml } from 'yaml';
-import type { Format } from './configure/args.ts';
 
-const ssgValues: Ssg[] = Object.values(ssgs);
+export type Mode = 'hosted' | 'headless';
+export type Format = 'yaml' | 'json';
+
+const ssgValues = Object.values(ssgs);
 
 export function detectSsg(filePaths: string[]): { ssg: SsgKey; scores: Record<SsgKey, number> } {
 	const scores: Record<SsgKey, number> = {
@@ -73,26 +73,6 @@ export async function writeFileAndFolder(path: string, content: string): Promise
 	await writeFile(path, content);
 }
 
-export function flattenCollectionTree(
-	trees: CollectionConfigTree[],
-	options?: { onlySuggested?: boolean }
-): Record<string, CollectionConfig> {
-	const result: Record<string, CollectionConfig> = {};
-	const onlySuggested = options?.onlySuggested ?? true;
-
-	function walk(nodes: CollectionConfigTree[]): void {
-		for (const node of nodes) {
-			if (!onlySuggested || node.suggested) {
-				result[node.key] = node.config;
-			}
-			walk(node.collections);
-		}
-	}
-
-	walk(trees);
-	return result;
-}
-
 export function stringify(config: Record<string, any>, format: Format): string {
 	if (format === 'json') {
 		return `${JSON.stringify(config, null, 2)}\n`;
@@ -120,3 +100,56 @@ export function success(text: string): string {
 export function secondary(text: string): string {
 	return styleText(['dim'], text);
 }
+
+export const checkSsg = (value: unknown | undefined): SsgKey | undefined => {
+	return typeof value === 'string' && Object.hasOwn(ssgs, value) ? (value as SsgKey) : undefined;
+};
+
+export const checkMode = (value: string | undefined): Mode | undefined => {
+	return value === 'hosted' || value === 'headless' ? value : undefined;
+};
+
+export const checkFormat = (value: string | undefined): Format | undefined => {
+	return value === 'json' || value === 'yaml' ? value : undefined;
+};
+
+export const DEFAULT_MODE: Mode = 'hosted' as const;
+export const DEFAULT_FORMAT: Format = 'yaml' as const;
+
+export function extensionFromFormat(format: Format | undefined): 'json' | 'yml' {
+	return format === 'json' ? 'json' : 'yml';
+}
+
+export const pathArg = {
+	path: {
+		type: 'positional',
+		description: 'The path to your site files',
+		default: '.',
+		required: false,
+	},
+} as const;
+
+export const ssgArg = {
+	ssg: {
+		type: 'string',
+		description: 'Override SSG detection',
+		valueHint: 'name',
+	},
+} as const;
+
+export const sourceArg = {
+	source: {
+		type: 'string',
+		description: 'Override source folder',
+		valueHint: 'path',
+	},
+} as const;
+
+export const modeArg = {
+	mode: {
+		type: 'string',
+		description: 'Mode for initial-site-settings',
+		default: DEFAULT_MODE,
+		valueHint: 'hosted|headless',
+	},
+} as const;

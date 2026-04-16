@@ -1,13 +1,12 @@
 import { resolve } from 'node:path';
 import { ssgs } from '@cloudcannon/gadget';
 import { type CommandContext, defineCommand } from 'citty';
-import { detectSsg, getFilePaths, printJson } from '../utility.ts';
-import { checkSsg, pathArg, ssgArg } from './args.ts';
+import { checkSsg, detectSsg, getFilePaths, pathArg, printJson, ssgArg } from './utility.ts';
 
 export const detectSourceCommand = defineCommand({
 	meta: {
 		name: 'detect-source',
-		description: 'Detect the source folder',
+		description: 'Detect the source folder.',
 	},
 	args: {
 		...pathArg,

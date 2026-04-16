@@ -1,9 +1,9 @@
-name: detect collections with source
+name: cloudcannon configure detect-collections with --source
 
 steps:
   - I run "cp -R %test_sites%/vonge-jekyll src"
-  - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure detect-collections src --ssg jekyll --source site"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-collections src --source site"
   - snapshot: stdout
     snapshot_content: |-
       ╎{

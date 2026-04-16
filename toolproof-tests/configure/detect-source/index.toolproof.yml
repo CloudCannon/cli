@@ -1,9 +1,9 @@
-name: detect source with ssg
+name: cloudcannon configure detect-source
 
 steps:
   - I run "cp -R %test_sites%/vonge-jekyll src"
-  - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure detect-source src --ssg jekyll"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-source src"
   - snapshot: stdout
     snapshot_content: |-
       ╎{

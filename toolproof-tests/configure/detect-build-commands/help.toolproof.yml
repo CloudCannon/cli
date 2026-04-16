@@ -1,0 +1,21 @@
+name: cloudcannon configure detect-build-commands --help
+
+steps:
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-build-commands --help"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Show build command suggestions. (configure detect-build-commands)
+      ╎
+      ╎USAGE configure detect-build-commands [OPTIONS] [PATH]
+      ╎
+      ╎ARGUMENTS
+      ╎
+      ╎  PATH    The path to your site files (Default: .)
+      ╎
+      ╎OPTIONS
+      ╎
+      ╎  --source=<path>    Override source folder
+      ╎     --ssg=<name>    Override SSG detection
+      ╎
+      ╎

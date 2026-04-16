@@ -1,10 +1,10 @@
-name: generate auto
+name: cloudcannon configure generate --auto --output src/custom.yml
 
 steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
-  - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure generate src --auto"
-  - I run "cat src/cloudcannon.config.yml"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate src --auto --output src/custom.yml"
+  - I run "cat src/custom.yml"
   - snapshot: stdout
     snapshot_content: |-
       ╎paths:

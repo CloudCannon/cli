@@ -1,8 +1,8 @@
-name: generate headless
+name: cloudcannon configure generate --auto --initial-site-settings --mode headless
 
 steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
-  - ref: ../core/run-cli.toolproof.yml
+  - ref: ../../core/run-cli.toolproof.yml
   - I run "npm -s run cloudcannon -- configure generate src --auto --initial-site-settings --mode headless"
   - I run "cat src/.cloudcannon/initial-site-settings.json"
   - snapshot: stdout

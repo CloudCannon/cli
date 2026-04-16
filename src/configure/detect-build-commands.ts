@@ -1,13 +1,20 @@
 import { resolve } from 'node:path';
 import { generateBuildCommands } from '@cloudcannon/gadget';
 import { type CommandContext, defineCommand } from 'citty';
-import { getFilePaths, printJson, readFileFn } from '../utility.ts';
-import { checkSsg, pathArg, sourceArg, ssgArg } from './args.ts';
+import {
+	checkSsg,
+	getFilePaths,
+	pathArg,
+	printJson,
+	readFileFn,
+	sourceArg,
+	ssgArg,
+} from './utility.ts';
 
 export const detectBuildCommands = defineCommand({
 	meta: {
-		name: 'build',
-		description: 'Show build command suggestions',
+		name: 'detect-build-commands',
+		description: 'Show build command suggestions.',
 	},
 	args: {
 		...pathArg,

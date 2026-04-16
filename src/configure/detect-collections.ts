@@ -1,13 +1,20 @@
 import { resolve } from 'node:path';
 import { generateConfiguration } from '@cloudcannon/gadget';
 import { type CommandContext, defineCommand } from 'citty';
-import { getFilePaths, printJson, readFileFn } from '../utility.ts';
-import { checkSsg, pathArg, sourceArg, ssgArg } from './args.ts';
+import {
+	checkSsg,
+	getFilePaths,
+	pathArg,
+	printJson,
+	readFileFn,
+	sourceArg,
+	ssgArg,
+} from './utility.ts';
 
 export const detectCollectionsCommand = defineCommand({
 	meta: {
-		name: 'collections',
-		description: 'List detected collections',
+		name: 'detect-collections',
+		description: 'List detected collections.',
 	},
 	args: {
 		...pathArg,

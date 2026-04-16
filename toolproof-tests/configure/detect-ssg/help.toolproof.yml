@@ -1,0 +1,16 @@
+name: cloudcannon configure detect-ssg --help
+
+steps:
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-ssg --help"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Detect the static site generator. (configure detect-ssg)
+      ╎
+      ╎USAGE configure detect-ssg [OPTIONS] [PATH]
+      ╎
+      ╎ARGUMENTS
+      ╎
+      ╎  PATH    The path to your site files (Default: .)
+      ╎
+      ╎

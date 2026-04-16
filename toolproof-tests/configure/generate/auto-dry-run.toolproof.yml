@@ -1,12 +1,12 @@
-name: generate with output
+name: cloudcannon configure generate --auto --dry-run
 
 steps:
   - I run "cp -R %test_sites%/sendit-astro-template src"
-  - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure generate src --auto --output src/custom.yml"
-  - I run "cat src/custom.yml"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate src --auto --dry-run"
   - snapshot: stdout
     snapshot_content: |-
+      ╎cloudcannon.config.yml
       ╎paths:
       ╎  static: public
       ╎  uploads: public/uploads
@@ -31,3 +31,4 @@ steps:
       ╎  data:
       ╎    path: data
       ╎    icon: data_usage
+      ╎

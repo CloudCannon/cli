@@ -1,12 +1,11 @@
 import { resolve } from 'node:path';
 import { type CommandContext, defineCommand } from 'citty';
-import { detectSsg, getFilePaths, printJson } from '../utility.ts';
-import { pathArg } from './args.ts';
+import { detectSsg, getFilePaths, pathArg, printJson } from './utility.ts';
 
 export const detectSsgCommand = defineCommand({
 	meta: {
 		name: 'detect-ssg',
-		description: 'Detect the static site generator',
+		description: 'Detect the static site generator.',
 	},
 	args: {
 		...pathArg,

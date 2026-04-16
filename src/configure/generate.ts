@@ -15,32 +15,29 @@ import {
 import type { BuildCommandSuggestion } from '@cloudcannon/gadget/dist/ssgs/ssg.js';
 import { type CommandContext, defineCommand } from 'citty';
 import {
-	detectSsg,
-	em,
-	flattenCollectionTree,
-	getFilePaths,
-	readFileFn,
-	secondary,
-	stringify,
-	success,
-	writeFileAndFolder,
-} from '../utility.ts';
-import {
 	checkFormat,
 	checkMode,
 	checkSsg,
 	DEFAULT_FORMAT,
 	DEFAULT_MODE,
+	detectSsg,
+	em,
 	extensionFromFormat,
 	type Format,
+	getFilePaths,
 	type Mode,
 	modeArg,
 	pathArg,
+	readFileFn,
+	secondary,
 	sourceArg,
 	ssgArg,
-} from './args.ts';
+	stringify,
+	success,
+	writeFileAndFolder,
+} from './utility.ts';
 
-export function generateInitialSiteSettings(
+function generateInitialSiteSettings(
 	ssg: SsgKey,
 	buildCommands: BuildCommands,
 	options?: {
@@ -113,6 +110,24 @@ function getSuggestedKeys(trees: CollectionConfigTree[]): string[] {
 		keys.push(...getSuggestedKeys(trees[i].collections));
 	}
 	return keys;
+}
+
+function getSuggestedCollectionsConfig(
+	trees: CollectionConfigTree[]
+): Record<string, CollectionConfig> {
+	const result: Record<string, CollectionConfig> = {};
+
+	function walk(nodes: CollectionConfigTree[]): void {
+		for (const node of nodes) {
+			if (node.suggested) {
+				result[node.key] = node.config;
+			}
+			walk(node.collections);
+		}
+	}
+
+	walk(trees);
+	return result;
 }
 
 function pickCollections(
@@ -385,14 +400,15 @@ async function generateAuto(
 	});
 
 	const ssg = result.ssg ?? 'other';
-	const config = { ...result.config };
-	const suggested = flattenCollectionTree(result.collections, { onlySuggested: true });
-
-	if (Object.keys(suggested).length > 0) {
-		config.collections_config = ssgs[ssg].sortCollectionsConfig(suggested);
-	}
 
 	if (!options['initial-site-settings-only']) {
+		const config = { ...result.config };
+		const collectionsConfig = getSuggestedCollectionsConfig(result.collections);
+
+		if (Object.keys(collectionsConfig).length > 0) {
+			config.collections_config = ssgs[ssg].sortCollectionsConfig(collectionsConfig);
+		}
+
 		const content = stringify(config, options.format);
 		const path =
 			options.output ??
@@ -480,7 +496,7 @@ const args = {
 export const generateCommand = defineCommand({
 	meta: {
 		name: 'generate',
-		description: 'Generate CloudCannon configuration files',
+		description: 'Generate CloudCannon configuration files.',
 	},
 	args,
 	async run(ctx: CommandContext<typeof args>): Promise<void> {

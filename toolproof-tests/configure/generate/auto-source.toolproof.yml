@@ -1,8 +1,8 @@
-name: generate with source
+name: cloudcannon configure generate --auto --source
 
 steps:
   - I run "cp -R %test_sites%/vonge-jekyll src"
-  - ref: ../core/run-cli.toolproof.yml
+  - ref: ../../core/run-cli.toolproof.yml
   - I run "npm -s run cloudcannon -- configure generate src --auto --source site"
   - I run "cat src/cloudcannon.config.yml"
   - snapshot: stdout

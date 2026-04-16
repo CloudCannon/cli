@@ -8,7 +8,7 @@ import { generateCommand } from './configure/generate.ts';
 export const configureCommand = defineCommand({
 	meta: {
 		name: 'configure',
-		description: 'Generate CloudCannon configuration files',
+		description: 'Generate CloudCannon configuration files.',
 	},
 	subCommands: {
 		'detect-build-commands': detectBuildCommands,
