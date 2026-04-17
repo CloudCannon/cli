@@ -1,0 +1,59 @@
+name: cloudcannon configure detect-build-commands with --source
+
+steps:
+  - I run "cp -R %test_sites%/vonge-jekyll src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-build-commands src --source site"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "install": [
+      ╎    {
+      ╎      "value": "npm i",
+      ╎      "attribution": "because of your `package.json` file",
+      ╎      "group": "node"
+      ╎    },
+      ╎    {
+      ╎      "value": "bundle install",
+      ╎      "attribution": "because of your Gemfile",
+      ╎      "group": "ruby"
+      ╎    }
+      ╎  ],
+      ╎  "build": [
+      ╎    {
+      ╎      "value": "bundle exec jekyll build",
+      ╎      "attribution": "because of your Gemfile",
+      ╎      "group": "ruby"
+      ╎    }
+      ╎  ],
+      ╎  "output": [
+      ╎    {
+      ╎      "value": "_site",
+      ╎      "attribution": "most common for Jekyll sites"
+      ╎    }
+      ╎  ],
+      ╎  "preserved": [
+      ╎    {
+      ╎      "value": "node_modules/",
+      ╎      "attribution": "because of your `package.json` file"
+      ╎    },
+      ╎    {
+      ╎      "value": ".bundle_cache/",
+      ╎      "attribution": "recommended for speeding up bundler installs"
+      ╎    }
+      ╎  ],
+      ╎  "environment": {
+      ╎    "GEM_HOME": {
+      ╎      "value": "/usr/local/__site/src/.bundle_cache/",
+      ╎      "attribution": "recommended for speeding up bundler installs"
+      ╎    },
+      ╎    "BUNDLE_GEMFILE": {
+      ╎      "value": "site/Gemfile",
+      ╎      "attribution": "because of your Gemfile"
+      ╎    },
+      ╎    "JEKYLL_ENV": {
+      ╎      "value": "production",
+      ╎      "attribution": "recommended for hosted Jekyll sites"
+      ╎    }
+      ╎  }
+      ╎}

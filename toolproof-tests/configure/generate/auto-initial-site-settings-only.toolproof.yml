@@ -1,0 +1,19 @@
+name: cloudcannon configure generate --auto --initial-site-settings-only
+
+steps:
+  - I run "cp -R %test_sites%/sendit-astro-template src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate src --auto --initial-site-settings-only"
+  - I run "cat src/.cloudcannon/initial-site-settings.json"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "ssg": "astro",
+      ╎  "mode": "hosted",
+      ╎  "build": {
+      ╎    "install_command": "npm i",
+      ╎    "build_command": "npm run build",
+      ╎    "output_path": "dist",
+      ╎    "preserved_paths": "node_modules/"
+      ╎  }
+      ╎}

@@ -1,0 +1,21 @@
+name: cloudcannon configure detect-collections --help
+
+steps:
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-collections --help"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎List detected collections. (configure detect-collections)
+      ╎
+      ╎USAGE configure detect-collections [OPTIONS] [PATH]
+      ╎
+      ╎ARGUMENTS
+      ╎
+      ╎  PATH    The path to your site files (Default: .)
+      ╎
+      ╎OPTIONS
+      ╎
+      ╎  --source=<path>    Override source folder
+      ╎     --ssg=<name>    Override SSG detection
+      ╎
+      ╎

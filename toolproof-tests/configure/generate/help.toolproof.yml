@@ -1,0 +1,31 @@
+name: cloudcannon configure generate --help
+
+steps:
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure generate --help | sed 's/[[:space:]]*$//'"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Generate CloudCannon configuration files. (configure generate)
+      ╎
+      ╎USAGE configure generate [OPTIONS] [PATH]
+      ╎
+      ╎ARGUMENTS
+      ╎
+      ╎  PATH    The path to your site files (Default: .)
+      ╎
+      ╎OPTIONS
+      ╎
+      ╎               --source=<path>    Override source folder
+      ╎                  --ssg=<name>    Override SSG detection
+      ╎      --mode=<hosted|headless>    Mode for initial-site-settings (Default: hosted)
+      ╎                        --auto    Non-interactive mode, accept all suggestions (Default: false)
+      ╎                     --dry-run    Log output instead of writing to files (Default: false)
+      ╎          --format=<yaml|json>    Output format (Default: yaml)
+      ╎               --output=<path>    Output file path
+      ╎       --initial-site-settings    Also generate initial-site-settings.json file (Default: false)
+      ╎  --initial-site-settings-only    Only generate initial-site-settings.json file (Default: false)
+      ╎   --install-command=<command>    Override install command
+      ╎     --build-command=<command>    Override build command
+      ╎          --output-path=<path>    Override output path
+      ╎
+      ╎

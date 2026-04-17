@@ -1,0 +1,127 @@
+name: cloudcannon configure detect-collections
+
+steps:
+  - I run "cp -R %test_sites%/sendit-astro-template src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-collections src --ssg astro"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "collections": [
+      ╎    {
+      ╎      "key": "source",
+      ╎      "suggested": false,
+      ╎      "config": {
+      ╎        "path": "",
+      ╎        "icon": "package_2"
+      ╎      },
+      ╎      "collections": [
+      ╎        {
+      ╎          "key": "src",
+      ╎          "suggested": false,
+      ╎          "config": {
+      ╎            "path": "src",
+      ╎            "icon": "abc"
+      ╎          },
+      ╎          "collections": [
+      ╎            {
+      ╎              "key": "pages",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "src/pages",
+      ╎                "icon": "wysiwyg"
+      ╎              },
+      ╎              "collections": []
+      ╎            },
+      ╎            {
+      ╎              "key": "shared",
+      ╎              "suggested": false,
+      ╎              "config": {
+      ╎                "path": "src/shared",
+      ╎                "icon": "share"
+      ╎              },
+      ╎              "collections": [
+      ╎                {
+      ╎                  "key": "shared_astro",
+      ╎                  "suggested": false,
+      ╎                  "config": {
+      ╎                    "path": "src/shared/astro",
+      ╎                    "icon": "share_eta"
+      ╎                  },
+      ╎                  "collections": []
+      ╎                }
+      ╎              ]
+      ╎            },
+      ╎            {
+      ╎              "key": "content",
+      ╎              "suggested": false,
+      ╎              "config": {
+      ╎                "path": "src/content",
+      ╎                "icon": "wysiwyg"
+      ╎              },
+      ╎              "collections": [
+      ╎                {
+      ╎                  "key": "blog",
+      ╎                  "suggested": true,
+      ╎                  "config": {
+      ╎                    "path": "src/content/blog",
+      ╎                    "icon": "event_available"
+      ╎                  },
+      ╎                  "collections": []
+      ╎                },
+      ╎                {
+      ╎                  "key": "content_pages",
+      ╎                  "suggested": true,
+      ╎                  "config": {
+      ╎                    "path": "src/content/pages",
+      ╎                    "icon": "contact_page"
+      ╎                  },
+      ╎                  "collections": []
+      ╎                }
+      ╎              ]
+      ╎            },
+      ╎            {
+      ╎              "key": "changelogs",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "src/changelogs",
+      ╎                "icon": "change_history"
+      ╎              },
+      ╎              "collections": [
+      ╎                {
+      ╎                  "key": "changelogs_2021",
+      ╎                  "suggested": false,
+      ╎                  "config": {
+      ╎                    "path": "src/changelogs/2021",
+      ╎                    "icon": "change_history"
+      ╎                  },
+      ╎                  "collections": []
+      ╎                },
+      ╎                {
+      ╎                  "key": "changelogs_2022",
+      ╎                  "suggested": false,
+      ╎                  "config": {
+      ╎                    "path": "src/changelogs/2022",
+      ╎                    "icon": "change_history"
+      ╎                  },
+      ╎                  "collections": []
+      ╎                }
+      ╎              ]
+      ╎            }
+      ╎          ]
+      ╎        },
+      ╎        {
+      ╎          "key": "data",
+      ╎          "suggested": true,
+      ╎          "config": {
+      ╎            "path": "data",
+      ╎            "icon": "data_usage"
+      ╎          },
+      ╎          "collections": []
+      ╎        }
+      ╎      ]
+      ╎    }
+      ╎  ],
+      ╎  "ssg": "astro",
+      ╎  "source": null
+      ╎}

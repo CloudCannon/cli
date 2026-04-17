@@ -1,0 +1,30 @@
+name: cloudcannon configure detect-ssg [jekyll]
+
+steps:
+  - I run "cp -R %test_sites%/vonge-jekyll src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-ssg src"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "ssg": "jekyll",
+      ╎  "scores": {
+      ╎    "hugo": 0,
+      ╎    "jekyll": 50,
+      ╎    "eleventy": 0,
+      ╎    "nextjs": 0,
+      ╎    "astro": 0,
+      ╎    "sveltekit": 0,
+      ╎    "bridgetown": 0,
+      ╎    "lume": 0,
+      ╎    "mkdocs": 0,
+      ╎    "docusaurus": 0,
+      ╎    "gatsby": 0,
+      ╎    "hexo": 0,
+      ╎    "nuxtjs": 0,
+      ╎    "sphinx": 0,
+      ╎    "static": 0,
+      ╎    "legacy": 0,
+      ╎    "other": 0
+      ╎  }
+      ╎}

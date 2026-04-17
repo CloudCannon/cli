@@ -12,9 +12,7 @@
 			"!.zed",
 			"!package.json",
 			"!package-lock.json",
-			"!CHANGELOG.md",
 			"!.github",
-			"!.backstage",
 			"!toolproof-tests/test-sites"
 		]
 	},

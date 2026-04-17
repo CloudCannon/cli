@@ -1,0 +1,142 @@
+name: cloudcannon configure detect-collections with --source and --ssg
+
+steps:
+  - I run "cp -R %test_sites%/vonge-jekyll src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-collections src --ssg jekyll --source site"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "collections": [
+      ╎    {
+      ╎      "key": "source",
+      ╎      "suggested": true,
+      ╎      "config": {
+      ╎        "path": "",
+      ╎        "icon": "package_2",
+      ╎        "disable_url": true
+      ╎      },
+      ╎      "collections": [
+      ╎        {
+      ╎          "key": "data",
+      ╎          "suggested": true,
+      ╎          "config": {
+      ╎            "path": "_data",
+      ╎            "icon": "data_usage",
+      ╎            "disable_url": true,
+      ╎            "disable_add": true,
+      ╎            "disable_add_folder": true,
+      ╎            "disable_file_actions": true
+      ╎          },
+      ╎          "collections": []
+      ╎        },
+      ╎        {
+      ╎          "key": "collections",
+      ╎          "suggested": false,
+      ╎          "config": {
+      ╎            "path": "collections",
+      ╎            "icon": "conditions",
+      ╎            "disable_url": true
+      ╎          },
+      ╎          "collections": [
+      ╎            {
+      ╎              "key": "pages",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "collections/_pages",
+      ╎                "icon": "wysiwyg"
+      ╎              },
+      ╎              "collections": []
+      ╎            },
+      ╎            {
+      ╎              "key": "posts",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "collections/_posts",
+      ╎                "icon": "event_available",
+      ╎                "create": {
+      ╎                  "path": "[relative_base_path]/{date|year}-{date|month}-{date|day}-{title|slugify}.[ext]"
+      ╎                },
+      ╎                "_inputs": {
+      ╎                  "categories": {
+      ╎                    "type": "multiselect",
+      ╎                    "options": {
+      ╎                      "values": "collections.posts[*].categories",
+      ╎                      "allow_create": true
+      ╎                    }
+      ╎                  },
+      ╎                  "tags": {
+      ╎                    "type": "multiselect",
+      ╎                    "options": {
+      ╎                      "values": "collections.posts[*].tags",
+      ╎                      "allow_create": true
+      ╎                    }
+      ╎                  }
+      ╎                },
+      ╎                "add_options": [
+      ╎                  {
+      ╎                    "name": "Add Post"
+      ╎                  },
+      ╎                  {
+      ╎                    "name": "Add Draft",
+      ╎                    "collection": "drafts"
+      ╎                  }
+      ╎                ]
+      ╎              },
+      ╎              "collections": []
+      ╎            },
+      ╎            {
+      ╎              "key": "drafts",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "collections/_drafts",
+      ╎                "icon": "event",
+      ╎                "create": {
+      ╎                  "publish_to": "posts"
+      ╎                },
+      ╎                "_inputs": {
+      ╎                  "categories": {
+      ╎                    "type": "multiselect",
+      ╎                    "options": {
+      ╎                      "values": "collections.posts[*].categories",
+      ╎                      "allow_create": true
+      ╎                    }
+      ╎                  },
+      ╎                  "tags": {
+      ╎                    "type": "multiselect",
+      ╎                    "options": {
+      ╎                      "values": "collections.posts[*].tags",
+      ╎                      "allow_create": true
+      ╎                    }
+      ╎                  }
+      ╎                }
+      ╎              },
+      ╎              "collections": []
+      ╎            },
+      ╎            {
+      ╎              "key": "projects",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "collections/_projects",
+      ╎                "icon": "eject"
+      ╎              },
+      ╎              "collections": []
+      ╎            },
+      ╎            {
+      ╎              "key": "testimonials",
+      ╎              "suggested": true,
+      ╎              "config": {
+      ╎                "path": "collections/_testimonials",
+      ╎                "icon": "festival",
+      ╎                "disable_url": true
+      ╎              },
+      ╎              "collections": []
+      ╎            }
+      ╎          ]
+      ╎        }
+      ╎      ]
+      ╎    }
+      ╎  ],
+      ╎  "ssg": "jekyll",
+      ╎  "source": "site"
+      ╎}

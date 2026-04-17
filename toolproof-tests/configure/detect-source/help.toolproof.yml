@@ -1,0 +1,20 @@
+name: cloudcannon configure detect-source --help
+
+steps:
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-source --help"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Detect the source folder. (configure detect-source)
+      ╎
+      ╎USAGE configure detect-source [OPTIONS] [PATH]
+      ╎
+      ╎ARGUMENTS
+      ╎
+      ╎  PATH    The path to your site files (Default: .)
+      ╎
+      ╎OPTIONS
+      ╎
+      ╎  --ssg=<name>    Override SSG detection
+      ╎
+      ╎

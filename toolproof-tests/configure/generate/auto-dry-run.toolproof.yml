@@ -1,0 +1,36 @@
+name: cloudcannon configure generate --auto --dry-run
+
+steps:
+  - I run "cp -R %test_sites%/sendit-astro-template src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- configure generate src --auto --dry-run | sed 's/timezone: .*/timezone: UTC/'
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎cloudcannon.config.yml
+      ╎paths:
+      ╎  static: public
+      ╎  uploads: public/uploads
+      ╎timezone: UTC
+      ╎markdown:
+      ╎  engine: commonmark
+      ╎  options:
+      ╎    gfm: true
+      ╎collections_config:
+      ╎  pages:
+      ╎    path: src/pages
+      ╎    icon: wysiwyg
+      ╎  blog:
+      ╎    path: src/content/blog
+      ╎    icon: event_available
+      ╎  changelogs:
+      ╎    path: src/changelogs
+      ╎    icon: change_history
+      ╎  content_pages:
+      ╎    path: src/content/pages
+      ╎    icon: contact_page
+      ╎  data:
+      ╎    path: data
+      ╎    icon: data_usage
+      ╎

@@ -3,28 +3,38 @@
 	"type": "module",
 	"version": "0.0.0",
 	"description": "Command line interface for the CloudCannon CMS.",
-	"keywords": [],
+	"keywords": [
+		"cloudcannon",
+		"cms",
+		"cli",
+		"static site generator",
+		"configuration"
+	],
 	"homepage": "https://github.com/CloudCannon/cli#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/CloudCannon/cli.git"
+		"url": "git+https://github.com/CloudCannon/cli.git"
 	},
 	"bugs": {
 		"url": "https://github.com/CloudCannon/cli/issues",
 		"email": "support@cloudcannon.com"
 	},
+	"exports": {
+		".": "./dist/index.js"
+	},
 	"main": "dist/index.js",
 	"bin": {
-		"cloudcannon": "./dist/index.js"
+		"cloudcannon": "dist/index.js"
 	},
 	"files": [
 		"dist"
 	],
 	"scripts": {
 		"build": "tsc",
-		"test": "node --experimental-strip-types --test",
-		"test:watch": "node --experimental-strip-types --test --watch",
-		"test:coverage": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info",
+		"test": "node --test",
+		"test:watch": "node --test --watch",
+		"test:coverage": "node --test --test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info",
+		"test:toolproof": "toolproof --placeholders dist_dir=$PWD/dist test_sites=$PWD/toolproof-tests/test-sites",
 		"lint": "biome check && tsc --noEmit",
 		"lint:fix": "biome check --fix"
 	},
@@ -33,12 +43,25 @@
 		"@biomejs/biome": "2.4.11",
 		"@cloudcannon/configuration-types": "0.0.54",
 		"@types/node": "25.6.0",
+		"toolproof": "0.18.0",
 		"typescript": "6.0.2"
 	},
-	"license": "MIT",
+	"engines": {
+		"node": ">=24"
+	},
+	"devEngines": {
+		"packageManager": {
+			"name": "npm"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"license": "ISC",
 	"dependencies": {
 		"@clack/prompts": "1.2.0",
-		"@cloudcannon/gadget": "0.0.29",
+		"@cloudcannon/gadget": "0.0.32",
+		"citty": "0.2.2",
 		"yaml": "2.8.3"
 	}
 }

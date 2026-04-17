@@ -1,0 +1,42 @@
+name: cloudcannon configure detect-build-commands
+
+steps:
+  - I run "cp -R %test_sites%/sendit-astro-template src"
+  - ref: ../../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- configure detect-build-commands src"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎{
+      ╎  "install": [
+      ╎    {
+      ╎      "value": "npm i",
+      ╎      "attribution": "because of your `package.json` file",
+      ╎      "group": "node"
+      ╎    }
+      ╎  ],
+      ╎  "build": [
+      ╎    {
+      ╎      "value": "npm run build",
+      ╎      "attribution": "found in your `package.json` file",
+      ╎      "group": "node"
+      ╎    },
+      ╎    {
+      ╎      "value": "npx astro build",
+      ╎      "attribution": "most common for Astro sites",
+      ╎      "group": "node"
+      ╎    }
+      ╎  ],
+      ╎  "output": [
+      ╎    {
+      ╎      "value": "dist",
+      ╎      "attribution": "most common for Astro sites"
+      ╎    }
+      ╎  ],
+      ╎  "preserved": [
+      ╎    {
+      ╎      "value": "node_modules/",
+      ╎      "attribution": "because of your `package.json` file"
+      ╎    }
+      ╎  ],
+      ╎  "environment": {}
+      ╎}
