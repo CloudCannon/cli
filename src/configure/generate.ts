@@ -5,14 +5,14 @@ import type {
 	InitialSiteSettings,
 	SsgKey,
 } from '@cloudcannon/configuration-types';
-import type { BuildCommands } from '@cloudcannon/gadget';
 import {
+	type BuildCommandSuggestion,
+	type BuildCommands,
 	type CollectionConfigTree,
 	generateBuildCommands,
 	generateConfiguration,
 	ssgs,
 } from '@cloudcannon/gadget';
-import type { BuildCommandSuggestion } from '@cloudcannon/gadget/dist/ssgs/ssg.js';
 import { type CommandContext, defineCommand } from 'citty';
 import {
 	checkFormat,

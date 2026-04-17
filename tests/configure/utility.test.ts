@@ -6,7 +6,7 @@ import {
 	checkSsg,
 	extensionFromFormat,
 	stringify,
-} from '../src/configure/utility.ts';
+} from '../../src/configure/utility.ts';
 
 describe('checkSsg', () => {
 	it('returns the value for a valid SSG key', () => {
