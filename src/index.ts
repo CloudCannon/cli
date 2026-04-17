@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json' with { type: 'json' };
 import { configureCommand } from './configure.ts';
