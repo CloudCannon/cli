@@ -14,6 +14,10 @@ jobs:
     needs: test
     outputs:
       npm_tag: ${{ steps.npm_tag.outputs.value }}
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v6
       - name: Get tag
@@ -36,8 +40,6 @@ jobs:
         run: npm run build
       - name: Publish package on npm
         run: npm publish --tag ${{ steps.npm_tag.outputs.value }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - uses: actions/setup-node@v6
         with:
           registry-url: https://npm.pkg.github.com
@@ -55,9 +57,9 @@ jobs:
       - name: Create release
         run: |
           if [ "${{ needs.publish-npm-package.outputs.npm_tag }}" = "latest" ]; then
-            gh release create ${{ github.ref_name }} --generate-notes
+            gh release create ${{ github.ref_name }} --generate-notes --repo ${{ github.repository }}
           else
-            gh release create ${{ github.ref_name }} --generate-notes --prerelease
+            gh release create ${{ github.ref_name }} --generate-notes --prerelease --repo ${{ github.repository }}
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
