@@ -20,9 +20,7 @@ export const filesListCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 		const files = await client.site(ctx.args.site).listFiles();
-		const output = Object.fromEntries(
-			files.map((file) => [file.sitePath, file.md5])
-		);
+		const output = Object.fromEntries(files.map((file) => [file.sitePath, file.md5]));
 		console.log(JSON.stringify(output, null, 2));
 	},
 });
