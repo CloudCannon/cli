@@ -2,7 +2,10 @@
 
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json' with { type: 'json' };
+import { buildsCommand } from './builds.ts';
 import { configureCommand } from './configure.ts';
+import { orgsCommand } from './orgs.ts';
+import { sitesCommand } from './site.ts';
 
 const main = defineCommand({
 	meta: {
@@ -11,7 +14,10 @@ const main = defineCommand({
 		description: 'Work with CloudCannon from the command line.',
 	},
 	subCommands: {
+		builds: buildsCommand,
 		configure: configureCommand,
+		orgs: orgsCommand,
+		sites: sitesCommand,
 	},
 });
 
