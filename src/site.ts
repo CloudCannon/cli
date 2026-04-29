@@ -1,4 +1,5 @@
 import { defineCommand } from 'citty';
+import { printJson } from './configure/utility.ts';
 import { filesGetCommand, filesListCommand, filesUploadCommand } from './files.ts';
 import { getSdkClient } from './sdk-client.ts';
 
@@ -19,7 +20,7 @@ export const sitesListCommand = defineCommand({
 
 		if (ctx.args.org) {
 			const sites = await client.org(ctx.args.org).sites();
-			console.log(JSON.stringify(sites, null, 2));
+			printJson(sites);
 			return;
 		}
 
@@ -29,7 +30,7 @@ export const sitesListCommand = defineCommand({
 			const sites = await client.org(org.uuid).sites();
 			allSites.push(...sites);
 		}
-		console.log(JSON.stringify(allSites, null, 2));
+		printJson(allSites);
 	},
 });
 
@@ -48,7 +49,7 @@ export const sitesGetCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 		const site = await client.site(ctx.args.uuid).get();
-		console.log(JSON.stringify(site, null, 2));
+		printJson(site);
 	},
 });
 
@@ -149,31 +150,57 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 		const client = getSdkClient();
 
 		const options: Record<string, unknown> = {};
-
-		if (ctx.args.ssg !== undefined) options.ssg = ctx.args.ssg;
-		if (ctx.args.buildingLocked !== undefined) options.building_locked = ctx.args.buildingLocked;
-		if (ctx.args.usesI18n !== undefined) options.uses_i18n = ctx.args.usesI18n;
-		if (ctx.args.defaultLocale !== undefined) options.default_locale = ctx.args.defaultLocale;
+		if (ctx.args.ssg !== undefined) {
+			options.ssg = ctx.args.ssg;
+		}
+		if (ctx.args.buildingLocked !== undefined) {
+			options.building_locked = ctx.args.buildingLocked;
+		}
+		if (ctx.args.usesI18n !== undefined) {
+			options.uses_i18n = ctx.args.usesI18n;
+		}
+		if (ctx.args.defaultLocale !== undefined) {
+			options.default_locale = ctx.args.defaultLocale;
+		}
 
 		const compile: Record<string, unknown> = {};
-		if (ctx.args.installCommand !== undefined) compile.install_command = ctx.args.installCommand;
-		if (ctx.args.buildCommand !== undefined) compile.build_command = ctx.args.buildCommand;
-		if (ctx.args.outputPath !== undefined) compile.output_path = ctx.args.outputPath;
-		if (ctx.args.preservedPaths !== undefined && typeof ctx.args.preservedPaths === 'string')
+		if (ctx.args.installCommand !== undefined) {
+			compile.install_command = ctx.args.installCommand;
+		}
+		if (ctx.args.buildCommand !== undefined) {
+			compile.build_command = ctx.args.buildCommand;
+		}
+		if (ctx.args.outputPath !== undefined) {
+			compile.output_path = ctx.args.outputPath;
+		}
+		if (ctx.args.preservedPaths !== undefined && typeof ctx.args.preservedPaths === 'string') {
 			compile.preserved_paths = ctx.args.preservedPaths.split(',');
-		if (ctx.args.hugoVersion !== undefined) compile.hugoVersion = ctx.args.hugoVersion;
-		if (ctx.args.nodeVersion !== undefined) compile.nodeVersion = ctx.args.nodeVersion;
-		if (ctx.args.rubyVersion !== undefined) compile.rubyVersion = ctx.args.rubyVersion;
-		if (ctx.args.denoVersion !== undefined) compile.denoVersion = ctx.args.denoVersion;
-		if (ctx.args.preserveOutput !== undefined) compile.preserveOutput = ctx.args.preserveOutput;
-		if (ctx.args.includeGit !== undefined) compile.includeGit = ctx.args.includeGit;
+		}
+		if (ctx.args.hugoVersion !== undefined) {
+			compile.hugoVersion = ctx.args.hugoVersion;
+		}
+		if (ctx.args.nodeVersion !== undefined) {
+			compile.nodeVersion = ctx.args.nodeVersion;
+		}
+		if (ctx.args.rubyVersion !== undefined) {
+			compile.rubyVersion = ctx.args.rubyVersion;
+		}
+		if (ctx.args.denoVersion !== undefined) {
+			compile.denoVersion = ctx.args.denoVersion;
+		}
+		if (ctx.args.preserveOutput !== undefined) {
+			compile.preserveOutput = ctx.args.preserveOutput;
+		}
+		if (ctx.args.includeGit !== undefined) {
+			compile.includeGit = ctx.args.includeGit;
+		}
 
 		if (Object.keys(compile).length > 0) {
 			options.compile = compile;
 		}
 
 		const site = await client.site(ctx.args.uuid).updateBuildConfig(options);
-		console.log(JSON.stringify(site, null, 2));
+		printJson(site);
 	},
 });
 

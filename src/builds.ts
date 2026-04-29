@@ -1,4 +1,5 @@
 import { defineCommand } from 'citty';
+import { printJson } from './configure/utility.ts';
 import { getSdkClient } from './sdk-client.ts';
 
 export const buildsListCommand = defineCommand({
@@ -17,7 +18,7 @@ export const buildsListCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 		const builds = await client.site(ctx.args.site).getBuilds();
-		console.log(JSON.stringify(builds, null, 2));
+		printJson(builds);
 	},
 });
 

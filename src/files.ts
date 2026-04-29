@@ -2,6 +2,7 @@ import { createWriteStream } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { Writable } from 'node:stream';
 import { defineCommand } from 'citty';
+import { printJson } from './configure/utility.ts';
 import { getSdkClient } from './sdk-client.ts';
 
 export const filesListCommand = defineCommand({
@@ -21,7 +22,7 @@ export const filesListCommand = defineCommand({
 		const client = getSdkClient();
 		const files = await client.site(ctx.args.site).listFiles();
 		const output = Object.fromEntries(files.map((file) => [file.sitePath, file.md5]));
-		console.log(JSON.stringify(output, null, 2));
+		printJson(output);
 	},
 });
 

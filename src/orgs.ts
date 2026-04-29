@@ -1,4 +1,5 @@
 import { defineCommand } from 'citty';
+import { printJson } from './configure/utility.ts';
 import { getSdkClient } from './sdk-client.ts';
 
 export const orgsListCommand = defineCommand({
@@ -9,7 +10,7 @@ export const orgsListCommand = defineCommand({
 	async run(): Promise<void> {
 		const client = getSdkClient();
 		const orgs = await client.orgs();
-		console.log(JSON.stringify(orgs, null, 2));
+		printJson(orgs);
 	},
 });
 
@@ -28,7 +29,7 @@ export const orgsGetCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 		const org = await client.org(ctx.args.uuid).get();
-		console.log(JSON.stringify(org, null, 2));
+		printJson(org);
 	},
 });
 
