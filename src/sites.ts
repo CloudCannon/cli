@@ -1,34 +1,27 @@
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
-import { filesGetCommand, filesListCommand, filesUploadCommand } from './files.ts';
 import { getSdkClient } from './sdk-client.ts';
+import { sitesBuildsCommand } from './sites/builds.ts';
+import { sitesFilesCommand } from './sites/files.ts';
+import {
+	sitesPrintLastBuildCommand,
+	sitesPrintLastFailedBuildCommand,
+	sitesPrintLastFailedSyncCommand,
+	sitesPrintLastSyncCommand,
+} from './sites/print-last.ts';
 
 export const sitesListCommand = defineCommand({
 	meta: {
 		name: 'list',
-		description: 'List all sites.',
+		description: 'List all sites across all organisations.',
 	},
-	args: {
-		org: {
-			type: 'string',
-			description: 'Limit to a specific organisation UUID',
-			valueHint: 'uuid',
-		},
-	},
-	async run(ctx): Promise<void> {
+	async run(): Promise<void> {
 		const client = getSdkClient();
-
-		if (ctx.args.org) {
-			const sites = await client.org(ctx.args.org).sites();
-			printJson(sites);
-			return;
-		}
-
 		const orgs = await client.orgs();
 		const allSites = [];
-		for (const org of orgs) {
+		for (const org of orgs.items) {
 			const sites = await client.org(org.uuid).sites();
-			allSites.push(...sites);
+			allSites.push(...sites.items);
 		}
 		printJson(allSites);
 	},
@@ -40,15 +33,16 @@ export const sitesGetCommand = defineCommand({
 		description: 'Get a site by UUID.',
 	},
 	args: {
-		uuid: {
-			type: 'positional',
+		site: {
+			type: 'string',
 			description: 'The site UUID',
+			valueHint: 'uuid',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const site = await client.site(ctx.args.uuid).get();
+		const site = await client.site(ctx.args.site).get();
 		printJson(site);
 	},
 });
@@ -59,15 +53,16 @@ export const sitesRebuildCommand = defineCommand({
 		description: 'Trigger a rebuild for a site.',
 	},
 	args: {
-		uuid: {
-			type: 'positional',
+		site: {
+			type: 'string',
 			description: 'The site UUID',
+			valueHint: 'uuid',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		await client.site(ctx.args.uuid).rebuild();
+		await client.site(ctx.args.site).rebuild();
 		console.log('Rebuild triggered.');
 	},
 });
@@ -78,9 +73,10 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 		description: 'Update the build configuration for a site.',
 	},
 	args: {
-		uuid: {
-			type: 'positional',
+		site: {
+			type: 'string',
 			description: 'The site UUID',
+			valueHint: 'uuid',
 			required: true,
 		},
 		ssg: {
@@ -199,20 +195,8 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 			options.compile = compile;
 		}
 
-		const site = await client.site(ctx.args.uuid).updateBuildConfig(options);
+		const site = await client.site(ctx.args.site).updateBuildConfig(options);
 		printJson(site);
-	},
-});
-
-export const sitesFilesCommand = defineCommand({
-	meta: {
-		name: 'files',
-		description: 'Manage files on a CloudCannon site.',
-	},
-	subCommands: {
-		list: filesListCommand,
-		get: filesGetCommand,
-		upload: filesUploadCommand,
 	},
 });
 
@@ -227,5 +211,10 @@ export const sitesCommand = defineCommand({
 		rebuild: sitesRebuildCommand,
 		'update-build-config': sitesUpdateBuildConfigCommand,
 		files: sitesFilesCommand,
+		builds: sitesBuildsCommand,
+		'print-last-build': sitesPrintLastBuildCommand,
+		'print-last-failed-build': sitesPrintLastFailedBuildCommand,
+		'print-last-sync': sitesPrintLastSyncCommand,
+		'print-last-failed-sync': sitesPrintLastFailedSyncCommand,
 	},
 });

@@ -2,10 +2,10 @@ import { createWriteStream } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { Writable } from 'node:stream';
 import { defineCommand } from 'citty';
-import { printJson } from './configure/utility.ts';
-import { getSdkClient } from './sdk-client.ts';
+import { printJson } from '../configure/utility.ts';
+import { getSdkClient } from '../sdk-client.ts';
 
-export const filesListCommand = defineCommand({
+export const sitesFilesListCommand = defineCommand({
 	meta: {
 		name: 'list',
 		description: 'List files from a site.',
@@ -26,7 +26,7 @@ export const filesListCommand = defineCommand({
 	},
 });
 
-export const filesGetCommand = defineCommand({
+export const sitesFilesGetCommand = defineCommand({
 	meta: {
 		name: 'get',
 		description: 'Get the contents of a file from a site.',
@@ -62,7 +62,7 @@ export const filesGetCommand = defineCommand({
 	},
 });
 
-export const filesUploadCommand = defineCommand({
+export const sitesFilesUploadCommand = defineCommand({
 	meta: {
 		name: 'upload',
 		description: 'Upload a file to a site.',
@@ -106,14 +106,14 @@ export const filesUploadCommand = defineCommand({
 	},
 });
 
-export const filesCommand = defineCommand({
+export const sitesFilesCommand = defineCommand({
 	meta: {
 		name: 'files',
-		description: 'Manage files on CloudCannon sites.',
+		description: 'Manage files on a CloudCannon site.',
 	},
 	subCommands: {
-		list: filesListCommand,
-		get: filesGetCommand,
-		upload: filesUploadCommand,
+		list: sitesFilesListCommand,
+		get: sitesFilesGetCommand,
+		upload: sitesFilesUploadCommand,
 	},
 });

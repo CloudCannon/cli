@@ -5,7 +5,7 @@ import pkg from '../package.json' with { type: 'json' };
 import { buildsCommand } from './builds.ts';
 import { configureCommand } from './configure.ts';
 import { orgsCommand } from './orgs.ts';
-import { sitesCommand } from './site.ts';
+import { sitesCommand } from './sites.ts';
 
 const main = defineCommand({
 	meta: {

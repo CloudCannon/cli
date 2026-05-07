@@ -1,5 +1,7 @@
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
+import { buildListOptions, listFlagDefs } from './list-options.ts';
+import { orgsSitesCommand } from './orgs/sites.ts';
 import { getSdkClient } from './sdk-client.ts';
 
 export const orgsListCommand = defineCommand({
@@ -7,10 +9,17 @@ export const orgsListCommand = defineCommand({
 		name: 'list',
 		description: 'List all organisations.',
 	},
-	async run(): Promise<void> {
+	args: listFlagDefs,
+	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const orgs = await client.orgs();
-		printJson(orgs);
+		const options = buildListOptions(ctx.args);
+		const orgs = await client.orgs(options as Parameters<typeof client.orgs>[0]);
+		printJson({
+			current_page: orgs.current_page,
+			total_pages: orgs.total_pages,
+			total_items: orgs.total_items,
+			items: orgs.items,
+		});
 	},
 });
 
@@ -20,15 +29,16 @@ export const orgsGetCommand = defineCommand({
 		description: 'Get an organisation by UUID.',
 	},
 	args: {
-		uuid: {
-			type: 'positional',
+		org: {
+			type: 'string',
 			description: 'The organisation UUID',
+			valueHint: 'uuid',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const org = await client.org(ctx.args.uuid).get();
+		const org = await client.org(ctx.args.org).get();
 		printJson(org);
 	},
 });
@@ -41,5 +51,6 @@ export const orgsCommand = defineCommand({
 	subCommands: {
 		list: orgsListCommand,
 		get: orgsGetCommand,
+		sites: orgsSitesCommand,
 	},
 });
