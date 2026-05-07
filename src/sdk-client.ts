@@ -7,5 +7,5 @@ export function getSdkClient(): CloudCannonClient {
 			'CLOUDCANNON_API_KEY environment variable is required. Set it with: export CLOUDCANNON_API_KEY=your_key'
 		);
 	}
-	return new CloudCannonClient({ key: apiKey, apiOrigin: 'dev-app.cloudcannon.com' });
+	return new CloudCannonClient({ key: apiKey });
 }
