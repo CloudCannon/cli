@@ -9,6 +9,7 @@ import {
 	sitesPrintLastFailedSyncCommand,
 	sitesPrintLastSyncCommand,
 } from './sites/print-last.ts';
+import { resolveSiteUuid } from './sites/resolve.ts';
 
 export const sitesListCommand = defineCommand({
 	meta: {
@@ -30,19 +31,23 @@ export const sitesListCommand = defineCommand({
 export const sitesGetCommand = defineCommand({
 	meta: {
 		name: 'get',
-		description: 'Get a site by UUID.',
+		description: 'Get a site by UUID or domain.',
 	},
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site UUID or domain',
+			valueHint: 'uuid|domain',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const site = await client.site(ctx.args.site).get();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		const site = await client.site(siteUuid).get();
 		printJson(site);
 	},
 });
@@ -55,14 +60,18 @@ export const sitesRebuildCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site UUID or domain',
+			valueHint: 'uuid|domain',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		await client.site(ctx.args.site).rebuild();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		await client.site(siteUuid).rebuild();
 		console.log('Rebuild triggered.');
 	},
 });
@@ -75,8 +84,8 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site UUID or domain',
+			valueHint: 'uuid|domain',
 			required: true,
 		},
 		ssg: {
@@ -195,7 +204,11 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 			options.compile = compile;
 		}
 
-		const site = await client.site(ctx.args.site).updateBuildConfig(options);
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		const site = await client.site(siteUuid).updateBuildConfig(options);
 		printJson(site);
 	},
 });

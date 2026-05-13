@@ -1,12 +1,13 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { getSdkClient } from '../sdk-client.ts';
+import { resolveSiteUuid } from './resolve.ts';
 
 const siteArgs = {
 	site: {
 		type: 'string',
-		description: 'The site UUID',
-		valueHint: 'uuid',
+		description: 'The site UUID or domain',
+		valueHint: 'uuid|domain',
 		required: true,
 	},
 } as const;
@@ -33,14 +34,16 @@ async function printLatestBuildLogs(
 		);
 		return;
 	}
-	if (!latest.uuid) {
-		console.log('Latest build is missing a UUID.');
-		return;
-	}
 	const resp = await client.build(latest.uuid).get();
 	const text = await resp.text();
 	if (text) {
-		console.log(text);
+		const cleanedText = text
+			.replace(/ ?\[⏱(\d+)ms\]/gm, '')
+			.replace(/ ?\[🏷[^\]]*\]/gm, '')
+			.replace(/\x1b\[\d*m/gm, '')
+			.trim();
+
+		console.log(cleanedText);
 	}
 }
 
@@ -66,14 +69,16 @@ async function printLatestSyncLogs(
 		);
 		return;
 	}
-	if (!latest.uuid) {
-		console.log('Latest sync is missing a UUID.');
-		return;
-	}
 	const resp = await client.sync(latest.uuid).get();
 	const text = await resp.text();
 	if (text) {
-		console.log(text);
+		const cleanedText = text
+			.replace(/ ?\[⏱(\d+)ms\]/gm, '')
+			.replace(/ ?\[🏷[^\]]*\]/gm, '')
+			.replace(/\x1b\[\d*m/gm, '')
+			.trim();
+
+		console.log(cleanedText);
 	}
 }
 
@@ -84,7 +89,12 @@ export const sitesPrintLastBuildCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		await printLatestBuildLogs(getSdkClient(), ctx.args.site, false);
+		const client = getSdkClient();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		await printLatestBuildLogs(client, siteUuid, false);
 	},
 });
 
@@ -95,7 +105,12 @@ export const sitesPrintLastFailedBuildCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		await printLatestBuildLogs(getSdkClient(), ctx.args.site, true);
+		const client = getSdkClient();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		await printLatestBuildLogs(client, siteUuid, true);
 	},
 });
 
@@ -106,7 +121,12 @@ export const sitesPrintLastSyncCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		await printLatestSyncLogs(getSdkClient(), ctx.args.site, false);
+		const client = getSdkClient();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		await printLatestSyncLogs(client, siteUuid, false);
 	},
 });
 
@@ -117,6 +137,11 @@ export const sitesPrintLastFailedSyncCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		await printLatestSyncLogs(getSdkClient(), ctx.args.site, true);
+		const client = getSdkClient();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		await printLatestSyncLogs(client, siteUuid, true);
 	},
 });

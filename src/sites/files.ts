@@ -4,6 +4,7 @@ import { Writable } from 'node:stream';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { getSdkClient } from '../sdk-client.ts';
+import { resolveSiteUuid } from './resolve.ts';
 
 export const sitesFilesListCommand = defineCommand({
 	meta: {
@@ -13,14 +14,18 @@ export const sitesFilesListCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site UUID or domain',
+			valueHint: 'uuid|domain',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const files = await client.site(ctx.args.site).listFiles();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		const files = await client.site(siteUuid).listFiles();
 		const output = Object.fromEntries(files.map((file) => [file.sitePath, file.md5]));
 		printJson(output);
 	},
@@ -34,8 +39,8 @@ export const sitesFilesGetCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site UUID or domain',
+			valueHint: 'uuid|domain',
 			required: true,
 		},
 		output: {
@@ -51,7 +56,11 @@ export const sitesFilesGetCommand = defineCommand({
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const resp = await client.site(ctx.args.site).getFile(ctx.args.path);
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		const resp = await client.site(siteUuid).getFile(ctx.args.path);
 		if (ctx.args.output) {
 			const stream = createWriteStream(ctx.args.output);
 			await resp.body?.pipeTo(Writable.toWeb(stream));
@@ -70,8 +79,8 @@ export const sitesFilesUploadCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site UUID or domain',
+			valueHint: 'uuid|domain',
 			required: true,
 		},
 		localPath: {
@@ -98,7 +107,11 @@ export const sitesFilesUploadCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 		const content = await readFile(ctx.args.localPath);
-		await client.site(ctx.args.site).uploadFile(ctx.args.path, content, {
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			return;
+		}
+		await client.site(siteUuid).uploadFile(ctx.args.path, content, {
 			type: ctx.args.type,
 			overwriteExistingFile: ctx.args.overwrite,
 		});
