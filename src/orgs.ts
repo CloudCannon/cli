@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
 import { buildListOptions, listFlagDefs } from './list-options.ts';
+import { resolveOrgUuid } from './orgs/resolve.ts';
 import { orgsSitesCommand } from './orgs/sites.ts';
 import { getSdkClient } from './sdk-client.ts';
 
@@ -38,7 +39,11 @@ export const orgsGetCommand = defineCommand({
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const org = await client.org(ctx.args.org).get();
+		const orgUuid = await resolveOrgUuid(client, ctx.args.org);
+		if (!orgUuid) {
+			return;
+		}
+		const org = await client.org(orgUuid).get();
 		printJson(org);
 	},
 });

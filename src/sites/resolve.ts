@@ -1,4 +1,6 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
+import type { ListOrgSitesOptions } from '@cloudcannon/sdk';
+import { printJson } from '../configure/utility.ts';
 
 const STABLE_DOMAIN_SUFFIX = '.cloudvent.net';
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -11,11 +13,15 @@ export async function resolveSiteUuid(
 		return identifier;
 	}
 
-	const filters: NonNullable<Parameters<ReturnType<typeof client.org>['sites']>[0]>['filters'] = {};
-	if (identifier.endsWith(STABLE_DOMAIN_SUFFIX)) {
+	const filters: ListOrgSitesOptions['filters'] = {};
+	const idCandidate = Number(identifier);
+
+	if (Number.isInteger(idCandidate) && idCandidate > 0) {
+		filters.id = idCandidate;
+	} else if (identifier.endsWith(STABLE_DOMAIN_SUFFIX)) {
 		filters.search = identifier.split('.')[0] + STABLE_DOMAIN_SUFFIX;
 	} else {
-		filters.domain_name = identifier;
+		filters.search = identifier;
 	}
 
 	const orgs = await client.orgs();
@@ -25,12 +31,15 @@ export async function resolveSiteUuid(
 		}
 		const sites = await client.org(org.uuid).sites({
 			filters,
-			items: 1,
 		});
-		const match = sites.items[0];
-		if (match?.stable_domain === identifier || match?.domain_name === identifier) {
-			return match.uuid;
+
+		if (sites.items.length > 1) {
+			console.error(`Site identifier "${identifier}" is ambiguous. Potential matches are:`);
+			printJson(sites.items);
+			return;
 		}
+
+		return sites.items[0].uuid;
 	}
 
 	console.error(`No site found matching domain "${identifier}".`);
