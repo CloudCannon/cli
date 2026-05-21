@@ -153,7 +153,7 @@ cloudcannon orgs list
 
 ---
 
-### `orgs get --org <name\|id\|uuid>`
+### `orgs get --org <name|id|uuid>`
 
 Get an organisation by name, ID, or UUID.
 
@@ -169,7 +169,7 @@ cloudcannon orgs get --org my-org
 
 ---
 
-### `orgs sites list --org <name\|id\|uuid>`
+### `orgs sites list --org <name|id|uuid>`
 
 List all sites for an organisation.
 
@@ -190,7 +190,7 @@ cloudcannon orgs sites list --org my-org
 
 ---
 
-### `orgs inboxes list --org <name\|id\|uuid>`
+### `orgs inboxes list --org <name|id|uuid>`
 
 List all inboxes for an organisation.
 
@@ -221,7 +221,7 @@ cloudcannon sites list
 
 ---
 
-### `sites get --site <name\|id\|uuid\|domain>`
+### `sites get --site <name|id|uuid|domain>`
 
 Get a site by name, ID, UUID, or domain.
 
@@ -237,7 +237,7 @@ cloudcannon sites get --site my-site
 
 ---
 
-### `sites rebuild --site <name\|id\|uuid\|domain>`
+### `sites rebuild --site <name|id|uuid|domain>`
 
 Trigger a rebuild for a site.
 
@@ -253,7 +253,7 @@ cloudcannon sites rebuild --site my-site
 
 ---
 
-### `sites update-build-config --site <name\|id\|uuid\|domain>`
+### `sites update-build-config --site <name|id|uuid|domain>`
 
 Update the build configuration for a site.
 
@@ -282,7 +282,7 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 
 ---
 
-### `sites files list --site <name\|id\|uuid\|domain>`
+### `sites files list --site <name|id|uuid|domain>`
 
 List files from a site.
 
@@ -298,7 +298,7 @@ cloudcannon sites files list --site my-site
 
 ---
 
-### `sites files get --site <name\|id\|uuid\|domain> [path]`
+### `sites files get --site <name|id|uuid|domain> [path]`
 
 Get the contents of a file from a site.
 
@@ -316,7 +316,7 @@ cloudcannon sites files get --site my-site index.html --output ./local-index.htm
 
 ---
 
-### `sites files upload --site <name\|id\|uuid\|domain> [localPath] [path]`
+### `sites files upload --site <name|id|uuid|domain> [localPath] [path]`
 
 Upload a file to a site.
 
@@ -334,7 +334,7 @@ cloudcannon sites files upload --site my-site ./local-file.html /uploaded-file.h
 
 ---
 
-### `sites builds list --site <name\|id\|uuid\|domain>`
+### `sites builds list --site <name|id|uuid|domain>`
 
 List builds for a site.
 
@@ -355,7 +355,7 @@ cloudcannon sites builds list --site my-site
 
 ---
 
-### `sites print-last-build --site <name\|id\|uuid\|domain>`
+### `sites print-last-build --site <name|id|uuid|domain>`
 
 Print the logs for the most recent build of a site.
 
@@ -371,7 +371,7 @@ cloudcannon sites print-last-build --site my-site
 
 ---
 
-### `sites print-last-failed-build --site <name\|id\|uuid\|domain>`
+### `sites print-last-failed-build --site <name|id|uuid|domain>`
 
 Print the logs for the most recent failed build of a site.
 
@@ -387,7 +387,7 @@ cloudcannon sites print-last-failed-build --site my-site
 
 ---
 
-### `sites print-last-sync --site <name\|id\|uuid\|domain>`
+### `sites print-last-sync --site <name|id|uuid|domain>`
 
 Print the logs for the most recent sync of a site.
 
@@ -403,7 +403,7 @@ cloudcannon sites print-last-sync --site my-site
 
 ---
 
-### `sites print-last-failed-sync --site <name\|id\|uuid\|domain>`
+### `sites print-last-failed-sync --site <name|id|uuid|domain>`
 
 Print the logs for the most recent failed sync of a site.
 
@@ -435,7 +435,7 @@ cloudcannon builds print-logs --build <uuid>
 
 ---
 
-### `inboxes submissions list --inbox <name\|id\|key\|uuid>`
+### `inboxes submissions list --inbox <name|id|key|uuid>`
 
 List submissions for an inbox.
 
