@@ -9,6 +9,7 @@ Command line interface for the CloudCannon CMS.
 - Generates CloudCannon configuration files interactively or non-interactively.
 - Detects your static site generator automatically, works with Astro, Bridgetown, Docusaurus, Eleventy, Gatsby, Hexo, Hugo, Jekyll, Lume, MkDocs, Next.js, Nuxt, Sphinx, SvelteKit.
 - Suggests collections, build commands, and output paths based on your project.
+- Manage organisations, sites, builds, files, and form submissions via the CloudCannon API.
 
 ## Install
 
@@ -16,16 +17,24 @@ Command line interface for the CloudCannon CMS.
 npm install --global @cloudcannon/cli
 ```
 
+## Authentication
+
+Commands that interact with the CloudCannon API require an API key. Set it via the `CLOUDCANNON_API_KEY` environment variable:
+
+```sh
+export CLOUDCANNON_API_KEY=your_api_key
+```
+
 ## Usage
 
 ```
-cloudcannon configure <command> [path] [flags]
+cloudcannon <command> [args] [flags]
 ```
 
 Run without arguments to see available commands:
 
 ```sh
-cloudcannon configure --help
+cloudcannon --help
 ```
 
 ## Commands
@@ -121,6 +130,329 @@ cloudcannon configure detect-build-commands ./my-site --ssg hugo
 |---|---|
 | `--ssg <name>` | Override SSG detection |
 | `--source <path>` | Override source folder |
+
+---
+
+### `orgs list`
+
+List all organisations.
+
+```sh
+cloudcannon orgs list
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--page <n>` | Page number to fetch |
+| `--items <n>` | Number of items per page |
+| `--sort-by <field>` | Field name to sort by |
+| `--sort-direction <ASC\|DESC>` | Sort direction |
+| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
+
+---
+
+### `orgs get --org <name\|id\|uuid>`
+
+Get an organisation by name, ID, or UUID.
+
+```sh
+cloudcannon orgs get --org my-org
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+
+---
+
+### `orgs sites list --org <name\|id\|uuid>`
+
+List all sites for an organisation.
+
+```sh
+cloudcannon orgs sites list --org my-org
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--page <n>` | Page number to fetch |
+| `--items <n>` | Number of items per page |
+| `--sort-by <field>` | Field name to sort by |
+| `--sort-direction <ASC\|DESC>` | Sort direction |
+| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
+
+---
+
+### `orgs inboxes list --org <name\|id\|uuid>`
+
+List all inboxes for an organisation.
+
+```sh
+cloudcannon orgs inboxes list --org my-org
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--page <n>` | Page number to fetch |
+| `--items <n>` | Number of items per page |
+| `--sort-by <field>` | Field name to sort by |
+| `--sort-direction <ASC\|DESC>` | Sort direction |
+| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
+
+---
+
+### `sites list`
+
+List all sites across all organisations.
+
+```sh
+cloudcannon sites list
+```
+
+---
+
+### `sites get --site <name\|id\|uuid\|domain>`
+
+Get a site by name, ID, UUID, or domain.
+
+```sh
+cloudcannon sites get --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `sites rebuild --site <name\|id\|uuid\|domain>`
+
+Trigger a rebuild for a site.
+
+```sh
+cloudcannon sites rebuild --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `sites update-build-config --site <name\|id\|uuid\|domain>`
+
+Update the build configuration for a site.
+
+```sh
+cloudcannon sites update-build-config --site my-site --ssg hugo
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+| `--ssg <name>` | Static site generator name |
+| `--building-locked <true\|false>` | Lock the site from building |
+| `--default-locale <locale>` | Default locale for i18n |
+| `--install-command <cmd>` | Override install command |
+| `--build-command <cmd>` | Override build command |
+| `--output-path <path>` | Override output path |
+| `--preserved-paths <paths>` | Comma-separated preserved paths |
+| `--hugo-version <version>` | Hugo version |
+| `--node-version <version>` | Node version |
+| `--ruby-version <version>` | Ruby version |
+| `--deno-version <version>` | Deno version |
+| `--preserve-output <true\|false>` | Preserve previous output |
+| `--include-git <true\|false>` | Include git history in build |
+
+---
+
+### `sites files list --site <name\|id\|uuid\|domain>`
+
+List files from a site.
+
+```sh
+cloudcannon sites files list --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `sites files get --site <name\|id\|uuid\|domain> [path]`
+
+Get the contents of a file from a site.
+
+```sh
+cloudcannon sites files get --site my-site index.html
+cloudcannon sites files get --site my-site index.html --output ./local-index.html
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+| `--output <path>` | Path to save the file to. If not provided then the file is printed to STDOUT |
+
+---
+
+### `sites files upload --site <name\|id\|uuid\|domain> [localPath] [path]`
+
+Upload a file to a site.
+
+```sh
+cloudcannon sites files upload --site my-site ./local-file.html /uploaded-file.html
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+| `--type <mime>` | MIME type of the file | |
+| `--overwrite` | Overwrite if the file already exists | `false` |
+
+---
+
+### `sites builds list --site <name\|id\|uuid\|domain>`
+
+List builds for a site.
+
+```sh
+cloudcannon sites builds list --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+| `--page <n>` | Page number to fetch |
+| `--items <n>` | Number of items per page |
+| `--sort-by <field>` | Field name to sort by |
+| `--sort-direction <ASC\|DESC>` | Sort direction |
+| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
+
+---
+
+### `sites print-last-build --site <name\|id\|uuid\|domain>`
+
+Print the logs for the most recent build of a site.
+
+```sh
+cloudcannon sites print-last-build --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `sites print-last-failed-build --site <name\|id\|uuid\|domain>`
+
+Print the logs for the most recent failed build of a site.
+
+```sh
+cloudcannon sites print-last-failed-build --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `sites print-last-sync --site <name\|id\|uuid\|domain>`
+
+Print the logs for the most recent sync of a site.
+
+```sh
+cloudcannon sites print-last-sync --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `sites print-last-failed-sync --site <name\|id\|uuid\|domain>`
+
+Print the logs for the most recent failed sync of a site.
+
+```sh
+cloudcannon sites print-last-failed-sync --site my-site
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+
+---
+
+### `builds print-logs --build <uuid>`
+
+Print the logs for a build.
+
+```sh
+cloudcannon builds print-logs --build <uuid>
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--build <uuid>` | The build UUID (required) |
+
+---
+
+### `inboxes submissions list --inbox <name\|id\|key\|uuid>`
+
+List submissions for an inbox.
+
+```sh
+cloudcannon inboxes submissions list --inbox my-inbox
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--page <n>` | Page number to fetch |
+| `--items <n>` | Number of items per page |
+| `--sort-by <field>` | Field name to sort by |
+| `--sort-direction <ASC\|DESC>` | Sort direction |
+| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
 
 ---
 
