@@ -14,8 +14,8 @@ export const sitesFilesListCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID or domain',
-			valueHint: 'uuid|domain',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 	},
@@ -39,8 +39,8 @@ export const sitesFilesGetCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID or domain',
-			valueHint: 'uuid|domain',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 		output: {
@@ -58,6 +58,7 @@ export const sitesFilesGetCommand = defineCommand({
 		const client = getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		const resp = await client.site(siteUuid).getFile(ctx.args.path);
@@ -79,8 +80,8 @@ export const sitesFilesUploadCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID or domain',
-			valueHint: 'uuid|domain',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 		localPath: {
@@ -109,6 +110,7 @@ export const sitesFilesUploadCommand = defineCommand({
 		const content = await readFile(ctx.args.localPath);
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		await client.site(siteUuid).uploadFile(ctx.args.path, content, {

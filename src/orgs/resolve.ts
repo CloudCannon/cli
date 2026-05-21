@@ -30,7 +30,7 @@ export async function resolveOrgUuid(
 	}
 
 	if (orgs.items.length === 0) {
-		console.error(`No site found matching domain "${identifier}".`);
+		console.error(`No organisation found matching "${identifier}".`);
 		return;
 	}
 

@@ -1,3 +1,4 @@
+import type { ListSiteBuildsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { buildListOptions, listFlagDefs } from '../list-options.ts';
@@ -12,8 +13,8 @@ export const sitesBuildsListCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID or domain',
-			valueHint: 'uuid|domain',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 		...listFlagDefs,
@@ -22,11 +23,12 @@ export const sitesBuildsListCommand = defineCommand({
 		const client = getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		const site = client.site(siteUuid);
 		const options = buildListOptions(ctx.args);
-		const builds = await site.getBuilds(options as Parameters<typeof site.getBuilds>[0]);
+		const builds = await site.getBuilds(options as ListSiteBuildsOptions);
 		printJson({
 			current_page: builds.current_page,
 			total_pages: builds.total_pages,

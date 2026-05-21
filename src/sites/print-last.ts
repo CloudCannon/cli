@@ -1,4 +1,5 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
+import type { ListSiteBuildsOptions, ListSiteSyncsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { getSdkClient } from '../sdk-client.ts';
 import { resolveSiteUuid } from './resolve.ts';
@@ -6,8 +7,8 @@ import { resolveSiteUuid } from './resolve.ts';
 const siteArgs = {
 	site: {
 		type: 'string',
-		description: 'The site UUID or domain',
-		valueHint: 'uuid|domain',
+		description: 'The site name, ID, UUID, or domain',
+		valueHint: 'name|id|uuid|domain',
 		required: true,
 	},
 } as const;
@@ -26,7 +27,7 @@ async function printLatestBuildLogs(
 	if (onlyFailed) {
 		options.filters = { successful: false };
 	}
-	const builds = await site.getBuilds(options as Parameters<typeof site.getBuilds>[0]);
+	const builds = await site.getBuilds(options as ListSiteBuildsOptions);
 	const latest = builds.items[0];
 	if (!latest) {
 		console.log(
@@ -61,7 +62,7 @@ async function printLatestSyncLogs(
 	if (onlyFailed) {
 		options.filters = { successful: false };
 	}
-	const syncs = await site.getSyncs(options as Parameters<typeof site.getSyncs>[0]);
+	const syncs = await site.getSyncs(options as ListSiteSyncsOptions);
 	const latest = syncs.items[0];
 	if (!latest) {
 		console.log(
@@ -92,6 +93,7 @@ export const sitesPrintLastBuildCommand = defineCommand({
 		const client = getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		await printLatestBuildLogs(client, siteUuid, false);
@@ -108,6 +110,7 @@ export const sitesPrintLastFailedBuildCommand = defineCommand({
 		const client = getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		await printLatestBuildLogs(client, siteUuid, true);
@@ -124,6 +127,7 @@ export const sitesPrintLastSyncCommand = defineCommand({
 		const client = getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		await printLatestSyncLogs(client, siteUuid, false);
@@ -140,6 +144,7 @@ export const sitesPrintLastFailedSyncCommand = defineCommand({
 		const client = getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
+			process.exitCode = 1;
 			return;
 		}
 		await printLatestSyncLogs(client, siteUuid, true);

@@ -4,6 +4,7 @@ import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json' with { type: 'json' };
 import { buildsCommand } from './builds.ts';
 import { configureCommand } from './configure.ts';
+import { inboxesCommand } from './inboxes.ts';
 import { orgsCommand } from './orgs.ts';
 import { sitesCommand } from './sites.ts';
 
@@ -16,6 +17,7 @@ const main = defineCommand({
 	subCommands: {
 		builds: buildsCommand,
 		configure: configureCommand,
+		inboxes: inboxesCommand,
 		orgs: orgsCommand,
 		sites: sitesCommand,
 	},

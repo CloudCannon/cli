@@ -42,6 +42,6 @@ export async function resolveSiteUuid(
 		return sites.items[0].uuid;
 	}
 
-	console.error(`No site found matching domain "${identifier}".`);
+	console.error(`No site found matching "${identifier}".`);
 	return undefined;
 }
