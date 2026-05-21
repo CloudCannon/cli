@@ -1,6 +1,9 @@
+import type { ListOrgsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
 import { buildListOptions, listFlagDefs } from './list-options.ts';
+import { orgsInboxesCommand } from './orgs/inboxes.ts';
+import { resolveOrgUuid } from './orgs/resolve.ts';
 import { orgsSitesCommand } from './orgs/sites.ts';
 import { getSdkClient } from './sdk-client.ts';
 
@@ -13,7 +16,7 @@ export const orgsListCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 		const options = buildListOptions(ctx.args);
-		const orgs = await client.orgs(options as Parameters<typeof client.orgs>[0]);
+		const orgs = await client.orgs(options as ListOrgsOptions);
 		printJson({
 			current_page: orgs.current_page,
 			total_pages: orgs.total_pages,
@@ -26,19 +29,24 @@ export const orgsListCommand = defineCommand({
 export const orgsGetCommand = defineCommand({
 	meta: {
 		name: 'get',
-		description: 'Get an organisation by UUID.',
+		description: 'Get an organisation by name, ID, or UUID.',
 	},
 	args: {
 		org: {
 			type: 'string',
-			description: 'The organisation UUID',
-			valueHint: 'uuid',
+			description: 'The organisation name, ID, or UUID',
+			valueHint: 'name|id|uuid',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const org = await client.org(ctx.args.org).get();
+		const orgUuid = await resolveOrgUuid(client, ctx.args.org);
+		if (!orgUuid) {
+			process.exitCode = 1;
+			return;
+		}
+		const org = await client.org(orgUuid).get();
 		printJson(org);
 	},
 });
@@ -52,5 +60,6 @@ export const orgsCommand = defineCommand({
 		list: orgsListCommand,
 		get: orgsGetCommand,
 		sites: orgsSitesCommand,
+		inboxes: orgsInboxesCommand,
 	},
 });

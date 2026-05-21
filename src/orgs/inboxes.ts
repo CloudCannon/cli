@@ -1,14 +1,14 @@
-import type { ListOrgSitesOptions } from '@cloudcannon/sdk';
+import type { ListOrgInboxesOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { buildListOptions, listFlagDefs } from '../list-options.ts';
 import { getSdkClient } from '../sdk-client.ts';
 import { resolveOrgUuid } from './resolve.ts';
 
-export const orgsSitesListCommand = defineCommand({
+export const orgsInboxesListCommand = defineCommand({
 	meta: {
 		name: 'list',
-		description: 'List all sites for an organisation.',
+		description: 'List all inboxes for an organisation.',
 	},
 	args: {
 		org: {
@@ -28,22 +28,22 @@ export const orgsSitesListCommand = defineCommand({
 		}
 		const org = client.org(orgUuid);
 		const options = buildListOptions(ctx.args);
-		const sites = await org.sites(options as ListOrgSitesOptions);
+		const inboxes = await org.getInboxes(options as ListOrgInboxesOptions);
 		printJson({
-			current_page: sites.current_page,
-			total_pages: sites.total_pages,
-			total_items: sites.total_items,
-			items: sites.items,
+			current_page: inboxes.current_page,
+			total_pages: inboxes.total_pages,
+			total_items: inboxes.total_items,
+			items: inboxes.items,
 		});
 	},
 });
 
-export const orgsSitesCommand = defineCommand({
+export const orgsInboxesCommand = defineCommand({
 	meta: {
-		name: 'sites',
-		description: 'Manage sites for an organisation.',
+		name: 'inboxes',
+		description: 'Manage inboxes for an organisation.',
 	},
 	subCommands: {
-		list: orgsSitesListCommand,
+		list: orgsInboxesListCommand,
 	},
 });

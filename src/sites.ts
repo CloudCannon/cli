@@ -1,3 +1,4 @@
+import type { BuildConfiguration } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
 import { getSdkClient } from './sdk-client.ts';
@@ -9,6 +10,7 @@ import {
 	sitesPrintLastFailedSyncCommand,
 	sitesPrintLastSyncCommand,
 } from './sites/print-last.ts';
+import { resolveSiteUuid } from './sites/resolve.ts';
 
 export const sitesListCommand = defineCommand({
 	meta: {
@@ -30,19 +32,24 @@ export const sitesListCommand = defineCommand({
 export const sitesGetCommand = defineCommand({
 	meta: {
 		name: 'get',
-		description: 'Get a site by UUID.',
+		description: 'Get a site by name, ID, UUID, or domain.',
 	},
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		const site = await client.site(ctx.args.site).get();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			process.exitCode = 1;
+			return;
+		}
+		const site = await client.site(siteUuid).get();
 		printJson(site);
 	},
 });
@@ -55,14 +62,19 @@ export const sitesRebuildCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 	},
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
-		await client.site(ctx.args.site).rebuild();
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			process.exitCode = 1;
+			return;
+		}
+		await client.site(siteUuid).rebuild();
 		console.log('Rebuild triggered.');
 	},
 });
@@ -75,8 +87,8 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 	args: {
 		site: {
 			type: 'string',
-			description: 'The site UUID',
-			valueHint: 'uuid',
+			description: 'The site name, ID, UUID, or domain',
+			valueHint: 'name|id|uuid|domain',
 			required: true,
 		},
 		ssg: {
@@ -145,57 +157,62 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = getSdkClient();
 
-		const options: Record<string, unknown> = {};
+		const options: BuildConfiguration = {};
 		if (ctx.args.ssg !== undefined) {
 			options.ssg = ctx.args.ssg;
 		}
 		if (ctx.args.buildingLocked !== undefined) {
-			options.building_locked = ctx.args.buildingLocked;
+			options.building_locked = !!ctx.args.buildingLocked;
 		}
 		if (ctx.args.usesI18n !== undefined) {
-			options.uses_i18n = ctx.args.usesI18n;
+			options.uses_i18n = !!ctx.args.usesI18n;
 		}
-		if (ctx.args.defaultLocale !== undefined) {
+		if (typeof ctx.args.defaultLocale === 'string') {
 			options.default_locale = ctx.args.defaultLocale;
 		}
 
-		const compile: Record<string, unknown> = {};
-		if (ctx.args.installCommand !== undefined) {
+		const compile: Partial<NonNullable<BuildConfiguration['compile']>> = {};
+		if (typeof ctx.args.installCommand === 'string') {
 			compile.install_command = ctx.args.installCommand;
 		}
-		if (ctx.args.buildCommand !== undefined) {
+		if (typeof ctx.args.buildCommand === 'string') {
 			compile.build_command = ctx.args.buildCommand;
 		}
-		if (ctx.args.outputPath !== undefined) {
+		if (typeof ctx.args.outputPath === 'string') {
 			compile.output_path = ctx.args.outputPath;
 		}
 		if (ctx.args.preservedPaths !== undefined && typeof ctx.args.preservedPaths === 'string') {
 			compile.preserved_paths = ctx.args.preservedPaths.split(',');
 		}
-		if (ctx.args.hugoVersion !== undefined) {
+		if (typeof ctx.args.hugoVersion === 'string') {
 			compile.hugoVersion = ctx.args.hugoVersion;
 		}
-		if (ctx.args.nodeVersion !== undefined) {
+		if (typeof ctx.args.nodeVersion === 'string') {
 			compile.nodeVersion = ctx.args.nodeVersion;
 		}
-		if (ctx.args.rubyVersion !== undefined) {
+		if (typeof ctx.args.rubyVersion === 'string') {
 			compile.rubyVersion = ctx.args.rubyVersion;
 		}
-		if (ctx.args.denoVersion !== undefined) {
+		if (typeof ctx.args.denoVersion === 'string') {
 			compile.denoVersion = ctx.args.denoVersion;
 		}
 		if (ctx.args.preserveOutput !== undefined) {
-			compile.preserveOutput = ctx.args.preserveOutput;
+			compile.preserveOutput = !!ctx.args.preserveOutput;
 		}
 		if (ctx.args.includeGit !== undefined) {
-			compile.includeGit = ctx.args.includeGit;
+			compile.includeGit = !!ctx.args.includeGit;
 		}
 
 		if (Object.keys(compile).length > 0) {
-			options.compile = compile;
+			options.compile = compile as BuildConfiguration['compile'];
 		}
 
-		const site = await client.site(ctx.args.site).updateBuildConfig(options);
+		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
+		if (!siteUuid) {
+			process.exitCode = 1;
+			return;
+		}
+		const site = await client.site(siteUuid).updateBuildConfig(options);
 		printJson(site);
 	},
 });
