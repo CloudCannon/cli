@@ -18,7 +18,7 @@ export const sitesListCommand = defineCommand({
 		description: 'List all sites across all organisations.',
 	},
 	async run(): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const orgs = await client.orgs();
 		const allSites = [];
 		for (const org of orgs.items) {
@@ -43,7 +43,7 @@ export const sitesGetCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
@@ -68,7 +68,7 @@ export const sitesRebuildCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
@@ -155,7 +155,7 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 
 		const options: BuildConfiguration = {};
 		if (ctx.args.ssg !== undefined) {

@@ -20,7 +20,7 @@ export const sitesBuildsListCommand = defineCommand({
 		...listFlagDefs,
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;

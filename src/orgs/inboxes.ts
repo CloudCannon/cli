@@ -20,7 +20,7 @@ export const orgsInboxesListCommand = defineCommand({
 		...listFlagDefs,
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const orgUuid = await resolveOrgUuid(client, ctx.args.org);
 		if (!orgUuid) {
 			process.exitCode = 1;

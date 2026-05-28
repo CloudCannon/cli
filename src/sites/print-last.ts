@@ -90,7 +90,7 @@ export const sitesPrintLastBuildCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
@@ -107,7 +107,7 @@ export const sitesPrintLastFailedBuildCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
@@ -124,7 +124,7 @@ export const sitesPrintLastSyncCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
@@ -141,7 +141,7 @@ export const sitesPrintLastFailedSyncCommand = defineCommand({
 	},
 	args: siteArgs,
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;

@@ -20,7 +20,7 @@ export const sitesFilesListCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			return;
@@ -55,7 +55,7 @@ export const sitesFilesGetCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
@@ -106,7 +106,7 @@ export const sitesFilesUploadCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const content = await readFile(ctx.args.localPath);
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
