@@ -1,0 +1,22 @@
+name: cloudcannon configure validate --routing [valid]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        posts:
+          path: _posts
+  - step: I have a ".cloudcannon/routing.json" file with the content {json}
+    json: |-
+      {
+        "routes": [
+          { "from": "/old-page", "to": "/new-page", "status": 301 }
+        ]
+      }
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- configure validate . --routing | sed 's|/.*/||'
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✓ valid: .cloudcannon/routing.json

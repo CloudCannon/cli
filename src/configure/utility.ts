@@ -89,17 +89,12 @@ export function printJson(data: unknown): void {
 	console.log(JSON.stringify(data, null, 2));
 }
 
-export function em(text: string): string {
-	return styleText(['blue', 'italic'], text);
-}
-
-export function success(text: string): string {
-	return styleText(['green'], text);
-}
-
-export function secondary(text: string): string {
-	return styleText(['dim'], text);
-}
+export const text = {
+	em: (t: string): string => styleText(['blue', 'italic'], t),
+	good: (t: string): string => styleText(['green'], t),
+	bad: (t: string): string => styleText(['red'], t),
+	secondary: (t: string): string => styleText(['dim'], t),
+};
 
 export const checkSsg = (value: unknown | undefined): SsgKey | undefined => {
 	return typeof value === 'string' && Object.hasOwn(ssgs, value) ? (value as SsgKey) : undefined;

@@ -1,0 +1,357 @@
+import { access, readFile } from 'node:fs/promises';
+import { relative, resolve } from 'node:path';
+import configSchema from '@cloudcannon/configuration-types/dist/cloudcannon-config.latest.schema.json' with {
+	type: 'json',
+};
+import settingsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-initial-site-settings.schema.json' with {
+	type: 'json',
+};
+import routingSchema from '@cloudcannon/configuration-types/dist/cloudcannon-routing.schema.json' with {
+	type: 'json',
+};
+import { Ajv, type ErrorObject, type ValidateFunction } from 'ajv';
+import { type CommandContext, defineCommand } from 'citty';
+import { parse as parseYaml } from 'yaml';
+import { pathArg, text } from './utility.ts';
+
+const ajv = new Ajv({ strict: false, allErrors: true, verbose: true });
+const validateConfig = ajv.compile(configSchema);
+const validateSettings = ajv.compile(settingsSchema);
+const validateRouting = ajv.compile(routingSchema);
+
+const CONFIG_FILENAMES = [
+	'cloudcannon.config.yml',
+	'cloudcannon.config.yaml',
+	'cloudcannon.config.json',
+] as const;
+
+const SETTINGS_PATH = '.cloudcannon/initial-site-settings.json';
+const ROUTING_PATH = '.cloudcannon/routing.json';
+
+// Collapses duplicate non-value errors emitted once per oneOf/anyOf branch into one per
+// (instancePath, schemaPath, keyword). const/enum are left intact for aggregateValueErrors.
+function filterBranchErrors(errors: ErrorObject[]): ErrorObject[] {
+	const seen = new Set<string>();
+	const result: ErrorObject[] = [];
+
+	for (let i = 0; i < errors.length; i++) {
+		if (isValueKeyword(errors[i].keyword)) {
+			result.push(errors[i]);
+			continue;
+		}
+
+		const key = `${errors[i].instancePath}|${errors[i].schemaPath}|${errors[i].keyword}`;
+		if (addNew(seen, key)) {
+			result.push(errors[i]);
+		}
+	}
+
+	return result;
+}
+
+// When the same field fails across multiple oneOf/anyOf branches (e.g. _inputs.*.type), each
+// branch contributes its own const/enum error with a different allowed value. This merges all
+// of them into a single enum error so the user sees all valid values at once.
+function aggregateValueErrors(errors: ErrorObject[]): ErrorObject[] {
+	const allowedValuesMap = new Map<string, Set<unknown>>();
+
+	for (let i = 0; i < errors.length; i++) {
+		if (!isValueKeyword(errors[i].keyword)) {
+			continue;
+		}
+
+		let allowedValues = allowedValuesMap.get(errors[i].instancePath);
+		if (!allowedValues) {
+			allowedValues = new Set();
+			allowedValuesMap.set(errors[i].instancePath, allowedValues);
+		}
+
+		if (errors[i].keyword === 'const') {
+			allowedValues.add(errors[i].params.allowedValue);
+		} else {
+			for (let j = 0; j < errors[i].params.allowedValues.length; j++) {
+				allowedValues.add(errors[i].params.allowedValues[j]);
+			}
+		}
+	}
+
+	const seen = new Set<string>();
+	const result: ErrorObject[] = [];
+
+	for (let i = 0; i < errors.length; i++) {
+		if (!isValueKeyword(errors[i].keyword)) {
+			result.push(errors[i]);
+			continue;
+		}
+
+		if (!addNew(seen, errors[i].instancePath)) {
+			continue;
+		}
+
+		const allowedValues = Array.from(allowedValuesMap.get(errors[i].instancePath) ?? []);
+		result.push(
+			allowedValues.length === 1 && errors[i].keyword === 'const'
+				? errors[i]
+				: { ...errors[i], keyword: 'enum', params: { allowedValues } }
+		);
+	}
+
+	return result;
+}
+
+function isValueKeyword(keyword: string): boolean {
+	return keyword === 'const' || keyword === 'enum';
+}
+
+function isStructuralKeyword(keyword: string): boolean {
+	return keyword === 'oneOf' || keyword === 'anyOf' || keyword === 'additionalProperties';
+}
+
+// Hide oneOf/anyOf errors when more specific child errors exist
+function filterStructuralErrors(errors: ErrorObject[]): ErrorObject[] {
+	const compositionPaths = new Set<string>();
+	const nonStructuralPaths: string[] = [];
+
+	for (let i = 0; i < errors.length; i++) {
+		if (errors[i].keyword === 'oneOf' || errors[i].keyword === 'anyOf') {
+			compositionPaths.add(errors[i].instancePath);
+		}
+
+		if (!isStructuralKeyword(errors[i].keyword)) {
+			nonStructuralPaths.push(errors[i].instancePath);
+		}
+	}
+
+	return errors.filter(
+		(error) =>
+			!isStructuralKeyword(error.keyword) ||
+			!compositionPaths.has(error.instancePath) ||
+			!nonStructuralPaths.some((p) => p.startsWith(`${error.instancePath}/`))
+	);
+}
+
+function addNew(set: Set<string>, key: string): boolean {
+	if (set.has(key)) {
+		return false;
+	}
+
+	set.add(key);
+	return true;
+}
+
+function quote(v: unknown): string {
+	return typeof v === 'string' ? `'${v}'` : String(v);
+}
+
+function formatError(error: ErrorObject): string {
+	switch (error.keyword) {
+		case 'const':
+			return `value ${quote(error.data)} should be ${quote(error.params.allowedValue)}`;
+		case 'additionalProperties':
+			return `unexpected property '${error.params.additionalProperty}'`;
+		case 'enum': {
+			const shown = error.params.allowedValues.slice(0, 5).map(quote).join(', ');
+			const extra = error.params.allowedValues.length - 5;
+			const suffix = extra > 0 ? ` and ${extra} more` : '';
+			return `unexpected value ${quote(error.data)}, allowed values: ${shown}${suffix}`;
+		}
+		case 'type': {
+			const expected = Array.isArray(error.params.type)
+				? error.params.type.join(' or ')
+				: error.params.type;
+
+			const actual = Array.isArray(error.data) ? 'array' : typeof error.data;
+			return `unexpected type ${actual} instead of ${expected}`;
+		}
+		default:
+			return error.message ?? 'unknown error';
+	}
+}
+
+async function findConfigFile(targetPath: string, filePath?: string): Promise<string | undefined> {
+	const candidates = filePath
+		? [resolve(filePath)]
+		: CONFIG_FILENAMES.map((f) => resolve(targetPath, f));
+
+	for (const candidate of candidates) {
+		try {
+			await access(candidate);
+			return candidate;
+		} catch {
+			// intentionally ignored
+		}
+	}
+}
+
+function checkParsed(displayName: string, validate: ValidateFunction, parsed: unknown): boolean {
+	if (validate(parsed)) {
+		console.log(`${text.good('✓ valid')}: ${text.em(displayName)}`);
+		return true;
+	}
+
+	console.error(`${text.bad('✗ invalid')}: ${text.em(displayName)}`);
+
+	const errors = filterStructuralErrors(
+		aggregateValueErrors(filterBranchErrors(validate.errors ?? []))
+	);
+
+	const seen = new Set<string>();
+	for (let i = 0; i < errors.length; i++) {
+		const path = errors[i].instancePath.replace(/^\//, '').replace(/\//g, '.') || '(root)';
+		const line = `  ${text.em(path)}: ${formatError(errors[i])}`;
+		if (addNew(seen, line)) {
+			console.error(line);
+		}
+	}
+
+	console.error('');
+	return false;
+}
+
+async function readStdin(): Promise<string> {
+	const chunks: Buffer[] = [];
+	for await (const chunk of process.stdin) {
+		chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+	}
+	return Buffer.concat(chunks).toString('utf-8');
+}
+
+async function checkFile(
+	filePath: string,
+	validate: ValidateFunction,
+	targetPath: string,
+	optional = false
+): Promise<boolean> {
+	let content: string;
+	try {
+		content = await readFile(filePath, 'utf-8');
+	} catch {
+		if (optional) {
+			return true;
+		}
+
+		console.error(`File not found: ${text.em(relative(targetPath, filePath))}`);
+		return false;
+	}
+
+	const displayName = relative(targetPath, filePath);
+	let parsed: unknown;
+	try {
+		parsed = filePath.endsWith('.json') ? JSON.parse(content) : parseYaml(content);
+	} catch (err) {
+		console.error(
+			`Failed to parse ${text.em(displayName)}: ${err instanceof Error ? err.message : String(err)}`
+		);
+
+		return false;
+	}
+
+	return checkParsed(displayName, validate, parsed);
+}
+
+const args = {
+	...pathArg,
+	configuration: {
+		type: 'boolean',
+		default: false,
+		description: 'Validate only the CloudCannon configuration file',
+	},
+	'initial-site-settings': {
+		type: 'boolean',
+		default: false,
+		description: `Validate only ${text.em(SETTINGS_PATH)}`,
+	},
+	routing: {
+		type: 'boolean',
+		default: false,
+		description: `Validate only ${text.em(ROUTING_PATH)}`,
+	},
+	'configuration-path': {
+		type: 'string',
+		description: `Path to the CloudCannon configuration file, overrides ${text.em('PATH')} search`,
+		valueHint: 'path',
+	},
+} as const;
+
+export const validateCommand = defineCommand({
+	meta: {
+		name: 'validate',
+		description: 'Validate a CloudCannon configuration file.',
+	},
+	args,
+	async run(ctx: CommandContext<typeof args>): Promise<void> {
+		const targetPath = resolve(ctx.args.path ?? '.');
+
+		if (!process.stdin.isTTY) {
+			const explicit = [
+				ctx.args.configuration,
+				ctx.args['initial-site-settings'],
+				ctx.args.routing,
+			];
+			if (explicit.filter(Boolean).length !== 1) {
+				console.error(
+					`Exactly one of ${text.em('--configuration')}, ${text.em('--initial-site-settings')}, or ${text.em('--routing')} must be set when reading from stdin.`
+				);
+				process.exit(1);
+			}
+
+			const validator = ctx.args.configuration
+				? validateConfig
+				: ctx.args['initial-site-settings']
+					? validateSettings
+					: validateRouting;
+
+			const content = await readStdin();
+			let parsed: unknown;
+			try {
+				try {
+					parsed = JSON.parse(content);
+				} catch {
+					parsed = parseYaml(content);
+				}
+			} catch (err) {
+				console.error(`Failed to parse stdin: ${err instanceof Error ? err.message : String(err)}`);
+				process.exit(1);
+			}
+
+			if (!checkParsed('<stdin>', validator, parsed)) {
+				process.exit(1);
+			}
+
+			return;
+		}
+
+		const none = !ctx.args.configuration && !ctx.args['initial-site-settings'] && !ctx.args.routing;
+		const doConfig = ctx.args.configuration || none;
+		const doSettings = ctx.args['initial-site-settings'] || none;
+		const doRouting = ctx.args.routing || none;
+
+		let allValid = true;
+
+		if (doConfig) {
+			const configPath = await findConfigFile(targetPath, ctx.args['configuration-path']);
+
+			if (!configPath) {
+				const searched = ctx.args['configuration-path'] ?? CONFIG_FILENAMES.map(text.em).join(', ');
+				console.error(`No CloudCannon configuration file found. Searched: ${searched}`);
+				process.exit(1);
+			}
+
+			allValid = await checkFile(configPath, validateConfig, targetPath);
+		}
+
+		if (doSettings) {
+			const settingsPath = resolve(targetPath, SETTINGS_PATH);
+			allValid = (await checkFile(settingsPath, validateSettings, targetPath, none)) && allValid;
+		}
+
+		if (doRouting) {
+			const routingPath = resolve(targetPath, ROUTING_PATH);
+			allValid = (await checkFile(routingPath, validateRouting, targetPath, none)) && allValid;
+		}
+
+		if (!allValid) {
+			process.exit(1);
+		}
+	},
+});

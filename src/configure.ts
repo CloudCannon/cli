@@ -4,6 +4,7 @@ import { detectCollectionsCommand } from './configure/detect-collections.ts';
 import { detectSourceCommand } from './configure/detect-source.ts';
 import { detectSsgCommand } from './configure/detect-ssg.ts';
 import { generateCommand } from './configure/generate.ts';
+import { validateCommand } from './configure/validate.ts';
 
 export const configureCommand = defineCommand({
 	meta: {
@@ -16,5 +17,6 @@ export const configureCommand = defineCommand({
 		'detect-source': detectSourceCommand,
 		'detect-ssg': detectSsgCommand,
 		generate: generateCommand,
+		validate: validateCommand,
 	},
 });
