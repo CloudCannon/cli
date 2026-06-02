@@ -61,7 +61,7 @@
 	"dependencies": {
 		"@clack/prompts": "1.2.0",
 		"@cloudcannon/gadget": "0.0.32",
-		"@cloudcannon/sdk": "0.0.4",
+		"@cloudcannon/sdk": "0.0.5",
 		"citty": "0.2.2",
 		"yaml": "2.8.3"
 	}
