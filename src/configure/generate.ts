@@ -21,6 +21,7 @@ import {
 	DEFAULT_FORMAT,
 	DEFAULT_MODE,
 	detectSsg,
+	exitOnCancel,
 	extensionFromFormat,
 	type Format,
 	getFilePaths,
@@ -145,13 +146,6 @@ function pickCollections(
 
 	walk(trees);
 	return result;
-}
-
-function exitOnCancel<T>(value: T | symbol): asserts value is T {
-	if (p.isCancel(value)) {
-		p.cancel('Operation cancelled.');
-		process.exit(0);
-	}
 }
 
 async function promptSsg(detectedSsg: SsgKey): Promise<SsgKey> {

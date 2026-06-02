@@ -62,7 +62,7 @@
 		"@cloudcannon/configuration-loader": "0.0.9",
 		"@cloudcannon/configuration-types": "0.0.58",
 		"@cloudcannon/gadget": "0.0.32",
-		"@cloudcannon/sdk": "0.0.4",
+		"@cloudcannon/sdk": "0.0.5",
 		"ajv": "8.20.0",
 		"citty": "0.2.2",
 		"yaml": "2.8.3"

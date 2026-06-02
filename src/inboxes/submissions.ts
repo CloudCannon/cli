@@ -20,7 +20,7 @@ export const inboxesSubmissionsListCommand = defineCommand({
 		...listFlagDefs,
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const inboxUuid = await resolveInboxUuid(client, ctx.args.inbox);
 		if (!inboxUuid) {
 			process.exitCode = 1;

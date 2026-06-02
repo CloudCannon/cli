@@ -20,10 +20,43 @@ npm install --global @cloudcannon/cli
 
 ## Authentication
 
-Commands that interact with the CloudCannon API require an API key. Set it via the `CLOUDCANNON_API_KEY` environment variable:
+Commands that interact with the CloudCannon API require authentication. You can authenticate using:
+
+### User Access Key (Recommended)
+
+Log in with your CloudCannon account interactively with your web browser:
+
+```sh
+cloudcannon login
+```
+
+For non-interactive environments, you can provide your access key via command line flags:
+
+```sh
+cloudcannon login --access-key-id <id> --access-key-secret <secret>
+```
+
+Or set environment variables:
+
+```sh
+export CC_ACCESS_KEY_ID=your_key_id
+export CC_ACCESS_KEY_SECRET=your_key_secret
+```
+
+### API Key
+
+Alternatively, set the `CLOUDCANNON_API_KEY` environment variable:
 
 ```sh
 export CLOUDCANNON_API_KEY=your_api_key
+```
+
+### Logout
+
+To log out and remove stored credentials:
+
+```sh
+cloudcannon logout
 ```
 
 ## Usage
@@ -39,6 +72,34 @@ cloudcannon --help
 ```
 
 ## Commands
+
+### `login`
+
+Log in to your CloudCannon account using a user access key.
+
+```sh
+cloudcannon login
+cloudcannon login --access-key-id <id> --access-key-secret <secret>
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--access-key-id <string>` | Access key ID for non-interactive login |
+| `--access-key-secret <string>` | Access key secret for non-interactive login |
+
+---
+
+### `logout`
+
+Log out and remove stored credentials.
+
+```sh
+cloudcannon logout
+```
+
+---
 
 ### `configure generate [path]`
 

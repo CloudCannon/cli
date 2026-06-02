@@ -14,7 +14,7 @@ export const orgsListCommand = defineCommand({
 	},
 	args: listFlagDefs,
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const options = buildListOptions(ctx.args);
 		const orgs = await client.orgs(options as ListOrgsOptions);
 		printJson({
@@ -40,7 +40,7 @@ export const orgsGetCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const orgUuid = await resolveOrgUuid(client, ctx.args.org);
 		if (!orgUuid) {
 			process.exitCode = 1;

@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { styleText } from 'node:util';
+import { cancel, isCancel } from '@clack/prompts';
 import type { SsgKey } from '@cloudcannon/configuration-types';
 import { ssgs } from '@cloudcannon/gadget';
 import { stringify as stringifyYaml } from 'yaml';
@@ -148,3 +149,10 @@ export const modeArg = {
 		valueHint: 'hosted|headless',
 	},
 } as const;
+
+export function exitOnCancel<T>(value: T | symbol): asserts value is T {
+	if (isCancel(value)) {
+		cancel('Operation cancelled.');
+		process.exit(0);
+	}
+}
