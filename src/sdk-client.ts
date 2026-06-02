@@ -28,19 +28,16 @@ if (dataDir) {
 	await mkdir(dataDir, { recursive: true });
 }
 
-function decodeUserAccessKey(encodedAccessKey: string): UserAccessKey {
+export function decodeUserAccessKey(encodedAccessKey: string): UserAccessKey {
 	const [encodedId, encodedSecret] = encodedAccessKey.split('#');
 	const id = Buffer.from(encodedId, 'base64').toString('utf-8');
 	const secret = Buffer.from(encodedSecret, 'base64').toString('utf-8');
 	return { id, secret };
 }
 
-export async function saveUserAccessKey(encodedAccessKey: string): Promise<void> {
+export async function saveUserAccessKey(accessKey: UserAccessKey): Promise<void> {
 	if (dataDir) {
-		await writeFile(
-			join(dataDir, 'auth.json'),
-			JSON.stringify(decodeUserAccessKey(encodedAccessKey))
-		);
+		await writeFile(join(dataDir, 'auth.json'), JSON.stringify(accessKey));
 	} else {
 		process.exitCode = 1;
 		console.error('Failed to find data directory. Unable to log in');
@@ -55,7 +52,9 @@ export async function deleteUserAccessKey(): Promise<void> {
 
 export async function getSdkClient(): Promise<CloudCannonClient> {
 	let userAccessKey: UserAccessKey | undefined;
-	if (dataDir) {
+	if (process.env.CC_ACCESS_KEY_ID && process.env.CC_ACCESS_KEY_SECRET) {
+		userAccessKey = { id: process.env.CC_ACCESS_KEY_ID, secret: process.env.CC_ACCESS_KEY_SECRET };
+	} else if (dataDir) {
 		try {
 			const data = await readFile(join(dataDir, 'auth.json'), 'utf-8');
 			userAccessKey = JSON.parse(data);
