@@ -1,0 +1,27 @@
+name: cloudcannon validate --initial-site-settings [valid, settings only]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        posts:
+          path: _posts
+  - step: I have a ".cloudcannon/initial-site-settings.json" file with the content {json}
+    json: |-
+      {
+        "ssg": "jekyll",
+        "mode": "hosted",
+        "build": {
+          "install_command": "bundle install",
+          "build_command": "bundle exec jekyll build",
+          "output_path": "_site",
+          "environment_variables": [{ "key": "JEKYLL_ENV", "value": "production" }]
+        }
+      }
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --initial-site-settings 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✓ valid: .cloudcannon/initial-site-settings.json

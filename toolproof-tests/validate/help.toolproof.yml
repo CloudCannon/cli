@@ -1,0 +1,24 @@
+name: cloudcannon validate --help
+
+steps:
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- validate --help | sed 's/[[:space:]]*$//'"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Validate CloudCannon configuration files. (cloudcannon validate v0.0.0)
+      ╎
+      ╎USAGE cloudcannon validate [OPTIONS] [PATH]
+      ╎
+      ╎ARGUMENTS
+      ╎
+      ╎  PATH    The path to your site files (Default: .)
+      ╎
+      ╎OPTIONS
+      ╎
+      ╎              --configuration    Validate only the CloudCannon configuration file and any split configuration files (Default: false)
+      ╎      --initial-site-settings    Validate only .cloudcannon/initial-site-settings.json (Default: false)
+      ╎                    --routing    Validate only .cloudcannon/routing.json (Default: false)
+      ╎  --configuration-path=<path>    Path to the CloudCannon configuration file, overrides PATH search
+      ╎                      --stdin    Read from stdin instead of files on disk (Default: false)
+      ╎
+      ╎

@@ -1,0 +1,15 @@
+name: cloudcannon validate --configuration [valid]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        posts:
+          path: _posts
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✓ valid: cloudcannon.config.yml

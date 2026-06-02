@@ -3,6 +3,7 @@
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json' with { type: 'json' };
 import { buildsCommand } from './builds.ts';
+import { validateCommand } from './configure/validate.ts';
 import { configureCommand } from './configure.ts';
 import { inboxesCommand } from './inboxes.ts';
 import { loginCommand } from './login.ts';
@@ -24,6 +25,7 @@ const main = defineCommand({
 		sites: sitesCommand,
 		login: loginCommand,
 		logout: logoutCommand,
+		validate: validateCommand,
 	},
 });
 

@@ -1,0 +1,34 @@
+name: cloudcannon validate [invalid, both]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        posts:
+          path: _posts
+  - step: I have a ".cloudcannon/initial-site-settings.json" file with the content {json}
+    json: |-
+      {
+        "ssg": "unknown-ssg",
+        "mode": "invalid",
+        "build": {
+          "install_command": 123,
+          "output_path": true,
+          "environment_variables": [{ "key": ["JEKYLL_ENV"], "pickle": 1 }]
+        }
+      }
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✓ valid: cloudcannon.config.yml
+      ╎✗ invalid: .cloudcannon/initial-site-settings.json
+      ╎  $.mode: unexpected value 'invalid', allowed values: 'hosted', 'headless'
+      ╎  $.ssg: unexpected value 'unknown-ssg', allowed values: 'hugo', 'jekyll', 'eleventy', 'astro', 'lume' and 12 more
+      ╎  $.build.install_command: unexpected type number instead of string
+      ╎  $.build.output_path: unexpected type boolean instead of string
+      ╎  $.build.environment_variables.0: must have required property 'value'
+      ╎  $.build.environment_variables.0: unexpected property 'pickle'
+      ╎  $.build.environment_variables.0.key: unexpected type array instead of string

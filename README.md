@@ -9,6 +9,7 @@ Command line interface for the CloudCannon CMS.
 - Generates CloudCannon configuration files interactively or non-interactively.
 - Detects your static site generator automatically, works with Astro, Bridgetown, Docusaurus, Eleventy, Gatsby, Hexo, Hugo, Jekyll, Lume, MkDocs, Next.js, Nuxt, Sphinx, SvelteKit.
 - Suggests collections, build commands, and output paths based on your project.
+- Validates CloudCannon configuration files against the schema, including split configuration files.
 - Manage organisations, sites, builds, files, and form submissions via the CloudCannon API.
 
 ## Install
@@ -120,8 +121,8 @@ cloudcannon configure generate ./my-site
 | `--ssg <name>` | Override SSG detection | |
 | `--source <path>` | Override source folder | |
 | `--mode <hosted\|headless>` | Mode for initial site settings | `hosted` |
-| `--initial-build-settings` | Also generate `.cloudcannon/initial-site-settings.json` | `false` |
-| `--initial-build-settings-only` | Only generate `.cloudcannon/initial-site-settings.json` | `false` |
+| `--initial-site-settings` | Also generate `.cloudcannon/initial-site-settings.json` | `false` |
+| `--initial-site-settings-only` | Only generate `.cloudcannon/initial-site-settings.json` | `false` |
 | `--install-command <cmd>` | Override detected install command | |
 | `--build-command <cmd>` | Override detected build command | |
 | `--output-path <path>` | Override detected output path | |
@@ -191,6 +192,37 @@ cloudcannon configure detect-build-commands ./my-site --ssg hugo
 |---|---|
 | `--ssg <name>` | Override SSG detection |
 | `--source <path>` | Override source folder |
+
+---
+
+### `validate [path]`
+
+Validate CloudCannon configuration files against the schema.
+
+```sh
+cloudcannon validate
+cloudcannon validate ./my-site
+```
+
+By default validates all configuration files found: `cloudcannon.config.yml`, `.cloudcannon/initial-site-settings.json`, `.cloudcannon/routing.json`, and any split configuration files.
+
+Use `--stdin` to read from stdin. Exactly one of `--configuration`, `--initial-site-settings`, or `--routing` must also be set to indicate the type of file being piped:
+
+```sh
+cat cloudcannon.config.yml | cloudcannon validate --stdin --configuration
+```
+
+> **Note:** When reading from stdin, split configuration files referenced via `*_from_glob` keys are not validated. Run `cloudcannon validate` on a directory to validate split configuration files.
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--configuration` | Validate only the CloudCannon configuration file and any split configuration files |
+| `--initial-site-settings` | Validate only `.cloudcannon/initial-site-settings.json` |
+| `--routing` | Validate only `.cloudcannon/routing.json` |
+| `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search |
+| `--stdin` | Read from stdin instead of files on disk |
 
 ---
 

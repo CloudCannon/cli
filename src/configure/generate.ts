@@ -21,7 +21,6 @@ import {
 	DEFAULT_FORMAT,
 	DEFAULT_MODE,
 	detectSsg,
-	em,
 	exitOnCancel,
 	extensionFromFormat,
 	type Format,
@@ -30,11 +29,10 @@ import {
 	modeArg,
 	pathArg,
 	readFileFn,
-	secondary,
 	sourceArg,
 	ssgArg,
 	stringify,
-	success,
+	text,
 	writeFileAndFolder,
 } from './utility.ts';
 
@@ -168,11 +166,11 @@ async function promptSsg(detectedSsg: SsgKey): Promise<SsgKey> {
 }
 
 async function promptSource(detectedSource: string | undefined): Promise<string | undefined> {
-	const sourceNote = secondary('(the subfolder containing your site files)');
+	const sourceNote = text.secondary('(the subfolder containing your site files)');
 
 	if (detectedSource) {
 		const confirmSource = await p.confirm({
-			message: `Use ${em(`/${detectedSource}`)} as the source folder? ${sourceNote}`,
+			message: `Use ${text.em(`/${detectedSource}`)} as the source folder? ${sourceNote}`,
 			initialValue: true,
 		});
 
@@ -205,7 +203,7 @@ async function promptCollections(detectedCollections: CollectionConfigTree[]): P
 
 	if (options.length > 0) {
 		const collectionChoice = await p.multiselect({
-			message: `Select which content folders you want as Collections: ${secondary('(how your content is grouped)')}`,
+			message: `Select which content folders you want as Collections: ${text.secondary('(how your content is grouped)')}`,
 			options,
 			initialValues,
 			required: false,
@@ -254,24 +252,24 @@ async function confirmAndWrite(path: string, content: string, dryRun: boolean): 
 	}
 
 	const shouldWrite = await p.confirm({
-		message: `Create this file at ${em(path)}?`,
+		message: `Create this file at ${text.em(path)}?`,
 		initialValue: true,
 	});
 
 	exitOnCancel(shouldWrite);
 	if (shouldWrite) {
 		await writeFileAndFolder(path, content);
-		p.log.success(`${success('Wrote:')} ${path}`);
+		p.log.success(`${text.good('Wrote:')} ${path}`);
 	}
 }
 
 async function writeOrLog(path: string, content: string, dryRun: boolean): Promise<void> {
 	if (dryRun) {
-		console.log(em(basename(path)));
+		console.log(text.em(basename(path)));
 		console.log(content);
 	} else {
 		await writeFileAndFolder(path, content);
-		console.log(`${success('Wrote:')} ${path}`);
+		console.log(`${text.good('Wrote:')} ${path}`);
 	}
 }
 
@@ -325,7 +323,7 @@ async function generateInteractive(
 		const configOutputPath = options.output ?? resolve(targetPath, `cloudcannon.config.${ext}`);
 		const configContent = stringify(config, options.format);
 
-		p.note(configContent, em(`cloudcannon.config.${ext}`));
+		p.note(configContent, text.em(`cloudcannon.config.${ext}`));
 		await confirmAndWrite(configOutputPath, configContent, !!options?.['dry-run']);
 	}
 
@@ -333,7 +331,7 @@ async function generateInteractive(
 		options?.['initial-site-settings'] ??
 		options?.['initial-site-settings-only'] ??
 		(await p.confirm({
-			message: `Generate ${em('.cloudcannon/initial-site-settings.json')}?`,
+			message: `Generate ${text.em('.cloudcannon/initial-site-settings.json')}?`,
 			initialValue: true,
 		}));
 	exitOnCancel(wantInitSettings);
@@ -362,11 +360,11 @@ async function generateInteractive(
 		const settingsContent = stringify(settings, 'json');
 		const settingsPath = resolve(targetPath, '.cloudcannon/initial-site-settings.json');
 
-		p.note(settingsContent, em('.cloudcannon/initial-site-settings.json'));
+		p.note(settingsContent, text.em('.cloudcannon/initial-site-settings.json'));
 		await confirmAndWrite(settingsPath, settingsContent, !!options?.['dry-run']);
 	}
 
-	p.outro(success('Done!'));
+	p.outro(text.good('Done!'));
 }
 
 async function generateAuto(
@@ -463,12 +461,12 @@ const args = {
 	'initial-site-settings': {
 		type: 'boolean',
 		default: false,
-		description: `Also generate ${em('initial-site-settings.json')} file`,
+		description: `Also generate ${text.em('initial-site-settings.json')} file`,
 	},
 	'initial-site-settings-only': {
 		type: 'boolean',
 		default: false,
-		description: `Only generate ${em('initial-site-settings.json')} file`,
+		description: `Only generate ${text.em('initial-site-settings.json')} file`,
 	},
 	'install-command': {
 		type: 'string',
