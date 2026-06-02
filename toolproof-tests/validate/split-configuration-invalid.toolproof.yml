@@ -1,4 +1,4 @@
-name: cloudcannon configure validate --configuration [invalid, with split files]
+name: cloudcannon validate --configuration [invalid, with split files]
 
 steps:
   - step: I have a "cloudcannon.config.yml" file with the content {yaml}
@@ -76,10 +76,10 @@ steps:
     yaml: |-
       mdx:
         path: 123
-  - ref: ../../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . --configuration 2>&1 || true
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
   - snapshot: stdout
     snapshot_content: |-
       ╎✗ invalid: cloudcannon.config.yml

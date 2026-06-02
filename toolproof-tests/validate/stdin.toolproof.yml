@@ -1,4 +1,4 @@
-name: cloudcannon configure validate --stdin [valid]
+name: cloudcannon validate --stdin [valid]
 
 steps:
   - step: I have a "thing.yml" file with the content {yaml}
@@ -6,10 +6,10 @@ steps:
       collections_config:
         posts:
           path: _posts
-  - ref: ../../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      cat thing.yml | npm -s run cloudcannon -- configure validate --stdin --configuration
+      cat thing.yml | npm -s run cloudcannon -- validate --stdin --configuration
   - snapshot: stdout
     snapshot_content: |-
       ╎✓ valid: <stdin>

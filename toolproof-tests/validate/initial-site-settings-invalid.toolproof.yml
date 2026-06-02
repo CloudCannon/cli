@@ -1,4 +1,4 @@
-name: cloudcannon configure validate [invalid, both]
+name: cloudcannon validate [invalid, both]
 
 steps:
   - step: I have a "cloudcannon.config.yml" file with the content {yaml}
@@ -17,10 +17,10 @@ steps:
           "environment_variables": [{ "key": ["JEKYLL_ENV"], "pickle": 1 }]
         }
       }
-  - ref: ../../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . 2>&1 || true
+      npm -s run cloudcannon -- validate . 2>&1 || true
   - snapshot: stdout
     snapshot_content: |-
       ╎✓ valid: cloudcannon.config.yml

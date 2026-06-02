@@ -1,4 +1,4 @@
-name: cloudcannon configure validate --routing [invalid]
+name: cloudcannon validate --routing [invalid]
 
 steps:
   - step: I have a "cloudcannon.config.yml" file with the content {yaml}
@@ -13,10 +13,10 @@ steps:
           { "from": ["/old-page"], "two": "/new-page", "status": 999 }
         ]
       }
-  - ref: ../../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . --routing 2>&1 || true
+      npm -s run cloudcannon -- validate . --routing 2>&1 || true
   - snapshot: stdout
     snapshot_content: |-
       ╎✗ invalid: .cloudcannon/routing.json

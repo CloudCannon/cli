@@ -195,13 +195,13 @@ cloudcannon configure detect-build-commands ./my-site --ssg hugo
 
 ---
 
-### `configure validate [path]`
+### `validate [path]`
 
 Validate CloudCannon configuration files against the schema.
 
 ```sh
-cloudcannon configure validate
-cloudcannon configure validate ./my-site
+cloudcannon validate
+cloudcannon validate ./my-site
 ```
 
 By default validates all configuration files found: `cloudcannon.config.yml`, `.cloudcannon/initial-site-settings.json`, `.cloudcannon/routing.json`, and any split configuration files.
@@ -209,10 +209,10 @@ By default validates all configuration files found: `cloudcannon.config.yml`, `.
 Use `--stdin` to read from stdin. Exactly one of `--configuration`, `--initial-site-settings`, or `--routing` must also be set to indicate the type of file being piped:
 
 ```sh
-cat cloudcannon.config.yml | cloudcannon configure validate --stdin --configuration
+cat cloudcannon.config.yml | cloudcannon validate --stdin --configuration
 ```
 
-> **Note:** When reading from stdin, split configuration files referenced via `*_from_glob` keys are not validated. Run `cloudcannon configure validate` on a directory to validate split configuration files.
+> **Note:** When reading from stdin, split configuration files referenced via `*_from_glob` keys are not validated. Run `cloudcannon validate` on a directory to validate split configuration files.
 
 **Flags**
 
@@ -361,7 +361,6 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 | `--ssg <name>` | Static site generator name |
 | `--building-locked <true\|false>` | Lock the site from building |
-| `--uses-i18n <true\|false>` | Enable i18n support |
 | `--default-locale <locale>` | Default locale for i18n |
 | `--install-command <cmd>` | Override install command |
 | `--build-command <cmd>` | Override build command |

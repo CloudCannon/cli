@@ -1,13 +1,13 @@
-name: cloudcannon configure validate --help
+name: cloudcannon validate --help
 
 steps:
-  - ref: ../../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- configure validate --help | sed 's/[[:space:]]*$//'"
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- validate --help | sed 's/[[:space:]]*$//'"
   - snapshot: stdout
     snapshot_content: |-
-      ╎Validate CloudCannon configuration files. (configure validate)
+      ╎Validate CloudCannon configuration files. (cloudcannon validate v0.0.0)
       ╎
-      ╎USAGE configure validate [OPTIONS] [PATH]
+      ╎USAGE cloudcannon validate [OPTIONS] [PATH]
       ╎
       ╎ARGUMENTS
       ╎

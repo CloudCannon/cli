@@ -1,12 +1,12 @@
-name: cloudcannon configure validate [parse error]
+name: cloudcannon validate [parse error]
 
 steps:
   - step: I have a "cloudcannon.config.json" file with the content {json}
     json: "{invalid}"
-  - ref: ../../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . 2>&1 || true
+      npm -s run cloudcannon -- validate . 2>&1 || true
   - snapshot: stdout
     snapshot_content: |-
       ╎Failed to parse cloudcannon.config.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)
