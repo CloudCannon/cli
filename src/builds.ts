@@ -15,7 +15,7 @@ export const buildsPrintLogsCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const client = getSdkClient();
+		const client = await getSdkClient();
 		const resp = await client.build(ctx.args.build).get();
 		const text = await resp.text();
 		if (text) {
