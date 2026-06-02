@@ -25,11 +25,10 @@ steps:
     snapshot_content: |-
       ╎✓ valid: cloudcannon.config.yml
       ╎✗ invalid: .cloudcannon/initial-site-settings.json
-      ╎  mode: unexpected value 'invalid', allowed values: 'hosted', 'headless'
-      ╎  ssg: unexpected value 'unknown-ssg', allowed values: 'hugo', 'jekyll', 'eleventy', 'astro', 'lume' and 12 more
-      ╎  build.install_command: unexpected type number instead of string
-      ╎  build.output_path: unexpected type boolean instead of string
-      ╎  build.environment_variables.0: must have required property 'value'
-      ╎  build.environment_variables.0: unexpected property 'pickle'
-      ╎  build.environment_variables.0.key: unexpected type array instead of string
-      ╎
+      ╎  $.mode: unexpected value 'invalid', allowed values: 'hosted', 'headless'
+      ╎  $.ssg: unexpected value 'unknown-ssg', allowed values: 'hugo', 'jekyll', 'eleventy', 'astro', 'lume' and 12 more
+      ╎  $.build.install_command: unexpected type number instead of string
+      ╎  $.build.output_path: unexpected type boolean instead of string
+      ╎  $.build.environment_variables.0: must have required property 'value'
+      ╎  $.build.environment_variables.0: unexpected property 'pickle'
+      ╎  $.build.environment_variables.0.key: unexpected type array instead of string

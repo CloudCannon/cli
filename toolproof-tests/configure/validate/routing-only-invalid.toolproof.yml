@@ -20,8 +20,7 @@ steps:
   - snapshot: stdout
     snapshot_content: |-
       ╎✗ invalid: .cloudcannon/routing.json
-      ╎  routes.0: must have required property 'to'
-      ╎  routes.0: unexpected property 'two'
-      ╎  routes.0.from: unexpected type array instead of string
-      ╎  routes.0.status: unexpected value 999, allowed values: 200, 301, 302, 303, 307 and 3 more
-      ╎
+      ╎  $.routes.0: must have required property 'to'
+      ╎  $.routes.0: unexpected property 'two'
+      ╎  $.routes.0.from: unexpected type array instead of string
+      ╎  $.routes.0.status: unexpected value 999, allowed values: 200, 301, 302, 303, 307 and 3 more

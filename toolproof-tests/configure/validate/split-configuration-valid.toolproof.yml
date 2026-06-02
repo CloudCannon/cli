@@ -1,0 +1,68 @@
+name: cloudcannon configure validate --split-configuration [valid]
+
+steps:
+  - step: I have a "cloudcannon.inputs.yml" file with the content {yaml}
+    yaml: |-
+      date:
+        type: date
+        label: Date
+  - step: I have a "blog.cloudcannon.inputs.yml" file with the content {yaml}
+    yaml: |-
+      title:
+        type: text
+        label: Title
+  - step: I have a "cloudcannon.inputs.json" file with the content {json}
+    json: |-
+      {
+        "author": { "type": "text", "label": "Author" }
+      }
+  - step: I have a "cloudcannon.structures.yml" file with the content {yaml}
+    yaml: |-
+      article:
+        values:
+          - value:
+              title: Hello
+  - step: I have a "cloudcannon.structure-value.yml" file with the content {yaml}
+    yaml: |-
+      value:
+        title: Hello
+  - step: I have a "cloudcannon.collections.yml" file with the content {yaml}
+    yaml: |-
+      posts:
+        path: _posts
+  - step: I have a "cloudcannon.schemas.yml" file with the content {yaml}
+    yaml: |-
+      article:
+        path: _schemas/article.yml
+  - step: I have a "cloudcannon.editables.yml" file with the content {yaml}
+    yaml: |-
+      content:
+        bold: true
+        italic: true
+  - step: I have a "cloudcannon.snippets.yml" file with the content {yaml}
+    yaml: |-
+      callout:
+        template: '<div>{{content}}</div>'
+  - step: I have a "cloudcannon.snippets-definitions.yml" file with the content {yaml}
+    yaml: |-
+      callout: '<div>{{content}}</div>'
+  - step: I have a "cloudcannon.snippets-imports.yml" file with the content {yaml}
+    yaml: |-
+      mdx: true
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- configure validate . --split-configuration | sed 's|/.*/||'
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✓ valid: blog.cloudcannon.inputs.yml
+      ╎✓ valid: cloudcannon.collections.yml
+      ╎✓ valid: cloudcannon.editables.yml
+      ╎✓ valid: cloudcannon.inputs.json
+      ╎✓ valid: cloudcannon.inputs.yml
+      ╎✓ valid: cloudcannon.schemas.yml
+      ╎✓ valid: cloudcannon.snippets-definitions.yml
+      ╎✓ valid: cloudcannon.snippets-imports.yml
+      ╎✓ valid: cloudcannon.snippets.yml
+      ╎✓ valid: cloudcannon.structure-value.yml
+      ╎✓ valid: cloudcannon.structures.yml

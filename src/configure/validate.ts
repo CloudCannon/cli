@@ -1,23 +1,45 @@
 import { access, readFile } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
+import collectionsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-collections.schema.json' with {
+	type: 'json',
+};
 import configSchema from '@cloudcannon/configuration-types/dist/cloudcannon-config.latest.schema.json' with {
+	type: 'json',
+};
+import editablesSchema from '@cloudcannon/configuration-types/dist/cloudcannon-editables.schema.json' with {
 	type: 'json',
 };
 import settingsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-initial-site-settings.schema.json' with {
 	type: 'json',
 };
+import inputsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-inputs.schema.json' with {
+	type: 'json',
+};
 import routingSchema from '@cloudcannon/configuration-types/dist/cloudcannon-routing.schema.json' with {
+	type: 'json',
+};
+import schemasSchema from '@cloudcannon/configuration-types/dist/cloudcannon-schemas.schema.json' with {
+	type: 'json',
+};
+import snippetsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-snippets.schema.json' with {
+	type: 'json',
+};
+import snippetsDefinitionsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-snippets-definitions.schema.json' with {
+	type: 'json',
+};
+import snippetsImportsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-snippets-imports.schema.json' with {
+	type: 'json',
+};
+import structureValueSchema from '@cloudcannon/configuration-types/dist/cloudcannon-structure-value.schema.json' with {
+	type: 'json',
+};
+import structuresSchema from '@cloudcannon/configuration-types/dist/cloudcannon-structures.schema.json' with {
 	type: 'json',
 };
 import { Ajv, type ErrorObject, type ValidateFunction } from 'ajv';
 import { type CommandContext, defineCommand } from 'citty';
 import { parse as parseYaml } from 'yaml';
-import { pathArg, text } from './utility.ts';
-
-const ajv = new Ajv({ strict: false, allErrors: true, verbose: true });
-const validateConfig = ajv.compile(configSchema);
-const validateSettings = ajv.compile(settingsSchema);
-const validateRouting = ajv.compile(routingSchema);
+import { getFilePaths, pathArg, text } from './utility.ts';
 
 const CONFIG_FILENAMES = [
 	'cloudcannon.config.yml',
@@ -27,6 +49,77 @@ const CONFIG_FILENAMES = [
 
 const SETTINGS_PATH = '.cloudcannon/initial-site-settings.json';
 const ROUTING_PATH = '.cloudcannon/routing.json';
+
+const ajv = new Ajv({ strict: false, allErrors: true, verbose: true });
+const validateConfig = ajv.compile(configSchema);
+const validateSettings = ajv.compile(settingsSchema);
+const validateRouting = ajv.compile(routingSchema);
+const validateCollections = ajv.compile(collectionsSchema);
+const validateEditables = ajv.compile(editablesSchema);
+const validateInputs = ajv.compile(inputsSchema);
+const validateSchemas = ajv.compile(schemasSchema);
+const validateSnippets = ajv.compile(snippetsSchema);
+const validateSnippetsDefinitions = ajv.compile(snippetsDefinitionsSchema);
+const validateSnippetsImports = ajv.compile(snippetsImportsSchema);
+const validateStructureValue = ajv.compile(structureValueSchema);
+const validateStructures = ajv.compile(structuresSchema);
+
+const SPLIT_CONFIG_FILES: Record<string, ValidateFunction> = {
+	'cloudcannon.collections.yml': validateCollections,
+	'cloudcannon.collections.yaml': validateCollections,
+	'cloudcannon.collections.json': validateCollections,
+	'cloudcannon.editables.yml': validateEditables,
+	'cloudcannon.editables.yaml': validateEditables,
+	'cloudcannon.editables.json': validateEditables,
+	'cloudcannon.inputs.yml': validateInputs,
+	'cloudcannon.inputs.yaml': validateInputs,
+	'cloudcannon.inputs.json': validateInputs,
+	'cloudcannon.schemas.yml': validateSchemas,
+	'cloudcannon.schemas.yaml': validateSchemas,
+	'cloudcannon.schemas.json': validateSchemas,
+	'cloudcannon.snippets.yml': validateSnippets,
+	'cloudcannon.snippets.yaml': validateSnippets,
+	'cloudcannon.snippets.json': validateSnippets,
+	'cloudcannon.snippets-definitions.yml': validateSnippetsDefinitions,
+	'cloudcannon.snippets-definitions.yaml': validateSnippetsDefinitions,
+	'cloudcannon.snippets-definitions.json': validateSnippetsDefinitions,
+	'cloudcannon.snippets-imports.yml': validateSnippetsImports,
+	'cloudcannon.snippets-imports.yaml': validateSnippetsImports,
+	'cloudcannon.snippets-imports.json': validateSnippetsImports,
+	'cloudcannon.structure-value.yml': validateStructureValue,
+	'cloudcannon.structure-value.yaml': validateStructureValue,
+	'cloudcannon.structure-value.json': validateStructureValue,
+	'cloudcannon.structures.yml': validateStructures,
+	'cloudcannon.structures.yaml': validateStructures,
+	'cloudcannon.structures.json': validateStructures,
+};
+
+const splitConfigKeys = Object.keys(SPLIT_CONFIG_FILES);
+
+async function findSplitConfigFiles(
+	targetPath: string
+): Promise<Array<{ filePath: string; validate: ValidateFunction }>> {
+	const filePaths = await getFilePaths(targetPath);
+	const results: Array<{ filePath: string; validate: ValidateFunction }> = [];
+
+	for (let i = 0; i < filePaths.length; i++) {
+		for (let j = 0; j < splitConfigKeys.length; j++) {
+			if (
+				filePaths[i] === splitConfigKeys[j] ||
+				filePaths[i].endsWith(`/${splitConfigKeys[j]}`) ||
+				filePaths[i].endsWith(`.${splitConfigKeys[j]}`)
+			) {
+				results.push({
+					filePath: resolve(targetPath, filePaths[i]),
+					validate: SPLIT_CONFIG_FILES[splitConfigKeys[j]],
+				});
+				break;
+			}
+		}
+	}
+
+	return results;
+}
 
 // Collapses duplicate non-value errors emitted once per oneOf/anyOf branch into one per
 // (instancePath, schemaPath, keyword). const/enum are left intact for aggregateValueErrors.
@@ -189,7 +282,7 @@ function checkParsed(displayName: string, validate: ValidateFunction, parsed: un
 		return true;
 	}
 
-	console.error(`${text.bad('✗ invalid')}: ${text.em(displayName)}`);
+	console.log(`${text.bad('✗ invalid')}: ${text.em(displayName)}`);
 
 	const errors = filterStructuralErrors(
 		aggregateValueErrors(filterBranchErrors(validate.errors ?? []))
@@ -197,14 +290,13 @@ function checkParsed(displayName: string, validate: ValidateFunction, parsed: un
 
 	const seen = new Set<string>();
 	for (let i = 0; i < errors.length; i++) {
-		const path = errors[i].instancePath.replace(/^\//, '').replace(/\//g, '.') || '(root)';
+		const path = errors[i].instancePath ? `$${errors[i].instancePath.replace(/\//g, '.')}` : '$';
 		const line = `  ${text.em(path)}: ${formatError(errors[i])}`;
 		if (addNew(seen, line)) {
-			console.error(line);
+			console.log(line);
 		}
 	}
 
-	console.error('');
 	return false;
 }
 
@@ -246,6 +338,11 @@ async function checkFile(
 		return false;
 	}
 
+	if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+		console.error(`Expected an object in ${text.em(displayName)}`);
+		return false;
+	}
+
 	return checkParsed(displayName, validate, parsed);
 }
 
@@ -266,6 +363,11 @@ const args = {
 		default: false,
 		description: `Validate only ${text.em(ROUTING_PATH)}`,
 	},
+	'split-configuration': {
+		type: 'boolean',
+		default: false,
+		description: `Validate only split CloudCannon configuration files found in ${text.em('PATH')}`,
+	},
 	'configuration-path': {
 		type: 'string',
 		description: `Path to the CloudCannon configuration file, overrides ${text.em('PATH')} search`,
@@ -276,7 +378,7 @@ const args = {
 export const validateCommand = defineCommand({
 	meta: {
 		name: 'validate',
-		description: 'Validate a CloudCannon configuration file.',
+		description: 'Validate CloudCannon configuration files.',
 	},
 	args,
 	async run(ctx: CommandContext<typeof args>): Promise<void> {
@@ -314,6 +416,11 @@ export const validateCommand = defineCommand({
 				process.exit(1);
 			}
 
+			if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+				console.error('Expected an object from stdin');
+				process.exit(1);
+			}
+
 			if (!checkParsed('<stdin>', validator, parsed)) {
 				process.exit(1);
 			}
@@ -321,10 +428,15 @@ export const validateCommand = defineCommand({
 			return;
 		}
 
-		const none = !ctx.args.configuration && !ctx.args['initial-site-settings'] && !ctx.args.routing;
+		const none =
+			!ctx.args.configuration &&
+			!ctx.args['initial-site-settings'] &&
+			!ctx.args.routing &&
+			!ctx.args['split-configuration'];
 		const doConfig = ctx.args.configuration || none;
 		const doSettings = ctx.args['initial-site-settings'] || none;
 		const doRouting = ctx.args.routing || none;
+		const doSplitConfiguration = ctx.args['split-configuration'] || none;
 
 		let allValid = true;
 
@@ -348,6 +460,18 @@ export const validateCommand = defineCommand({
 		if (doRouting) {
 			const routingPath = resolve(targetPath, ROUTING_PATH);
 			allValid = (await checkFile(routingPath, validateRouting, targetPath, none)) && allValid;
+		}
+
+		if (doSplitConfiguration) {
+			const splitConfigFiles = await findSplitConfigFiles(targetPath);
+			for (let i = 0; i < splitConfigFiles.length; i++) {
+				allValid =
+					(await checkFile(
+						splitConfigFiles[i].filePath,
+						splitConfigFiles[i].validate,
+						targetPath
+					)) && allValid;
+			}
 		}
 
 		if (!allValid) {

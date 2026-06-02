@@ -9,6 +9,7 @@ Command line interface for the CloudCannon CMS.
 - Generates CloudCannon configuration files interactively or non-interactively.
 - Detects your static site generator automatically, works with Astro, Bridgetown, Docusaurus, Eleventy, Gatsby, Hexo, Hugo, Jekyll, Lume, MkDocs, Next.js, Nuxt, Sphinx, SvelteKit.
 - Suggests collections, build commands, and output paths based on your project.
+- Validates CloudCannon configuration files against the schema, including split configuration files.
 - Manage organisations, sites, builds, files, and form submissions via the CloudCannon API.
 
 ## Install
@@ -59,8 +60,8 @@ cloudcannon configure generate ./my-site
 | `--ssg <name>` | Override SSG detection | |
 | `--source <path>` | Override source folder | |
 | `--mode <hosted\|headless>` | Mode for initial site settings | `hosted` |
-| `--initial-build-settings` | Also generate `.cloudcannon/initial-site-settings.json` | `false` |
-| `--initial-build-settings-only` | Only generate `.cloudcannon/initial-site-settings.json` | `false` |
+| `--initial-site-settings` | Also generate `.cloudcannon/initial-site-settings.json` | `false` |
+| `--initial-site-settings-only` | Only generate `.cloudcannon/initial-site-settings.json` | `false` |
 | `--install-command <cmd>` | Override detected install command | |
 | `--build-command <cmd>` | Override detected build command | |
 | `--output-path <path>` | Override detected output path | |
@@ -130,6 +131,35 @@ cloudcannon configure detect-build-commands ./my-site --ssg hugo
 |---|---|
 | `--ssg <name>` | Override SSG detection |
 | `--source <path>` | Override source folder |
+
+---
+
+### `configure validate [path]`
+
+Validate CloudCannon configuration files against the schema.
+
+```sh
+cloudcannon configure validate
+cloudcannon configure validate ./my-site
+```
+
+By default validates all configuration files found: `cloudcannon.config.yml`, `.cloudcannon/initial-site-settings.json`, `.cloudcannon/routing.json`, and any split configuration files.
+
+Accepts input from stdin when exactly one of `--configuration`, `--initial-site-settings`, or `--routing` is set:
+
+```sh
+cat cloudcannon.config.yml | cloudcannon configure validate --configuration
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--configuration` | Validate only the CloudCannon configuration file |
+| `--initial-site-settings` | Validate only `.cloudcannon/initial-site-settings.json` |
+| `--routing` | Validate only `.cloudcannon/routing.json` |
+| `--split-configuration` | Validate only split CloudCannon configuration files found in `path` |
+| `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search |
 
 ---
 
@@ -268,6 +298,7 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 | `--ssg <name>` | Static site generator name |
 | `--building-locked <true\|false>` | Lock the site from building |
+| `--uses-i18n <true\|false>` | Enable i18n support |
 | `--default-locale <locale>` | Default locale for i18n |
 | `--install-command <cmd>` | Override install command |
 | `--build-command <cmd>` | Override build command |

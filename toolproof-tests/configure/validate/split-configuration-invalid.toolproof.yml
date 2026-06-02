@@ -1,0 +1,66 @@
+name: cloudcannon configure validate --split-configuration [invalid]
+
+steps:
+  - step: I have a "cloudcannon.inputs.yml" file with the content {yaml}
+    yaml: |-
+      date:
+        type: datetime
+        instance_value: now
+  - step: I have a "blog.cloudcannon.inputs.yml" file with the content {yaml}
+    yaml: |-
+      date:
+        type: datetime
+        instance_value: now
+  - step: I have a "cloudcannon.structures.yml" file with the content {yaml}
+    yaml: |-
+      article:
+        reorder_inputs: not-a-boolean
+  - step: I have a "cloudcannon.structure-value.yml" file with the content {yaml}
+    yaml: |-
+      label: missing-required-value
+  - step: I have a "cloudcannon.collections.yml" file with the content {yaml}
+    yaml: |-
+      posts:
+        sort: 123
+  - step: I have a "cloudcannon.schemas.yml" file with the content {yaml}
+    yaml: |-
+      article:
+        reorder_inputs: not-a-boolean
+  - step: I have a "cloudcannon.editables.yml" file with the content {yaml}
+    yaml: |-
+      content:
+        bold: not-a-boolean
+  - step: I have a "cloudcannon.snippets-imports.yml" file with the content {yaml}
+    yaml: |-
+      mdx:
+        path: 123
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- configure validate . --split-configuration 2>&1 | sed 's|/.*/||'
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: blog.cloudcannon.inputs.yml
+      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
+      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
+      ╎✗ invalid: cloudcannon.collections.yml
+      ╎  $.posts: must have required property 'path'
+      ╎  $.posts: unexpected property 'sort'
+      ╎✗ invalid: cloudcannon.editables.yml
+      ╎  $.content.bold: unexpected type string instead of boolean
+      ╎✗ invalid: cloudcannon.inputs.yml
+      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
+      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
+      ╎✗ invalid: cloudcannon.schemas.yml
+      ╎  $.article: must have required property 'path'
+      ╎  $.article.reorder_inputs: unexpected type string instead of boolean
+      ╎✗ invalid: cloudcannon.snippets-imports.yml
+      ╎  $.mdx: unexpected type object instead of boolean
+      ╎  $.mdx: must have required property 'exclude'
+      ╎  $.mdx: unexpected property 'path'
+      ╎  $.mdx: must have required property 'include'
+      ╎  $.mdx: must match a schema in anyOf
+      ╎✗ invalid: cloudcannon.structure-value.yml
+      ╎  $: must have required property 'value'
+      ╎✗ invalid: cloudcannon.structures.yml
+      ╎  $.article.reorder_inputs: unexpected type string instead of boolean
