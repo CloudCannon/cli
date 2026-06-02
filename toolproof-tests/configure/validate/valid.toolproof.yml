@@ -9,7 +9,7 @@ steps:
   - ref: ../../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . | sed 's|/.*/||'
+      npm -s run cloudcannon -- configure validate . 2>&1 || true
   - snapshot: stdout
     snapshot_content: |-
       ╎✓ valid: cloudcannon.config.yml

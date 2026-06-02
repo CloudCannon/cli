@@ -21,7 +21,7 @@ steps:
   - ref: ../../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . --initial-site-settings | sed 's|/.*/||'
+      npm -s run cloudcannon -- configure validate . --initial-site-settings 2>&1 || true
   - snapshot: stdout
     snapshot_content: |-
       ╎✓ valid: .cloudcannon/initial-site-settings.json
