@@ -93,15 +93,16 @@ async function findSplitConfigFiles(
 		},
 	});
 
-	const paths = Object.keys(pathsToGlobKey);
+	const entries = Object.entries(pathsToGlobKey);
 	const results: Array<{ filePath: string; validate: ValidateFunction }> = [];
 
-	for (let i = 0; i < paths.length; i++) {
-		const validate = GLOB_KEY_VALIDATORS[pathsToGlobKey[paths[i]]];
+	for (let i = 0; i < entries.length; i++) {
+		const [filePath, globKey] = entries[i];
+		const validate = GLOB_KEY_VALIDATORS[globKey];
 		if (validate) {
-			results.push({ filePath: paths[i], validate });
+			results.push({ filePath, validate });
 		} else {
-			console.log(`- unable to validate: ${text.em(relative(targetPath, paths[i]))}`);
+			console.log(`- unable to validate: ${text.em(relative(targetPath, filePath))}`);
 		}
 	}
 
