@@ -1,5 +1,7 @@
 import { access, readFile } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
+import { type GlobTypeKey, loadConfiguration } from '@cloudcannon/configuration-loader';
+import type { Configuration } from '@cloudcannon/configuration-types';
 import collectionsSchema from '@cloudcannon/configuration-types/dist/cloudcannon-collections.schema.json' with {
 	type: 'json',
 };
@@ -39,7 +41,7 @@ import structuresSchema from '@cloudcannon/configuration-types/dist/cloudcannon-
 import { Ajv, type ErrorObject, type ValidateFunction } from 'ajv';
 import { type CommandContext, defineCommand } from 'citty';
 import { parse as parseYaml } from 'yaml';
-import { getFilePaths, pathArg, text } from './utility.ts';
+import { pathArg, text } from './utility.ts';
 
 const CONFIG_FILENAMES = [
 	'cloudcannon.config.yml',
@@ -64,57 +66,42 @@ const validateSnippetsImports = ajv.compile(snippetsImportsSchema);
 const validateStructureValue = ajv.compile(structureValueSchema);
 const validateStructures = ajv.compile(structuresSchema);
 
-const SPLIT_CONFIG_FILES: Record<string, ValidateFunction> = {
-	'cloudcannon.collections.yml': validateCollections,
-	'cloudcannon.collections.yaml': validateCollections,
-	'cloudcannon.collections.json': validateCollections,
-	'cloudcannon.editables.yml': validateEditables,
-	'cloudcannon.editables.yaml': validateEditables,
-	'cloudcannon.editables.json': validateEditables,
-	'cloudcannon.inputs.yml': validateInputs,
-	'cloudcannon.inputs.yaml': validateInputs,
-	'cloudcannon.inputs.json': validateInputs,
-	'cloudcannon.schemas.yml': validateSchemas,
-	'cloudcannon.schemas.yaml': validateSchemas,
-	'cloudcannon.schemas.json': validateSchemas,
-	'cloudcannon.snippets.yml': validateSnippets,
-	'cloudcannon.snippets.yaml': validateSnippets,
-	'cloudcannon.snippets.json': validateSnippets,
-	'cloudcannon.snippets-definitions.yml': validateSnippetsDefinitions,
-	'cloudcannon.snippets-definitions.yaml': validateSnippetsDefinitions,
-	'cloudcannon.snippets-definitions.json': validateSnippetsDefinitions,
-	'cloudcannon.snippets-imports.yml': validateSnippetsImports,
-	'cloudcannon.snippets-imports.yaml': validateSnippetsImports,
-	'cloudcannon.snippets-imports.json': validateSnippetsImports,
-	'cloudcannon.structure-value.yml': validateStructureValue,
-	'cloudcannon.structure-value.yaml': validateStructureValue,
-	'cloudcannon.structure-value.json': validateStructureValue,
-	'cloudcannon.structures.yml': validateStructures,
-	'cloudcannon.structures.yaml': validateStructures,
-	'cloudcannon.structures.json': validateStructures,
+const GLOB_KEY_VALIDATORS: Partial<Record<GlobTypeKey, ValidateFunction>> = {
+	collections_config_from_glob: validateCollections,
+	schemas_from_glob: validateSchemas,
+	_editables_from_glob: validateEditables,
+	_inputs_from_glob: validateInputs,
+	_snippets_from_glob: validateSnippets,
+	_snippets_definitions_from_glob: validateSnippetsDefinitions,
+	_snippets_imports_from_glob: validateSnippetsImports,
+	_structures_from_glob: validateStructures,
+	values_from_glob: validateStructureValue,
 };
 
-const splitConfigKeys = Object.keys(SPLIT_CONFIG_FILES);
-
 async function findSplitConfigFiles(
+	configPath: string,
+	parsedConfig: Configuration,
 	targetPath: string
 ): Promise<Array<{ filePath: string; validate: ValidateFunction }>> {
-	const filePaths = await getFilePaths(targetPath);
+	const { pathsToGlobKey } = await loadConfiguration(configPath, {
+		parseFile: (contents: string, filePath: string) => {
+			if (filePath === configPath) {
+				return parsedConfig;
+			}
+
+			return filePath.endsWith('.json') ? JSON.parse(contents) : parseYaml(contents);
+		},
+	});
+
+	const paths = Object.keys(pathsToGlobKey);
 	const results: Array<{ filePath: string; validate: ValidateFunction }> = [];
 
-	for (let i = 0; i < filePaths.length; i++) {
-		for (let j = 0; j < splitConfigKeys.length; j++) {
-			if (
-				filePaths[i] === splitConfigKeys[j] ||
-				filePaths[i].endsWith(`/${splitConfigKeys[j]}`) ||
-				filePaths[i].endsWith(`.${splitConfigKeys[j]}`)
-			) {
-				results.push({
-					filePath: resolve(targetPath, filePaths[i]),
-					validate: SPLIT_CONFIG_FILES[splitConfigKeys[j]],
-				});
-				break;
-			}
+	for (let i = 0; i < paths.length; i++) {
+		const validate = GLOB_KEY_VALIDATORS[pathsToGlobKey[paths[i]]];
+		if (validate) {
+			results.push({ filePath: paths[i], validate });
+		} else {
+			console.log(`- unable to validate: ${text.em(relative(targetPath, paths[i]))}`);
 		}
 	}
 
@@ -308,25 +295,15 @@ async function readStdin(): Promise<string> {
 	return Buffer.concat(chunks).toString('utf-8');
 }
 
-async function checkFile(
-	filePath: string,
-	validate: ValidateFunction,
-	targetPath: string,
-	optional = false
-): Promise<boolean> {
+async function readAndParseFile(filePath: string, displayName: string): Promise<unknown | null> {
 	let content: string;
 	try {
 		content = await readFile(filePath, 'utf-8');
 	} catch {
-		if (optional) {
-			return true;
-		}
-
-		console.error(`File not found: ${text.em(relative(targetPath, filePath))}`);
-		return false;
+		console.error(`File not found: ${text.em(displayName)}`);
+		return null;
 	}
 
-	const displayName = relative(targetPath, filePath);
 	let parsed: unknown;
 	try {
 		parsed = filePath.endsWith('.json') ? JSON.parse(content) : parseYaml(content);
@@ -334,12 +311,35 @@ async function checkFile(
 		console.error(
 			`Failed to parse ${text.em(displayName)}: ${err instanceof Error ? err.message : String(err)}`
 		);
-
-		return false;
+		return null;
 	}
 
 	if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
 		console.error(`Expected an object in ${text.em(displayName)}`);
+		return null;
+	}
+
+	return parsed;
+}
+
+async function checkFile(
+	filePath: string,
+	validate: ValidateFunction,
+	targetPath: string,
+	optional = false
+): Promise<boolean> {
+	const displayName = relative(targetPath, filePath);
+
+	if (optional) {
+		try {
+			await access(filePath);
+		} catch {
+			return true;
+		}
+	}
+
+	const parsed = await readAndParseFile(filePath, displayName);
+	if (!parsed) {
 		return false;
 	}
 
@@ -351,7 +351,8 @@ const args = {
 	configuration: {
 		type: 'boolean',
 		default: false,
-		description: 'Validate only the CloudCannon configuration file',
+		description:
+			'Validate only the CloudCannon configuration file and any split configuration files',
 	},
 	'initial-site-settings': {
 		type: 'boolean',
@@ -362,11 +363,6 @@ const args = {
 		type: 'boolean',
 		default: false,
 		description: `Validate only ${text.em(ROUTING_PATH)}`,
-	},
-	'split-configuration': {
-		type: 'boolean',
-		default: false,
-		description: `Validate only split CloudCannon configuration files found in ${text.em('PATH')}`,
 	},
 	'configuration-path': {
 		type: 'string',
@@ -428,15 +424,10 @@ export const validateCommand = defineCommand({
 			return;
 		}
 
-		const none =
-			!ctx.args.configuration &&
-			!ctx.args['initial-site-settings'] &&
-			!ctx.args.routing &&
-			!ctx.args['split-configuration'];
+		const none = !ctx.args.configuration && !ctx.args['initial-site-settings'] && !ctx.args.routing;
 		const doConfig = ctx.args.configuration || none;
 		const doSettings = ctx.args['initial-site-settings'] || none;
 		const doRouting = ctx.args.routing || none;
-		const doSplitConfiguration = ctx.args['split-configuration'] || none;
 
 		let allValid = true;
 
@@ -449,7 +440,27 @@ export const validateCommand = defineCommand({
 				process.exit(1);
 			}
 
-			allValid = await checkFile(configPath, validateConfig, targetPath);
+			const configDisplayName = relative(targetPath, configPath);
+			const parsedConfig = await readAndParseFile(configPath, configDisplayName);
+			if (!parsedConfig) {
+				process.exit(1);
+			}
+
+			allValid = checkParsed(configDisplayName, validateConfig, parsedConfig) && allValid;
+
+			const splitConfigFiles = await findSplitConfigFiles(
+				configPath,
+				parsedConfig as Configuration,
+				targetPath
+			);
+			for (let i = 0; i < splitConfigFiles.length; i++) {
+				allValid =
+					(await checkFile(
+						splitConfigFiles[i].filePath,
+						splitConfigFiles[i].validate,
+						targetPath
+					)) && allValid;
+			}
 		}
 
 		if (doSettings) {
@@ -460,18 +471,6 @@ export const validateCommand = defineCommand({
 		if (doRouting) {
 			const routingPath = resolve(targetPath, ROUTING_PATH);
 			allValid = (await checkFile(routingPath, validateRouting, targetPath, none)) && allValid;
-		}
-
-		if (doSplitConfiguration) {
-			const splitConfigFiles = await findSplitConfigFiles(targetPath);
-			for (let i = 0; i < splitConfigFiles.length; i++) {
-				allValid =
-					(await checkFile(
-						splitConfigFiles[i].filePath,
-						splitConfigFiles[i].validate,
-						targetPath
-					)) && allValid;
-			}
 		}
 
 		if (!allValid) {

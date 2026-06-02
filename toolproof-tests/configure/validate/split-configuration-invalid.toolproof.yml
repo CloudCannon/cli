@@ -1,6 +1,26 @@
-name: cloudcannon configure validate --split-configuration [invalid]
+name: cloudcannon configure validate --configuration [invalid, with split files]
 
 steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      something: this does not belong here
+      collections_config_from_glob:
+        - cloudcannon.collections.yml
+        - custom-colls.yml
+      _editables_from_glob:
+        - cloudcannon.editables.yml
+      _inputs_from_glob:
+        - cloudcannon.inputs.yml
+        - cloudcannon.inputs.json
+        - blog.cloudcannon.inputs.yml
+      _snippets_from_glob:
+        - cloudcannon.snippets.yml
+      _snippets_definitions_from_glob:
+        - cloudcannon.snippets-definitions.yml
+      _snippets_imports_from_glob:
+        - cloudcannon.snippets-imports.yml
+      _structures_from_glob:
+        - cloudcannon.structures.yml
   - step: I have a "cloudcannon.inputs.yml" file with the content {yaml}
     yaml: |-
       date:
@@ -15,6 +35,8 @@ steps:
     yaml: |-
       article:
         reorder_inputs: not-a-boolean
+        values_from_glob:
+          - cloudcannon.structure-value.yml
   - step: I have a "cloudcannon.structure-value.yml" file with the content {yaml}
     yaml: |-
       label: missing-required-value
@@ -22,6 +44,14 @@ steps:
     yaml: |-
       posts:
         sort: 123
+        schemas_from_glob:
+          - cloudcannon.schemas.yml
+  - step: I have a "custom-colls.yml" file with the content {yaml}
+    yaml: |-
+      staff:
+        path: staff-members
+        sort_options:
+          - hello
   - step: I have a "cloudcannon.schemas.yml" file with the content {yaml}
     yaml: |-
       article:
@@ -30,6 +60,18 @@ steps:
     yaml: |-
       content:
         bold: not-a-boolean
+  - step: I have a "cloudcannon.snippets.yml" file with the content {yaml}
+    yaml: |-
+      callout:
+        template: 123
+  - step: I have a "cloudcannon.snippets-definitions.yml" file with the content {yaml}
+    yaml: |-
+      callout: 123
+  - step: I have a "cloudcannon.inputs.json" file with the content {json}
+    json: |-
+      {
+        "date": { "type": "datetime", "instance_value": "now" }
+      }
   - step: I have a "cloudcannon.snippets-imports.yml" file with the content {yaml}
     yaml: |-
       mdx:
@@ -37,30 +79,40 @@ steps:
   - ref: ../../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
-      npm -s run cloudcannon -- configure validate . --split-configuration 2>&1 | sed 's|/.*/||'
+      npm -s run cloudcannon -- configure validate . --configuration | sed 's|/.*/||'
   - snapshot: stdout
     snapshot_content: |-
-      ╎✗ invalid: blog.cloudcannon.inputs.yml
-      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
-      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
-      ╎✗ invalid: cloudcannon.collections.yml
-      ╎  $.posts: must have required property 'path'
-      ╎  $.posts: unexpected property 'sort'
-      ╎✗ invalid: cloudcannon.editables.yml
-      ╎  $.content.bold: unexpected type string instead of boolean
-      ╎✗ invalid: cloudcannon.inputs.yml
-      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
-      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
-      ╎✗ invalid: cloudcannon.schemas.yml
-      ╎  $.article: must have required property 'path'
-      ╎  $.article.reorder_inputs: unexpected type string instead of boolean
+      ╎✗ invalid: cloudcannon.config.yml
+      ╎  $: unexpected property 'something'
+      ╎✗ invalid: cloudcannon.snippets.yml
+      ╎  $.callout.template: unexpected type number instead of string
       ╎✗ invalid: cloudcannon.snippets-imports.yml
       ╎  $.mdx: unexpected type object instead of boolean
       ╎  $.mdx: must have required property 'exclude'
       ╎  $.mdx: unexpected property 'path'
       ╎  $.mdx: must have required property 'include'
       ╎  $.mdx: must match a schema in anyOf
+      ╎✓ valid: cloudcannon.snippets-definitions.yml
+      ╎✗ invalid: cloudcannon.collections.yml
+      ╎  $.posts: must have required property 'path'
+      ╎  $.posts: unexpected property 'sort'
+      ╎✗ invalid: custom-colls.yml
+      ╎  $.staff.sort_options.0: unexpected type string instead of object
+      ╎✗ invalid: blog.cloudcannon.inputs.yml
+      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
+      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
+      ╎✗ invalid: cloudcannon.inputs.json
+      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
+      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
+      ╎✗ invalid: cloudcannon.inputs.yml
+      ╎  $.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
+      ╎  $.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
+      ╎✗ invalid: cloudcannon.editables.yml
+      ╎  $.content.bold: unexpected type string instead of boolean
+      ╎✗ invalid: cloudcannon.structures.yml
+      ╎  $.article.reorder_inputs: unexpected type string instead of boolean
       ╎✗ invalid: cloudcannon.structure-value.yml
       ╎  $: must have required property 'value'
-      ╎✗ invalid: cloudcannon.structures.yml
+      ╎✗ invalid: cloudcannon.schemas.yml
+      ╎  $.article: must have required property 'path'
       ╎  $.article.reorder_inputs: unexpected type string instead of boolean

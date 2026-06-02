@@ -59,6 +59,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@clack/prompts": "1.2.0",
+		"@cloudcannon/configuration-loader": "0.0.9",
 		"@cloudcannon/configuration-types": "0.0.58",
 		"@cloudcannon/gadget": "0.0.32",
 		"@cloudcannon/sdk": "0.0.4",

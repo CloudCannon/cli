@@ -15,10 +15,9 @@ steps:
       ╎
       ╎OPTIONS
       ╎
-      ╎              --configuration    Validate only the CloudCannon configuration file (Default: false)
+      ╎              --configuration    Validate only the CloudCannon configuration file and any split configuration files (Default: false)
       ╎      --initial-site-settings    Validate only .cloudcannon/initial-site-settings.json (Default: false)
       ╎                    --routing    Validate only .cloudcannon/routing.json (Default: false)
-      ╎        --split-configuration    Validate only split CloudCannon configuration files found in PATH (Default: false)
       ╎  --configuration-path=<path>    Path to the CloudCannon configuration file, overrides PATH search
       ╎
       ╎

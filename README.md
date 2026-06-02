@@ -151,14 +151,15 @@ Accepts input from stdin when exactly one of `--configuration`, `--initial-site-
 cat cloudcannon.config.yml | cloudcannon configure validate --configuration
 ```
 
+> **Note:** When reading from stdin, split configuration files referenced via `*_from_glob` keys are not validated. Run `cloudcannon configure validate` on a directory to validate split configuration files.
+
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--configuration` | Validate only the CloudCannon configuration file |
+| `--configuration` | Validate only the CloudCannon configuration file and any split configuration files |
 | `--initial-site-settings` | Validate only `.cloudcannon/initial-site-settings.json` |
 | `--routing` | Validate only `.cloudcannon/routing.json` |
-| `--split-configuration` | Validate only split CloudCannon configuration files found in `path` |
 | `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search |
 
 ---
