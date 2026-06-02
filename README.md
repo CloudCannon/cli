@@ -145,10 +145,10 @@ cloudcannon configure validate ./my-site
 
 By default validates all configuration files found: `cloudcannon.config.yml`, `.cloudcannon/initial-site-settings.json`, `.cloudcannon/routing.json`, and any split configuration files.
 
-Accepts input from stdin when exactly one of `--configuration`, `--initial-site-settings`, or `--routing` is set:
+Use `--stdin` to read from stdin. Exactly one of `--configuration`, `--initial-site-settings`, or `--routing` must also be set to indicate the type of file being piped:
 
 ```sh
-cat cloudcannon.config.yml | cloudcannon configure validate --configuration
+cat cloudcannon.config.yml | cloudcannon configure validate --stdin --configuration
 ```
 
 > **Note:** When reading from stdin, split configuration files referenced via `*_from_glob` keys are not validated. Run `cloudcannon configure validate` on a directory to validate split configuration files.
@@ -161,6 +161,7 @@ cat cloudcannon.config.yml | cloudcannon configure validate --configuration
 | `--initial-site-settings` | Validate only `.cloudcannon/initial-site-settings.json` |
 | `--routing` | Validate only `.cloudcannon/routing.json` |
 | `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search |
+| `--stdin` | Read from stdin instead of files on disk |
 
 ---
 

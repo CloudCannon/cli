@@ -19,5 +19,6 @@ steps:
       ╎      --initial-site-settings    Validate only .cloudcannon/initial-site-settings.json (Default: false)
       ╎                    --routing    Validate only .cloudcannon/routing.json (Default: false)
       ╎  --configuration-path=<path>    Path to the CloudCannon configuration file, overrides PATH search
+      ╎                      --stdin    Read from stdin instead of files on disk (Default: false)
       ╎
       ╎

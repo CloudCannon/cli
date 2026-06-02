@@ -369,6 +369,11 @@ const args = {
 		description: `Path to the CloudCannon configuration file, overrides ${text.em('PATH')} search`,
 		valueHint: 'path',
 	},
+	stdin: {
+		type: 'boolean',
+		default: false,
+		description: 'Read from stdin instead of files on disk',
+	},
 } as const;
 
 export const validateCommand = defineCommand({
@@ -380,7 +385,7 @@ export const validateCommand = defineCommand({
 	async run(ctx: CommandContext<typeof args>): Promise<void> {
 		const targetPath = resolve(ctx.args.path ?? '.');
 
-		if (!process.stdin.isTTY) {
+		if (ctx.args.stdin) {
 			const explicit = [
 				ctx.args.configuration,
 				ctx.args['initial-site-settings'],
