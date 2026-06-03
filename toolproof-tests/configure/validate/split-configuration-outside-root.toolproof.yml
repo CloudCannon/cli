@@ -1,0 +1,24 @@
+name: cloudcannon validate [split config outside project root is not validated]
+
+steps:
+  - step: I have a "project/cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      _inputs_from_glob:
+        - ../outside-inputs.yml
+        - inside-inputs.yml
+  - step: I have a "outside-inputs.yml" file with the content {yaml}
+    yaml: |-
+      date:
+        type: date
+  - step: I have a "project/inside-inputs.yml" file with the content {yaml}
+    yaml: |-
+      title:
+        type: text
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate project --configuration
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✓ valid: cloudcannon.config.yml
+      ╎✓ valid: inside-inputs.yml
