@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import tab from '@bomb.sh/tab/citty';
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json' with { type: 'json' };
-import tab from '@bomb.sh/tab/citty';
 import { buildsCommand } from './builds.ts';
 import { validateCommand } from './configure/validate.ts';
 import { configureCommand } from './configure.ts';
