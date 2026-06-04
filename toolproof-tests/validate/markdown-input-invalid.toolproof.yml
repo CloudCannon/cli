@@ -1,0 +1,29 @@
+name: cloudcannon validate [invalid, markdown input]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      _inputs:
+        text:
+          type: markdown
+          comment: The testimonial quote text.
+          options:
+            blockquote: false
+            bold: true
+            format:
+            italic: true
+            link: true
+            strike: false
+            subscript: true
+            superscript: true
+            underline: false
+            bulletedlist: false
+            numberedlist: false
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: cloudcannon.config.yml
+      ╎  $._inputs.text.options.format: unexpected type null, allowed types: string

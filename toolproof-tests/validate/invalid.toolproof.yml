@@ -30,11 +30,10 @@ steps:
   - snapshot: stdout
     snapshot_content: |-
       ╎✗ invalid: cloudcannon.config.yml
-      ╎  $: unexpected property '_select_datasets'
-      ╎  $.version: value 'newest' should be 'latest'
-      ╎  $.collections_config.posts.icon: unexpected value 'nature_person', allowed values: '123', '360', '10k', '10mp', '11mp' and 3579 more
-      ╎  $.collections_config.posts.create: unexpected type number instead of object
-      ╎  $.collections_config.data: must have required property 'path'
-      ╎  $.collections_config.data.icon: unexpected value 'date_usage', allowed values: '123', '360', '10k', '10mp', '11mp' and 3579 more
-      ╎  $._inputs.date.instance_value: unexpected value 'now', allowed values: 'UUID', 'NOW'
-      ╎  $._inputs.date.type: unexpected value 'datetime', allowed values: 'text', 'email', 'disabled', 'pinterest', 'facebook' and 24 more
+      ╎  $: unexpected property _select_datasets
+      ╎  $.version: value newest should be latest
+      ╎  $.collections_config.posts.icon: unexpected value nature_person, allowed values: 3584 values (closest: nature_people)
+      ╎  $.collections_config.posts.create: unexpected type number, allowed types: object
+      ╎  $.collections_config.data: must have required property path
+      ╎  $.collections_config.data.icon: unexpected value date_usage, allowed values: 3584 values (closest: data_usage)
+      ╎  $._inputs.date.instance_value: unexpected value now, allowed values: UUID, NOW

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import tab from '@bomb.sh/tab/citty';
 import { defineCommand, runMain } from 'citty';
 import pkg from '../package.json' with { type: 'json' };
 import { buildsCommand } from './builds.ts';
@@ -29,4 +30,5 @@ const main = defineCommand({
 	},
 });
 
+await tab(main);
 runMain(main);
