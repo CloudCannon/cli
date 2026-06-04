@@ -14,7 +14,7 @@ steps:
     yaml: |-
       title:
         type: text
-  - ref: ../../core/run-cli.toolproof.yml
+  - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
       npm -s run cloudcannon -- validate project --configuration

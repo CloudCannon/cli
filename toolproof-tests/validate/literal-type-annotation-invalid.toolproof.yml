@@ -1,0 +1,18 @@
+name: cloudcannon validate [invalid, literal annotated in allowed types]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        team:
+          path: src/content/team
+          preview:
+            image:
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: cloudcannon.config.yml
+      ╎  $.collections_config.team.preview.image: unexpected type null, allowed types: array, string, boolean (false)

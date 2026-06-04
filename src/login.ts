@@ -6,6 +6,7 @@ import { decodeUserAccessKey, saveUserAccessKey } from './sdk-client.ts';
 export const loginCommand = defineCommand({
 	meta: {
 		name: 'login',
+		description: 'Log in to your CloudCannon account.',
 	},
 	args: {
 		'access-key-id': {

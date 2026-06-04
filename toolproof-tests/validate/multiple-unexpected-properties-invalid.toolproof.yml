@@ -1,0 +1,17 @@
+name: cloudcannon validate [invalid, multiple unexpected properties]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      source: src
+      foo: 1
+      bar: 2
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: cloudcannon.config.yml
+      ╎  $: unexpected property foo
+      ╎  $: unexpected property bar

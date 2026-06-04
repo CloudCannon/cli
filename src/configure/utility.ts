@@ -95,6 +95,7 @@ export const text = {
 	good: (t: string): string => styleText(['green'], t),
 	bad: (t: string): string => styleText(['red'], t),
 	secondary: (t: string): string => styleText(['dim'], t),
+	value: (t: string): string => styleText(['cyan'], t),
 };
 
 export const checkSsg = (value: unknown | undefined): SsgKey | undefined => {

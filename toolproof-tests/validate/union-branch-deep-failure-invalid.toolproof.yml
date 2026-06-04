@@ -1,0 +1,22 @@
+name: cloudcannon validate [invalid, matched union branch fails deeper]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      _inputs:
+        price:
+          type: object
+          options:
+            structures:
+              values:
+                - label: First
+                  value: {}
+                - label: Second
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: cloudcannon.config.yml
+      ╎  $._inputs.price.options.structures.values[1]: must have required property value

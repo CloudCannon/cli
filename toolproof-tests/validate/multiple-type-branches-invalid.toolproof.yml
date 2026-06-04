@@ -1,0 +1,22 @@
+name: cloudcannon validate [invalid, multiple anyOf type branches]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      _inputs:
+        verticalOffset:
+          type: object
+          comment: Offset section up above or below the previous section.
+          options:
+            structures:
+              - label: Vertical Offset
+                value:
+                  size: xl
+  - ref: ../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --configuration 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: cloudcannon.config.yml
+      ╎  $._inputs.verticalOffset.options.structures: unexpected type array, allowed types: string, object

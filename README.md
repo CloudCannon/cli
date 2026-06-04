@@ -59,6 +59,21 @@ To log out and remove stored credentials:
 cloudcannon logout
 ```
 
+## Shell completions
+
+Enable tab completion for your shell by adding the following to your shell config:
+
+```sh
+# zsh
+echo 'source <(cloudcannon complete zsh)' >> ~/.zshrc
+
+# bash
+echo 'source <(cloudcannon complete bash)' >> ~/.bashrc
+
+# fish
+echo 'cloudcannon complete fish | source' >> ~/.config/fish/config.fish
+```
+
 ## Usage
 
 ```
