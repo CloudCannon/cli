@@ -5,7 +5,7 @@ import { buildListOptions, listFlagDefs } from './list-options.ts';
 import { orgsInboxesCommand } from './orgs/inboxes.ts';
 import { resolveOrgUuid } from './orgs/resolve.ts';
 import { orgsSitesCommand } from './orgs/sites.ts';
-import { getSdkClient } from './sdk-client.ts';
+import { getSdkClient, handleAPIError } from './sdk-client.ts';
 
 export const orgsListCommand = defineCommand({
 	meta: {
@@ -16,13 +16,18 @@ export const orgsListCommand = defineCommand({
 	async run(ctx): Promise<void> {
 		const client = await getSdkClient();
 		const options = buildListOptions(ctx.args);
-		const orgs = await client.orgs(options as ListOrgsOptions);
-		printJson({
-			current_page: orgs.current_page,
-			total_pages: orgs.total_pages,
-			total_items: orgs.total_items,
-			items: orgs.items,
-		});
+		try {
+			const orgs = await client.orgs(options as ListOrgsOptions);
+			printJson({
+				current_page: orgs.current_page,
+				total_pages: orgs.total_pages,
+				total_items: orgs.total_items,
+				items: orgs.items,
+			});
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 
@@ -46,8 +51,13 @@ export const orgsGetCommand = defineCommand({
 			process.exitCode = 1;
 			return;
 		}
-		const org = await client.org(orgUuid).get();
-		printJson(org);
+		try {
+			const org = await client.org(orgUuid).get();
+			printJson(org);
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 

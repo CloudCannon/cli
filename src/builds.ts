@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty';
-import { getSdkClient } from './sdk-client.ts';
+import { getSdkClient, handleAPIError } from './sdk-client.ts';
 
 export const buildsPrintLogsCommand = defineCommand({
 	meta: {
@@ -16,10 +16,15 @@ export const buildsPrintLogsCommand = defineCommand({
 	},
 	async run(ctx): Promise<void> {
 		const client = await getSdkClient();
-		const resp = await client.build(ctx.args.build).get();
-		const text = await resp.text();
-		if (text) {
-			console.log(text);
+		try {
+			const resp = await client.build(ctx.args.build).get();
+			const text = await resp.text();
+			if (text) {
+				console.log(text);
+			}
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
 		}
 	},
 });

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { Writable } from 'node:stream';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
-import { getSdkClient } from '../sdk-client.ts';
+import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 import { resolveSiteUuid } from './resolve.ts';
 
 export const sitesFilesListCommand = defineCommand({
@@ -25,9 +25,14 @@ export const sitesFilesListCommand = defineCommand({
 		if (!siteUuid) {
 			return;
 		}
-		const files = await client.site(siteUuid).listFiles();
-		const output = Object.fromEntries(files.map((file) => [file.sitePath, file.md5]));
-		printJson(output);
+		try {
+			const files = await client.site(siteUuid).listFiles();
+			const output = Object.fromEntries(files.map((file) => [file.sitePath, file.md5]));
+			printJson(output);
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 
@@ -61,13 +66,18 @@ export const sitesFilesGetCommand = defineCommand({
 			process.exitCode = 1;
 			return;
 		}
-		const resp = await client.site(siteUuid).getFile(ctx.args.path);
-		if (ctx.args.output) {
-			const stream = createWriteStream(ctx.args.output);
-			await resp.body?.pipeTo(Writable.toWeb(stream));
-		} else {
-			const text = await resp.text();
-			console.log(text);
+		try {
+			const resp = await client.site(siteUuid).getFile(ctx.args.path);
+			if (ctx.args.output) {
+				const stream = createWriteStream(ctx.args.output);
+				await resp.body?.pipeTo(Writable.toWeb(stream));
+			} else {
+				const text = await resp.text();
+				console.log(text);
+			}
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
 		}
 	},
 });
@@ -113,11 +123,16 @@ export const sitesFilesUploadCommand = defineCommand({
 			process.exitCode = 1;
 			return;
 		}
-		await client.site(siteUuid).uploadFile(ctx.args.path, content, {
-			type: ctx.args.type,
-			overwriteExistingFile: ctx.args.overwrite,
-		});
-		console.log('File uploaded.');
+		try {
+			await client.site(siteUuid).uploadFile(ctx.args.path, content, {
+				type: ctx.args.type,
+				overwriteExistingFile: ctx.args.overwrite,
+			});
+			console.log('File uploaded.');
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 

@@ -1,6 +1,8 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import CloudCannonClient, {
+	ApiError,
+	AuthenticationError,
 	type CloudCannonClientConfig,
 	type UserAccessKey,
 } from '@cloudcannon/sdk';
@@ -50,6 +52,23 @@ const dataDir = getDataDir();
 
 if (dataDir) {
 	await mkdir(dataDir, { recursive: true });
+}
+
+export function handleAPIError(err: unknown): void {
+	if (err instanceof AuthenticationError) {
+		console.error(
+			text.bad(`Failed to authenticate with the CloudCannon API while requesting ${err.url}`)
+		);
+		console.error('This may mean that your credentials are invalid or have been revoked.');
+		console.error('Please try logging out and logging in again.');
+	} else if (err instanceof ApiError) {
+		console.error(
+			text.bad(`Encountered an unexpected CloudCannon API error while requesting ${err.url}`)
+		);
+		console.error(err.errors);
+	} else {
+		throw err;
+	}
 }
 
 export function validateUserAccessKey(accessKey: UserAccessKey): boolean {

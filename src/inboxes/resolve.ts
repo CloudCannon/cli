@@ -1,6 +1,7 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
 import type { ListOrgInboxesOptions } from '@cloudcannon/sdk';
 import { printJson } from '../configure/utility.ts';
+import { handleAPIError } from '../sdk-client.ts';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -21,23 +22,28 @@ export async function resolveInboxUuid(
 		filters.search = identifier;
 	}
 
-	const orgs = await client.orgs();
-	for (const org of orgs.items) {
-		const inboxes = await client.org(org.uuid).getInboxes({
-			filters,
-		});
+	try {
+		const orgs = await client.orgs();
+		for (const org of orgs.items) {
+			const inboxes = await client.org(org.uuid).getInboxes({
+				filters,
+			});
 
-		if (inboxes.items.length > 1) {
-			console.error(`Inbox identifier "${identifier}" is ambiguous. Potential matches are:`);
-			printJson(inboxes.items);
-			return;
-		}
+			if (inboxes.items.length > 1) {
+				console.error(`Inbox identifier "${identifier}" is ambiguous. Potential matches are:`);
+				printJson(inboxes.items);
+				return;
+			}
 
-		if (inboxes.items.length === 1) {
+			if (inboxes.items.length === 0) {
+				console.error(`No inbox found matching "${identifier}".`);
+				return;
+			}
+
 			return inboxes.items[0].uuid;
 		}
+	} catch (err: unknown) {
+		handleAPIError(err);
+		return;
 	}
-
-	console.error(`No inbox found matching "${identifier}".`);
-	return;
 }

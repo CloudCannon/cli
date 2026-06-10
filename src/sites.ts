@@ -1,7 +1,7 @@
 import type { BuildConfiguration } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
-import { getSdkClient } from './sdk-client.ts';
+import { getSdkClient, handleAPIError } from './sdk-client.ts';
 import { sitesBuildsCommand } from './sites/builds.ts';
 import { sitesFilesCommand } from './sites/files.ts';
 import {
@@ -49,8 +49,14 @@ export const sitesGetCommand = defineCommand({
 			process.exitCode = 1;
 			return;
 		}
-		const site = await client.site(siteUuid).get();
-		printJson(site);
+
+		try {
+			const site = await client.site(siteUuid).get();
+			printJson(site);
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 
@@ -74,7 +80,15 @@ export const sitesRebuildCommand = defineCommand({
 			process.exitCode = 1;
 			return;
 		}
-		await client.site(siteUuid).rebuild();
+
+		try {
+			await client.site(siteUuid).rebuild();
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+			return;
+		}
+
 		console.log('Rebuild triggered.');
 	},
 });
@@ -212,8 +226,14 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 			process.exitCode = 1;
 			return;
 		}
-		const site = await client.site(siteUuid).updateBuildConfig(options);
-		printJson(site);
+
+		try {
+			const site = await client.site(siteUuid).updateBuildConfig(options);
+			printJson(site);
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 

@@ -2,7 +2,7 @@ import type { ListSiteBuildsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { buildListOptions, listFlagDefs } from '../list-options.ts';
-import { getSdkClient } from '../sdk-client.ts';
+import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 import { resolveSiteUuid } from './resolve.ts';
 
 export const sitesBuildsListCommand = defineCommand({
@@ -28,13 +28,18 @@ export const sitesBuildsListCommand = defineCommand({
 		}
 		const site = client.site(siteUuid);
 		const options = buildListOptions(ctx.args);
-		const builds = await site.getBuilds(options as ListSiteBuildsOptions);
-		printJson({
-			current_page: builds.current_page,
-			total_pages: builds.total_pages,
-			total_items: builds.total_items,
-			items: builds.items,
-		});
+		try {
+			const builds = await site.getBuilds(options as ListSiteBuildsOptions);
+			printJson({
+				current_page: builds.current_page,
+				total_pages: builds.total_pages,
+				total_items: builds.total_items,
+				items: builds.items,
+			});
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 

@@ -2,7 +2,7 @@ import type { ListOrgSitesOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { buildListOptions, listFlagDefs } from '../list-options.ts';
-import { getSdkClient } from '../sdk-client.ts';
+import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 import { resolveOrgUuid } from './resolve.ts';
 
 export const orgsSitesListCommand = defineCommand({
@@ -28,13 +28,18 @@ export const orgsSitesListCommand = defineCommand({
 		}
 		const org = client.org(orgUuid);
 		const options = buildListOptions(ctx.args);
-		const sites = await org.sites(options as ListOrgSitesOptions);
-		printJson({
-			current_page: sites.current_page,
-			total_pages: sites.total_pages,
-			total_items: sites.total_items,
-			items: sites.items,
-		});
+		try {
+			const sites = await org.sites(options as ListOrgSitesOptions);
+			printJson({
+				current_page: sites.current_page,
+				total_pages: sites.total_pages,
+				total_items: sites.total_items,
+				items: sites.items,
+			});
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 
