@@ -1,7 +1,13 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
-import type { ListSiteBuildsOptions, ListSiteSyncsOptions } from '@cloudcannon/sdk';
+import type {
+	Build,
+	ListSiteBuildsOptions,
+	ListSiteSyncsOptions,
+	PaginatedResponse,
+	Sync,
+} from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
-import { getSdkClient } from '../sdk-client.ts';
+import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 import { resolveSiteUuid } from './resolve.ts';
 
 const siteArgs = {
@@ -27,7 +33,14 @@ async function printLatestBuildLogs(
 	if (onlyFailed) {
 		options.filters = { successful: false };
 	}
-	const builds = await site.getBuilds(options as ListSiteBuildsOptions);
+	let builds: PaginatedResponse<Build>;
+	try {
+		builds = await site.getBuilds(options as ListSiteBuildsOptions);
+	} catch (err: unknown) {
+		handleAPIError(err);
+		process.exitCode = 1;
+		return;
+	}
 	const latest = builds.items[0];
 	if (!latest) {
 		console.log(
@@ -35,16 +48,21 @@ async function printLatestBuildLogs(
 		);
 		return;
 	}
-	const resp = await client.build(latest.uuid).get();
-	const text = await resp.text();
-	if (text) {
-		const cleanedText = text
-			.replace(/ ?\[⏱(\d+)ms\]/gm, '')
-			.replace(/ ?\[🏷[^\]]*\]/gm, '')
-			.replace(/\x1b\[\d*m/gm, '')
-			.trim();
+	try {
+		const resp = await client.build(latest.uuid).get();
+		const text = await resp.text();
+		if (text) {
+			const cleanedText = text
+				.replace(/ ?\[⏱(\d+)ms\]/gm, '')
+				.replace(/ ?\[🏷[^\]]*\]/gm, '')
+				.replace(/\x1b\[\d*m/gm, '')
+				.trim();
 
-		console.log(cleanedText);
+			console.log(cleanedText);
+		}
+	} catch (err: unknown) {
+		handleAPIError(err);
+		process.exitCode = 1;
 	}
 }
 
@@ -62,7 +80,14 @@ async function printLatestSyncLogs(
 	if (onlyFailed) {
 		options.filters = { successful: false };
 	}
-	const syncs = await site.getSyncs(options as ListSiteSyncsOptions);
+	let syncs: PaginatedResponse<Sync>;
+	try {
+		syncs = await site.getSyncs(options as ListSiteSyncsOptions);
+	} catch (err: unknown) {
+		handleAPIError(err);
+		process.exitCode = 1;
+		return;
+	}
 	const latest = syncs.items[0];
 	if (!latest) {
 		console.log(
@@ -70,16 +95,21 @@ async function printLatestSyncLogs(
 		);
 		return;
 	}
-	const resp = await client.sync(latest.uuid).get();
-	const text = await resp.text();
-	if (text) {
-		const cleanedText = text
-			.replace(/ ?\[⏱(\d+)ms\]/gm, '')
-			.replace(/ ?\[🏷[^\]]*\]/gm, '')
-			.replace(/\x1b\[\d*m/gm, '')
-			.trim();
+	try {
+		const resp = await client.sync(latest.uuid).get();
+		const text = await resp.text();
+		if (text) {
+			const cleanedText = text
+				.replace(/ ?\[⏱(\d+)ms\]/gm, '')
+				.replace(/ ?\[🏷[^\]]*\]/gm, '')
+				.replace(/\x1b\[\d*m/gm, '')
+				.trim();
 
-		console.log(cleanedText);
+			console.log(cleanedText);
+		}
+	} catch (err: unknown) {
+		handleAPIError(err);
+		process.exitCode = 1;
 	}
 }
 

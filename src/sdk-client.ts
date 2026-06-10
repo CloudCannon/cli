@@ -1,6 +1,8 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import CloudCannonClient, {
+	ApiError,
+	AuthenticationError,
 	type CloudCannonClientConfig,
 	type UserAccessKey,
 } from '@cloudcannon/sdk';
@@ -52,14 +54,49 @@ if (dataDir) {
 	await mkdir(dataDir, { recursive: true });
 }
 
-export function decodeUserAccessKey(encodedAccessKey: string): UserAccessKey {
+export function handleAPIError(err: unknown): void {
+	if (err instanceof AuthenticationError) {
+		console.error(
+			text.bad(`Failed to authenticate with the CloudCannon API while requesting ${err.url}`)
+		);
+		console.error('This may mean that your credentials are invalid or have been revoked.');
+		console.error('Please try logging out and logging in again.');
+	} else if (err instanceof ApiError) {
+		console.error(
+			text.bad(`Encountered an unexpected CloudCannon API error while requesting ${err.url}`)
+		);
+		console.error(err.errors);
+	} else {
+		throw err;
+	}
+}
+
+export function validateUserAccessKey(accessKey: UserAccessKey): boolean {
+	if (!/ccu_[a-zA-z0-9=_-]{24}/.test(accessKey.id)) {
+		console.error("Error: Access key id is invalid. Please check it's correct and try again.");
+		return false;
+	}
+
+	if (!/[a-zA-z0-9=+/]{32}/.test(accessKey.secret)) {
+		console.error("Error: Access key secret is invalid. Please check it's correct and try again.");
+		return false;
+	}
+
+	return true;
+}
+
+export function decodeUserAccessKey(encodedAccessKey: string): UserAccessKey | undefined {
 	const [encodedId, encodedSecret] = encodedAccessKey.split('#');
 	if (!encodedId || !encodedSecret) {
-		throw new Error('Invalid access key format. Expected "base64Id#base64Secret".');
+		console.error("Error: Authorization code is invalid. Please check it's correct and try again.");
+		return;
 	}
 	const id = Buffer.from(encodedId, 'base64').toString('utf-8');
 	const secret = Buffer.from(encodedSecret, 'base64').toString('utf-8');
-	return { id, secret };
+	const accessKey = { id, secret };
+	if (validateUserAccessKey(accessKey)) {
+		return accessKey;
+	}
 }
 
 export async function saveUserAccessKey(accessKey: UserAccessKey): Promise<void> {

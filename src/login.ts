@@ -1,7 +1,7 @@
 import { text } from '@clack/prompts';
 import { defineCommand } from 'citty';
-import { exitOnCancel } from './configure/utility.ts';
-import { decodeUserAccessKey, saveUserAccessKey } from './sdk-client.ts';
+import { exitOnCancel, text as styleText } from './configure/utility.ts';
+import { decodeUserAccessKey, saveUserAccessKey, validateUserAccessKey } from './sdk-client.ts';
 
 export const loginCommand = defineCommand({
 	meta: {
@@ -19,20 +19,46 @@ export const loginCommand = defineCommand({
 		},
 	},
 	async run(ctx): Promise<void> {
-		const accessKeyId = ctx.args['access-key-id'];
-		const accessKeySecret = ctx.args['access-key-secret'];
+		if (ctx.rawArgs.length > 0) {
+			const invalidArgs = [];
 
-		if (accessKeyId || accessKeySecret) {
-			if (!accessKeyId || !accessKeySecret) {
-				console.error(
-					'Error: Both --access-key-id and --access-key-secret must be provided together'
-				);
+			for (const arg of ctx.rawArgs) {
+				const argName = arg.split(' ')[0]?.split('=')[0];
+				if (!argName || argName === '--access-key-id' || argName === '--access-key-secret') {
+					continue;
+				}
+				invalidArgs.push(argName);
+			}
+
+			if (invalidArgs.length > 0) {
+				console.error(`Unrecognized argument(s): ${invalidArgs.join(', ')}`);
+				console.error('Supported arguments are --access-key-id and --access-key-secret');
+				console.error(styleText.bad('Failed to login'));
 				process.exitCode = 1;
 				return;
 			}
 
-			console.log('Logged in successfully');
-			return saveUserAccessKey({ id: accessKeyId, secret: accessKeySecret });
+			const accessKeyId = ctx.args['access-key-id'];
+			const accessKeySecret = ctx.args['access-key-secret'];
+
+			if (!accessKeyId || !accessKeySecret) {
+				console.error('Both --access-key-id and --access-key-secret must be provided together');
+				process.exitCode = 1;
+				return;
+			}
+
+			const userAccessKey = { id: accessKeyId, secret: accessKeySecret };
+
+			if (!validateUserAccessKey(userAccessKey)) {
+				console.error(styleText.bad('Failed to login'));
+				process.exitCode = 1;
+				return;
+			}
+
+			await saveUserAccessKey(userAccessKey);
+
+			console.log(styleText.good('Logged in successfully'));
+			return;
 		}
 
 		const encodedUserAccessKey = await text({
@@ -40,6 +66,17 @@ export const loginCommand = defineCommand({
 				'Open https://app.cloudcannon.com/cli/login in your web browser to receive your access key and paste it below to log in.',
 		});
 		exitOnCancel(encodedUserAccessKey);
-		return saveUserAccessKey(decodeUserAccessKey(encodedUserAccessKey));
+
+		const userAccessKey = decodeUserAccessKey(encodedUserAccessKey);
+		if (!userAccessKey) {
+			console.error(styleText.bad('Login failed'));
+			process.exitCode = 1;
+			return;
+		}
+
+		await saveUserAccessKey(userAccessKey);
+
+		console.log(styleText.good('Logged in successfully'));
+		return;
 	},
 });

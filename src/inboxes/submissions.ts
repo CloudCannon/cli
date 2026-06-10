@@ -2,7 +2,7 @@ import type { ListInboxSubmissionsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { buildListOptions, listFlagDefs } from '../list-options.ts';
-import { getSdkClient } from '../sdk-client.ts';
+import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 import { resolveInboxUuid } from './resolve.ts';
 
 export const inboxesSubmissionsListCommand = defineCommand({
@@ -28,13 +28,18 @@ export const inboxesSubmissionsListCommand = defineCommand({
 		}
 		const inboxClient = client.inbox(inboxUuid);
 		const options = buildListOptions(ctx.args);
-		const submissions = await inboxClient.getSubmissions(options as ListInboxSubmissionsOptions);
-		printJson({
-			current_page: submissions.current_page,
-			total_pages: submissions.total_pages,
-			total_items: submissions.total_items,
-			items: submissions.items,
-		});
+		try {
+			const submissions = await inboxClient.getSubmissions(options as ListInboxSubmissionsOptions);
+			printJson({
+				current_page: submissions.current_page,
+				total_pages: submissions.total_pages,
+				total_items: submissions.total_items,
+				items: submissions.items,
+			});
+		} catch (err: unknown) {
+			handleAPIError(err);
+			process.exitCode = 1;
+		}
 	},
 });
 
