@@ -22,12 +22,17 @@ export const loginCommand = defineCommand({
 		if (ctx.rawArgs.length > 0) {
 			const invalidArgs = [];
 
-			for (const arg of ctx.rawArgs) {
-				const argName = arg.split(' ')[0]?.split('=')[0];
-				if (!argName || argName === '--access-key-id' || argName === '--access-key-secret') {
+			for (const arg of Object.keys(ctx.args)) {
+				if (
+					arg === '_' ||
+					arg === 'access-key-id' ||
+					arg === 'access-key-secret' ||
+					arg === 'accessKeyId' ||
+					arg === 'accessKeySecret'
+				) {
 					continue;
 				}
-				invalidArgs.push(argName);
+				invalidArgs.push(arg);
 			}
 
 			if (invalidArgs.length > 0) {

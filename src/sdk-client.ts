@@ -6,7 +6,7 @@ import CloudCannonClient, {
 	type CloudCannonClientConfig,
 	type UserAccessKey,
 } from '@cloudcannon/sdk';
-import { text } from './configure/utility.ts';
+import { printErrorJson, text } from './configure/utility.ts';
 
 function getWindowsDataDir(): string | undefined {
 	if (process.env.LOCALAPPDATA) {
@@ -59,13 +59,41 @@ export function handleAPIError(err: unknown): void {
 		console.error(
 			text.bad(`Failed to authenticate with the CloudCannon API while requesting ${err.url}`)
 		);
+
+		const details: { authHeaders: Record<string, string>; errors?: unknown; options?: unknown } = {
+			authHeaders: err.authHeaders,
+		};
+
+		if (err.errors) {
+			details.errors = err.errors;
+		}
+
+		if (err.options) {
+			details.options = err.options;
+		}
+
+		printErrorJson(details);
+
 		console.error('This may mean that your credentials are invalid or have been revoked.');
 		console.error('Please try logging out and logging in again.');
 	} else if (err instanceof ApiError) {
 		console.error(
 			text.bad(`Encountered an unexpected CloudCannon API error while requesting ${err.url}`)
 		);
-		console.error(err.errors);
+
+		const details: { status: number | null; errors?: unknown; options?: unknown } = {
+			status: err.status,
+		};
+
+		if (err.errors) {
+			details.errors = err.errors;
+		}
+
+		if (err.options) {
+			details.options = err.options;
+		}
+
+		printErrorJson(details);
 	} else {
 		throw err;
 	}
