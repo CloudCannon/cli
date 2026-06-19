@@ -90,6 +90,10 @@ export function printJson(data: unknown): void {
 	console.log(JSON.stringify(data, null, 2));
 }
 
+export function printErrorJson(data: unknown): void {
+	console.log(text.bad(JSON.stringify(data, null, 2)));
+}
+
 export const text = {
 	em: (t: string): string => styleText(['blue', 'italic'], t),
 	good: (t: string): string => styleText(['green'], t),

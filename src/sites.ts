@@ -19,13 +19,19 @@ export const sitesListCommand = defineCommand({
 	},
 	async run(): Promise<void> {
 		const client = await getSdkClient();
-		const orgs = await client.orgs();
-		const allSites = [];
-		for (const org of orgs.items) {
-			const sites = await client.org(org.uuid).sites();
-			allSites.push(...sites.items);
+
+		try {
+			const orgs = await client.orgs();
+			const allSites = [];
+			for (const org of orgs.items) {
+				const sites = await client.org(org.uuid).sites();
+				allSites.push(...sites.items);
+			}
+			printJson(allSites);
+		} catch (err) {
+			handleAPIError(err);
+			process.exitCode = 1;
 		}
-		printJson(allSites);
 	},
 });
 
