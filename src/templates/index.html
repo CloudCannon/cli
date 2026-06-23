@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        window.OriginalBlob = Blob;
+    </script>
+    <script type="module" src="{{ DEV_SERVER_ENTRYPOINT }}"></script>
+    <script type="module" src="{{ DEV_SERVER_SHARED_ENTRYPOINT }}"></script>
+    <link href="{{ DEV_SERVER_STYLES_ENTRYPOINT }}" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.cloudcannon.com/css/2025-TT-Norms-Pro_500_800.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="app-container js-app-container" id="js-app-container">
+        <div class="app-content">
+            <div class="app-body"></div>
+        </div>
+</body>
+
+</html>

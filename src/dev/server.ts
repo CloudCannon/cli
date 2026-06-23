@@ -1,7 +1,7 @@
 import { createReadStream } from 'node:fs';
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { open, readdir, readFile } from 'node:fs/promises';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { extname, join, resolve as resolvePath } from 'node:path';
+import { extname, join, relative } from 'node:path';
 import process from 'node:process';
 import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
@@ -25,15 +25,32 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
 	'.md': 'text/markdown',
 };
 
-const CORS_HEADERS: Readonly<Record<string, string>> = {
-	'Access-Control-Allow-Origin': '*',
-	'Access-Control-Allow-Methods': 'GET, OPTIONS',
-	'Access-Control-Allow-Headers': 'Content-Type',
+const TEMPLATES_DIR = fileURLToPath(new URL('../templates/', import.meta.url));
+
+const ROUTES = {
+	index: new URLPattern({ pathname: '/{index.html}?' }),
+	editor: new URLPattern({ pathname: '/app/assets/e2e/omnipage/editor.html' }),
+	source: new URLPattern({ pathname: '/__source/*' }),
+	apiListing: new URLPattern({ pathname: '/__api/listing' }),
+	apiOutputDir: new URLPattern({ pathname: '/__api/output_dir' }),
+	output: new URLPattern({ pathname: '/__output/*' }),
 };
 
-const DEFAULT_INDEX_PLACEHOLDER = '{{ DEV_SERVER_ENTRYPOINT }}';
+const DEV_SERVER_ORIGIN: string = process.env.DEV_SERVER_ORIGIN ?? 'https://cdn.cloudcannon.com';
+const DEV_SERVER_ENTRYPOINT: string = process.env.DEV_SERVER_ENTRYPOINT ?? '/site-router-embed.js';
+const DEV_SERVER_SHARED_ENTRYPOINT: string =
+	process.env.DEV_SERVER_SHARED_ENTRYPOINT ?? '/shared.js';
+const DEV_SERVER_STYLES_ENTRYPOINT: string =
+	process.env.DEV_SERVER_STYLES_ENTRYPOINT ?? '/redesign.css';
 
-const TEMPLATES_DIR = fileURLToPath(new URL('./templates/', import.meta.url));
+let DEV_SERVER_PREFIX: string | undefined = process.env.DEV_SERVER_PREFIX;
+
+if (!DEV_SERVER_PREFIX && Boolean(process.env.USE_BETA_ASSETS)) {
+	DEV_SERVER_PREFIX = '/staging-dev-server';
+}
+if (!DEV_SERVER_PREFIX) {
+	DEV_SERVER_PREFIX = '/production-dev-server';
+}
 
 function getContentType(filepath: string): string {
 	const ext = extname(filepath).toLowerCase();
@@ -42,9 +59,9 @@ function getContentType(filepath: string): string {
 
 async function serveFileContents(filepath: string): Promise<Response> {
 	try {
-		await stat(filepath);
-		const stream = createReadStream(filepath);
-		const webStream = Readable.toWeb(stream) as unknown as ReadableStream<Uint8Array>;
+		const fd = await open(filepath);
+		const stream = createReadStream('', { fd });
+		const webStream = Readable.toWeb(stream);
 		return new Response(webStream, {
 			headers: { 'Content-Type': getContentType(filepath) },
 		});
@@ -56,9 +73,12 @@ async function serveFileContents(filepath: string): Promise<Response> {
 	}
 }
 
-async function serveTemplate(filename: string): Promise<Response> {
+async function serveTemplate(filename: string, port: number): Promise<Response> {
 	try {
-		const contents = await readFile(join(TEMPLATES_DIR, filename), 'utf-8');
+		const contents = (await readFile(join(TEMPLATES_DIR, filename), 'utf-8')).replace(
+			'{{ DEV_SERVER_PORT }}',
+			String(port)
+		);
 		return new Response(contents, {
 			headers: { 'Content-Type': 'text/html' },
 		});
@@ -67,11 +87,23 @@ async function serveTemplate(filename: string): Promise<Response> {
 	}
 }
 
-async function serveIndexHtml(config: DevServerConfig): Promise<Response> {
+async function serveIndexHtml(port: number): Promise<Response> {
 	try {
 		let contents = await readFile(join(TEMPLATES_DIR, 'index.html'), 'utf-8');
-		const entrypointUrl = `${config.origin}${config.prefix}${config.entrypoint}`;
-		contents = contents.replace(DEFAULT_INDEX_PLACEHOLDER, entrypointUrl);
+		contents = contents
+			.replace(
+				'{{ DEV_SERVER_ENTRYPOINT }}',
+				`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_ENTRYPOINT}`
+			)
+			.replace('{{ DEV_SERVER_PORT }}', String(port))
+			.replace(
+				'{{ DEV_SERVER_SHARED_ENTRYPOINT }}',
+				`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_SHARED_ENTRYPOINT}`
+			)
+			.replace(
+				'{{ DEV_SERVER_STYLES_ENTRYPOINT }}',
+				`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_STYLES_ENTRYPOINT}`
+			);
 		return new Response(contents, {
 			headers: { 'Content-Type': 'text/html' },
 		});
@@ -122,45 +154,22 @@ async function getFileListing(dir: string, outputPath: string): Promise<string[]
 	const files: string[] = [];
 	const patterns = await getGitignorePatterns(dir);
 
-	async function walk(currentPath: string, relativePath: string): Promise<void> {
+	async function walk(currentPath: string): Promise<void> {
 		const entries = await readdir(currentPath, { withFileTypes: true });
 		for (const entry of entries) {
 			const fullPath = join(currentPath, entry.name);
-			const relPath = relativePath ? join(relativePath, entry.name) : entry.name;
+			const relPath = relative(dir, fullPath);
 			if (matchesGitignore(relPath, patterns, entry.isDirectory(), outputPath)) continue;
 			if (entry.isFile()) {
 				files.push(relPath);
 			} else if (entry.isDirectory()) {
-				await walk(fullPath, relPath);
+				await walk(fullPath);
 			}
 		}
 	}
 
-	await walk(dir, '');
+	await walk(dir);
 	return files;
-}
-
-function addCorsHeaders(response: Response): Response {
-	const headers = new Headers(response.headers);
-	for (const [key, value] of Object.entries(CORS_HEADERS)) {
-		headers.set(key, value);
-	}
-	return new Response(response.body, {
-		status: response.status,
-		statusText: response.statusText,
-		headers,
-	});
-}
-
-function createRoutes(): Routes {
-	return {
-		index: new URLPattern({ pathname: '/{index.html}?' }),
-		editor: new URLPattern({ pathname: '/app/assets/e2e/omnipage/editor.html' }),
-		source: new URLPattern({ pathname: '/__source/*' }),
-		apiListing: new URLPattern({ pathname: '/__api/listing' }),
-		apiOutputDir: new URLPattern({ pathname: '/__api/output_dir' }),
-		output: new URLPattern({ pathname: '/__output/*' }),
-	};
 }
 
 export interface DevServerOptions {
@@ -171,39 +180,6 @@ export interface DevServerOptions {
 export interface DevServerConfig {
 	outputPath: string;
 	port: number;
-	origin: string;
-	prefix: string;
-	entrypoint: string;
-}
-
-export interface Routes {
-	index: URLPattern;
-	editor: URLPattern;
-	source: URLPattern;
-	apiListing: URLPattern;
-	apiOutputDir: URLPattern;
-	output: URLPattern;
-}
-
-export function resolveConfig(options: DevServerOptions): DevServerConfig {
-	const origin = process.env.DEV_SERVER_ORIGIN ?? 'https://cdn.cloudcannon.com';
-	let prefix = process.env.DEV_SERVER_PREFIX;
-	const entrypoint = process.env.DEV_SERVER_ENTRYPOINT ?? '/site-router-embed.js';
-
-	if (!prefix && Boolean(process.env.USE_BETA_ASSETS)) {
-		prefix = '/staging-dev-server';
-	}
-	if (!prefix) {
-		prefix = '/production-dev-server';
-	}
-
-	return {
-		outputPath: options.outputPath,
-		port: options.port ?? 10101,
-		origin,
-		prefix,
-		entrypoint,
-	};
 }
 
 export interface DevServerHandle {
@@ -212,7 +188,7 @@ export interface DevServerHandle {
 	close(): Promise<void>;
 }
 
-async function adaptRequest(req: IncomingMessage): Promise<Request> {
+async function messageToWebRequest(req: IncomingMessage): Promise<Request> {
 	const host = req.headers.host ?? 'localhost';
 	const url = `http://${host}${req.url ?? '/'}`;
 	const headers = new Headers();
@@ -283,26 +259,26 @@ async function sendResponse(res: ServerResponse, response: Response): Promise<vo
 
 async function handleRoute(
 	url: URL,
-	config: DevServerConfig,
 	cwd: string,
-	routes: Routes
+	port: number,
+	outputPath: string
 ): Promise<Response> {
-	if (routes.index.test(url)) {
-		return await serveIndexHtml(config);
+	if (ROUTES.index.test(url)) {
+		return await serveIndexHtml(port);
 	}
-	if (routes.editor.test(url)) {
-		return await serveTemplate('editor.html');
+	if (ROUTES.editor.test(url)) {
+		return await serveTemplate('editor.html', port);
 	}
 
-	const sourceMatch = routes.source.exec(url);
+	const sourceMatch = ROUTES.source.exec(url);
 	if (sourceMatch) {
 		const path = sourceMatch.pathname.groups[0] ?? '';
 		return await serveFileContents(join(cwd, path));
 	}
 
-	if (routes.apiListing.test(url)) {
+	if (ROUTES.apiListing.test(url)) {
 		try {
-			const files = await getFileListing(cwd, config.outputPath);
+			const files = await getFileListing(cwd, outputPath);
 			return new Response(JSON.stringify(files), {
 				headers: { 'Content-Type': 'application/json' },
 			});
@@ -311,48 +287,42 @@ async function handleRoute(
 		}
 	}
 
-	if (routes.apiOutputDir.test(url)) {
-		const normalized = config.outputPath.replace(/^\/+|\/+$/g, '');
+	if (ROUTES.apiOutputDir.test(url)) {
+		const normalized = outputPath.replace(/^\/+|\/+$/g, '');
 		return new Response(JSON.stringify(normalized), {
 			headers: { 'Content-Type': 'application/json' },
 		});
 	}
 
-	const outputMatch = routes.output.exec(url);
+	const outputMatch = ROUTES.output.exec(url);
 	if (outputMatch) {
 		const path = outputMatch.pathname.groups[0] ?? '';
-		return await serveFileContents(join(cwd, config.outputPath, path));
+		return await serveFileContents(join(cwd, outputPath, path));
 	}
 
-	return await serveFileContents(join(cwd, config.outputPath, url.pathname));
+	return await serveFileContents(join(cwd, outputPath, url.pathname));
 }
 
-export async function startDevServer(options: DevServerOptions): Promise<DevServerHandle> {
-	const config = resolveConfig(options);
+async function handleRequest(
+	request: Request,
+	cwd: string,
+	port: number,
+	outputPath: string
+): Promise<Response> {
+	const url = new URL(request.url);
+	const start = performance.now();
+	const response = await handleRoute(url, cwd, port, outputPath);
+	const duration = (performance.now() - start).toFixed(2);
+	console.log(`${request.method} ${url.pathname} ${response.status} ${duration}ms`);
+	return response;
+}
+
+export async function startDevServer(port: number, outputPath: string): Promise<DevServerHandle> {
 	const cwd = process.cwd();
-	const routes = createRoutes();
-
-	const handler = async (request: Request): Promise<Response> => {
-		const url = new URL(request.url);
-		const start = performance.now();
-
-		if (request.method === 'OPTIONS') {
-			const response = new Response(null, { status: 204, headers: CORS_HEADERS });
-			const duration = (performance.now() - start).toFixed(2);
-			console.log(`${request.method} ${url.pathname} ${response.status} ${duration}ms`);
-			return response;
-		}
-
-		const response = addCorsHeaders(await handleRoute(url, config, cwd, routes));
-		const duration = (performance.now() - start).toFixed(2);
-		console.log(`${request.method} ${url.pathname} ${response.status} ${duration}ms`);
-		return response;
-	};
-
 	const server = createServer(async (req, res) => {
 		try {
-			const request = await adaptRequest(req);
-			const response = await handler(request);
+			const request = await messageToWebRequest(req);
+			const response = await handleRequest(request, cwd, port, outputPath);
 			await sendResponse(res, response);
 		} catch (err: unknown) {
 			console.error(err);
@@ -366,19 +336,18 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
 
 	await new Promise<void>((resolve, reject) => {
 		server.once('error', reject);
-		server.listen(config.port, () => {
+		server.listen(port, () => {
 			server.off('error', reject);
 			resolve();
 		});
 	});
 
 	const addr = server.address();
-	const actualPort = typeof addr === 'object' && addr ? addr.port : config.port;
+	const actualPort = typeof addr === 'object' && addr ? addr.port : port;
 	const url = `http://localhost:${actualPort}`;
 
 	console.log(`CloudCannon dev server running at ${url}`);
-	console.log(`Serving output from: ${resolvePath(cwd, config.outputPath)}`);
-	console.log(`Entrypoint: ${config.origin}${config.prefix}${config.entrypoint}`);
+	console.log(`Serving output from: ${outputPath}`);
 
 	return {
 		port: actualPort,

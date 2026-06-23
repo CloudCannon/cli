@@ -29,10 +29,7 @@ export const devCommand = defineCommand({
 			return;
 		}
 
-		const handle = await startDevServer({
-			outputPath: ctx.args.outputPath,
-			port,
-		});
+		const handle = await startDevServer(port, ctx.args.outputPath);
 
 		const shutdown = async (signal: string): Promise<void> => {
 			console.log(`\nReceived ${signal}, shutting down dev server...`);
@@ -45,10 +42,10 @@ export const devCommand = defineCommand({
 		};
 
 		process.on('SIGINT', () => {
-			void shutdown('SIGINT');
+			shutdown('SIGINT');
 		});
 		process.on('SIGTERM', () => {
-			void shutdown('SIGTERM');
+			shutdown('SIGTERM');
 		});
 	},
 });

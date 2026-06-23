@@ -1,0 +1,89 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Visual Editor</title>
+    <meta name="visual-editor" content="v02" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        iframe,
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <iframe id="editor-iframe"></iframe>
+    <script type="module">
+        window.APP_BASE_URL = "http://localhost:{{ DEV_SERVER_PORT }}";
+        window.iframeIdentifier = window.location.hash.match(
+            /iframeIdentifier=(.*)(&|$)/,
+        )[1];
+
+        window.addEventListener("load", function () {
+            function injectScript(src, scriptType) {
+                var script = document.createElement("script");
+                if (scriptType) {
+                    script.type = scriptType;
+                }
+                script.src = src;
+                script.crossOrigin = "anonymous";
+                document
+                    .getElementsByTagName("body")[0]
+                    .appendChild(script);
+                console.log("Script injected", script);
+            }
+
+            function receiveMessage(event) {
+                console.log("Message received", event);
+                if (event.origin !== window.APP_BASE_URL) {
+                    return;
+                }
+
+                var message = event.data;
+                if (message.action === "inject-response") {
+                    console.log("Inject RECV", message, message.data);
+
+                    window.removeEventListener("message", receiveMessage);
+                    injectScript(
+                        message.data.editorJS,
+                        message.data.scriptType,
+                    );
+                }
+            }
+
+            window.addEventListener("message", receiveMessage);
+
+            function loadInnerEditor() {
+                const page = window.location.hash.slice(1).split("?")[0];
+                fetch(page)
+                    .then((res) => res.text())
+                    .then((content) => {
+                        window.injectedContent = content;
+                        window.parent.postMessage(
+                            {
+                                action: "inject",
+                                iframeIdentifier: window.iframeIdentifier,
+                            },
+                            window.APP_BASE_URL,
+                        );
+                    });
+            }
+
+            if (window.parent) {
+                loadInnerEditor();
+            }
+        });
+    </script>
+</body>
+
+</html>
