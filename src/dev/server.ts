@@ -1,7 +1,8 @@
 import { createReadStream } from 'node:fs';
-import { open, readdir, readFile } from 'node:fs/promises';
+import { open, readdir, readFile, stat } from 'node:fs/promises';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { extname, join, relative } from 'node:path';
+import { userInfo } from 'node:os';
+import { basename, extname, join, relative } from 'node:path';
 import process from 'node:process';
 import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
@@ -27,14 +28,53 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
 
 const TEMPLATES_DIR = fileURLToPath(new URL('../templates/', import.meta.url));
 
-const ROUTES = {
-	index: new URLPattern({ pathname: '/{index.html}?' }),
-	editor: new URLPattern({ pathname: '/app/assets/e2e/omnipage/editor.html' }),
-	source: new URLPattern({ pathname: '/__source/*' }),
-	apiListing: new URLPattern({ pathname: '/__api/listing' }),
-	apiOutputDir: new URLPattern({ pathname: '/__api/output_dir' }),
-	output: new URLPattern({ pathname: '/__output/*' }),
-};
+interface Route {
+	test(url: URL): boolean;
+	exec(url: URL): { path: string } | null;
+}
+
+function urlPatternRoute(spec: { pathname: string }): Route {
+	const pattern = new URLPattern(spec);
+	return {
+		test: (url) => pattern.test(url),
+		exec: (url) => {
+			const match = pattern.exec(url);
+			return match ? { path: match.pathname.groups[0] ?? '' } : null;
+		},
+	};
+}
+
+function regexRoute(regex: RegExp): Route {
+	return {
+		test: (url) => regex.test(url.pathname),
+		exec: (url) => {
+			const match = regex.exec(url.pathname);
+			return match ? { path: match[1] ?? '' } : null;
+		},
+	};
+}
+
+const HAS_URL_PATTERN = typeof URLPattern !== 'undefined';
+
+const ROUTES = HAS_URL_PATTERN
+	? {
+			index: urlPatternRoute({ pathname: '/{index.html}?' }),
+			editor: urlPatternRoute({ pathname: '/app/assets/e2e/omnipage/editor.html' }),
+			source: urlPatternRoute({ pathname: '/__source/*' }),
+			apiDetails: urlPatternRoute({ pathname: '/__api/details' }),
+			apiMegafile: urlPatternRoute({ pathname: '/__api/megafile' }),
+			apiFileInfo: urlPatternRoute({ pathname: '/__api/file/*' }),
+			output: urlPatternRoute({ pathname: '/__output/*' }),
+		}
+	: {
+			index: regexRoute(/^\/(?:index\.html)?$/),
+			editor: regexRoute(/^\/app\/assets\/e2e\/omnipage\/editor\.html$/),
+			source: regexRoute(/^\/__source\/(.*)$/),
+			apiDetails: regexRoute(/^\/__api\/details$/),
+			apiMegafile: regexRoute(/^\/__api\/megafile$/),
+			apiFileInfo: regexRoute(/^\/__api\/file\/(.*)$/),
+			output: regexRoute(/^\/__output\/(.*)$/),
+		};
 
 const DEV_SERVER_ORIGIN: string = process.env.DEV_SERVER_ORIGIN ?? 'https://cdn.cloudcannon.com';
 const DEV_SERVER_ENTRYPOINT: string = process.env.DEV_SERVER_ENTRYPOINT ?? '/site-router-embed.js';
@@ -52,9 +92,88 @@ if (!DEV_SERVER_PREFIX) {
 	DEV_SERVER_PREFIX = '/production-dev-server';
 }
 
+function getOsUsername(): string | undefined {
+	try {
+		return userInfo().username?.trim();
+	} catch {
+		return undefined;
+	}
+}
+
 function getContentType(filepath: string): string {
 	const ext = extname(filepath).toLowerCase();
 	return CONTENT_TYPES[ext] ?? 'application/octet-stream';
+}
+
+const BINARY_EXTENSIONS: ReadonlySet<string> = new Set([
+	// images
+	'.png',
+	'.jpg',
+	'.jpeg',
+	'.gif',
+	'.ico',
+	'.webp',
+	'.avif',
+	'.bmp',
+	'.tiff',
+	'.tif',
+	'.heic',
+	'.heif',
+	// fonts
+	'.woff',
+	'.woff2',
+	'.ttf',
+	'.otf',
+	'.eot',
+	// audio / video
+	'.mp3',
+	'.wav',
+	'.ogg',
+	'.flac',
+	'.aac',
+	'.m4a',
+	'.mp4',
+	'.webm',
+	'.mov',
+	'.avi',
+	'.mkv',
+	// archives / binaries
+	'.zip',
+	'.tar',
+	'.gz',
+	'.bz2',
+	'.7z',
+	'.rar',
+	'.pdf',
+	'.exe',
+	'.dll',
+	'.so',
+	'.dylib',
+	'.class',
+	'.jar',
+	'.wasm',
+]);
+
+function isBinaryBuffer(buf: Buffer): boolean {
+	const sample = buf.length > 8000 ? buf.subarray(0, 8000) : buf;
+	return sample.includes(0);
+}
+
+function isLikelyBinary(filepath: string): boolean {
+	return BINARY_EXTENSIONS.has(extname(filepath).toLowerCase());
+}
+
+function titleizeDirname(dir: string): string {
+	const name = basename(dir);
+	const words = name
+		.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+		.replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+		.split(/[_\-\s]+/)
+		.filter(Boolean);
+	if (words.length === 0) {
+		return name;
+	}
+	return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 }
 
 async function serveFileContents(filepath: string): Promise<Response> {
@@ -73,37 +192,88 @@ async function serveFileContents(filepath: string): Promise<Response> {
 	}
 }
 
-async function serveTemplate(filename: string, port: number): Promise<Response> {
+async function getFileInfo(
+	cwd: string,
+	path: string
+): Promise<{ content?: string; file_size: number; last_modified: string }> {
+	const stats = await stat(join(cwd, path));
+
+	let content: string | undefined;
+	if (!isLikelyBinary(path)) {
+		try {
+			const buf = await readFile(join(cwd, path));
+			if (!isBinaryBuffer(buf)) {
+				content = buf.toString('utf8');
+			}
+		} catch {}
+	}
+
+	return { content, file_size: stats.size, last_modified: stats.mtime.toISOString() };
+}
+
+async function serveFileInfo(cwd: string, path: string): Promise<Response> {
 	try {
-		const contents = (await readFile(join(TEMPLATES_DIR, filename), 'utf-8')).replace(
-			'{{ DEV_SERVER_PORT }}',
-			String(port)
-		);
-		return new Response(contents, {
-			headers: { 'Content-Type': 'text/html' },
+		const payload = await getFileInfo(cwd, path);
+		return new Response(JSON.stringify(payload), {
+			headers: { 'Content-Type': 'application/json' },
 		});
-	} catch {
+	} catch (err: unknown) {
+		if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') {
+			return new Response('Not Found', { status: 404 });
+		}
 		return new Response('Internal Server Error', { status: 500 });
 	}
 }
 
-async function serveIndexHtml(port: number): Promise<Response> {
+async function serveMegafile(cwd: string, outputPath: string): Promise<Response> {
+	const outputDir = outputPath.replace(/^\/+|\/+$/g, '');
+	const encoder = new TextEncoder();
+	const stream = new ReadableStream<Uint8Array>({
+		async start(controller): Promise<void> {
+			try {
+				const files = await getFileListing(cwd, outputPath);
+				for (const file of files) {
+					if (file === outputDir || file.startsWith(`${outputDir}/`)) {
+						continue;
+					}
+
+					if (isLikelyBinary(file)) {
+						continue;
+					}
+
+					try {
+						const payload = await getFileInfo(cwd, file);
+						controller.enqueue(encoder.encode(`${JSON.stringify({ filename: file, payload })}\n`));
+					} catch {}
+				}
+			} catch (err: unknown) {
+				controller.error(err);
+				return;
+			}
+			controller.close();
+		},
+	});
+	return new Response(stream, {
+		headers: { 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'no-store' },
+	});
+}
+
+const TEMPLATE_SUBSTITUTIONS: Readonly<Record<string, (port: number) => string>> = {
+	'{{ DEV_SERVER_PORT }}': (port: number) => String(port),
+	'{{ DEV_SERVER_ENTRYPOINT }}': () =>
+		`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_ENTRYPOINT}`,
+	'{{ DEV_SERVER_SHARED_ENTRYPOINT }}': () =>
+		`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_SHARED_ENTRYPOINT}`,
+	'{{ DEV_SERVER_STYLES_ENTRYPOINT }}': () =>
+		`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_STYLES_ENTRYPOINT}`,
+};
+
+async function serveTemplate(filename: string, port: number): Promise<Response> {
 	try {
-		let contents = await readFile(join(TEMPLATES_DIR, 'index.html'), 'utf-8');
-		contents = contents
-			.replace(
-				'{{ DEV_SERVER_ENTRYPOINT }}',
-				`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_ENTRYPOINT}`
-			)
-			.replace('{{ DEV_SERVER_PORT }}', String(port))
-			.replace(
-				'{{ DEV_SERVER_SHARED_ENTRYPOINT }}',
-				`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_SHARED_ENTRYPOINT}`
-			)
-			.replace(
-				'{{ DEV_SERVER_STYLES_ENTRYPOINT }}',
-				`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_STYLES_ENTRYPOINT}`
-			);
+		let contents = await readFile(join(TEMPLATES_DIR, filename), 'utf-8');
+		for (const [placeholder, resolve] of Object.entries(TEMPLATE_SUBSTITUTIONS)) {
+			contents = contents.replaceAll(placeholder, resolve(port));
+		}
 		return new Response(contents, {
 			headers: { 'Content-Type': 'text/html' },
 		});
@@ -170,16 +340,6 @@ async function getFileListing(dir: string, outputPath: string): Promise<string[]
 
 	await walk(dir);
 	return files;
-}
-
-export interface DevServerOptions {
-	outputPath: string;
-	port?: number;
-}
-
-export interface DevServerConfig {
-	outputPath: string;
-	port: number;
 }
 
 export interface DevServerHandle {
@@ -264,7 +424,7 @@ async function handleRoute(
 	outputPath: string
 ): Promise<Response> {
 	if (ROUTES.index.test(url)) {
-		return await serveIndexHtml(port);
+		return await serveTemplate('index.html', port);
 	}
 	if (ROUTES.editor.test(url)) {
 		return await serveTemplate('editor.html', port);
@@ -272,14 +432,17 @@ async function handleRoute(
 
 	const sourceMatch = ROUTES.source.exec(url);
 	if (sourceMatch) {
-		const path = sourceMatch.pathname.groups[0] ?? '';
+		const path = sourceMatch.path;
 		return await serveFileContents(join(cwd, path));
 	}
 
-	if (ROUTES.apiListing.test(url)) {
+	if (ROUTES.apiDetails.test(url)) {
 		try {
-			const files = await getFileListing(cwd, outputPath);
-			return new Response(JSON.stringify(files), {
+			const sourceFiles = await getFileListing(cwd, outputPath);
+			const outputDir = outputPath.replace(/^\/+|\/+$/g, '');
+			const siteName = titleizeDirname(cwd);
+			const userName = getOsUsername();
+			return new Response(JSON.stringify({ sourceFiles, outputDir, siteName, userName }), {
 				headers: { 'Content-Type': 'application/json' },
 			});
 		} catch {
@@ -287,16 +450,18 @@ async function handleRoute(
 		}
 	}
 
-	if (ROUTES.apiOutputDir.test(url)) {
-		const normalized = outputPath.replace(/^\/+|\/+$/g, '');
-		return new Response(JSON.stringify(normalized), {
-			headers: { 'Content-Type': 'application/json' },
-		});
+	if (ROUTES.apiMegafile.test(url)) {
+		return await serveMegafile(cwd, outputPath);
+	}
+
+	const fileInfoMatch = ROUTES.apiFileInfo.exec(url);
+	if (fileInfoMatch) {
+		return await serveFileInfo(cwd, fileInfoMatch.path);
 	}
 
 	const outputMatch = ROUTES.output.exec(url);
 	if (outputMatch) {
-		const path = outputMatch.pathname.groups[0] ?? '';
+		const path = outputMatch.path;
 		return await serveFileContents(join(cwd, outputPath, path));
 	}
 
