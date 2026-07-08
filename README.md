@@ -10,6 +10,7 @@ Command line interface for the CloudCannon CMS.
 - Detects your static site generator automatically, works with Astro, Bridgetown, Docusaurus, Eleventy, Gatsby, Hexo, Hugo, Jekyll, Lume, MkDocs, Next.js, Nuxt, Sphinx, SvelteKit.
 - Suggests collections, build commands, and output paths based on your project.
 - Validates CloudCannon configuration files against the schema, including split configuration files.
+- Runs a local dev server that loads the CloudCannon app against your local files, with live sync in both directions.
 - Manage organisations, sites, builds, files, and form submissions via the CloudCannon API.
 
 ## Install
@@ -238,6 +239,28 @@ cat cloudcannon.config.yml | cloudcannon validate --stdin --configuration
 | `--routing` | Validate only `.cloudcannon/routing.json` |
 | `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search |
 | `--stdin` | Read from stdin instead of files on disk |
+
+---
+
+### `dev [outputPath]`
+
+Run a local dev server that loads the CloudCannon app in your browser, pointed at your local site files. This lets you preview and edit your site in CloudCannon without deploying.
+
+File changes on disk are pushed to the app in real time, and edits made in the app are written back to disk.
+
+```sh
+cloudcannon dev output
+cloudcannon dev ./_site --port 3000
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--port <port>` | Port to run the dev server on | `10101` |
+| `--live-sync` / `--no-live-sync` | Push disk file changes to the app | `true` |
+| `--app-sync` / `--no-app-sync` | Accept app-initiated file writes (uploads, moves, deletes) to disk | `true` |
+| `--verbose` | Log every request (method, path, status, duration) | `false` |
 
 ---
 

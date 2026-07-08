@@ -65,8 +65,10 @@
 		"@cloudcannon/gadget": "0.0.33",
 		"@cloudcannon/sdk": "0.0.6",
 		"ajv": "8.20.0",
+		"chokidar": "^4.0.3",
 		"citty": "0.2.2",
 		"fastest-levenshtein": "1.0.16",
+		"ignore": "7.0.5",
 		"yaml": "2.8.3"
 	}
 }
