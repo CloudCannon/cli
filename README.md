@@ -325,7 +325,7 @@ cloudcannon orgs sites list
 
 ### `orgs inboxes list [org]`
 
-List all inboxes for an organisation. If you belong to only one organisation, it is selected automatically.
+List all inboxes for an organization. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs inboxes list --org my-org
