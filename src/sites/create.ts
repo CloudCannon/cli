@@ -127,7 +127,7 @@ export const sitesCreateCommand = defineCommand({
 		},
 		org: {
 			type: 'string',
-			description: 'The organisation name, ID, or UUID',
+			description: 'The organization name, ID, or UUID',
 			valueHint: 'name|id|uuid',
 		},
 		name: {
