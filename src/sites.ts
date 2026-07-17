@@ -3,6 +3,7 @@ import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
 import { getSdkClient, handleAPIError } from './sdk-client.ts';
 import { sitesBuildsCommand } from './sites/builds.ts';
+import { sitesCreateCommand } from './sites/create.ts';
 import { sitesFilesCommand } from './sites/files.ts';
 import {
 	sitesPrintLastBuildCommand,
@@ -251,6 +252,7 @@ export const sitesCommand = defineCommand({
 	subCommands: {
 		list: sitesListCommand,
 		get: sitesGetCommand,
+		create: sitesCreateCommand,
 		rebuild: sitesRebuildCommand,
 		'update-build-config': sitesUpdateBuildConfigCommand,
 		files: sitesFilesCommand,

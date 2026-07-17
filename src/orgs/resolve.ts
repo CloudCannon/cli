@@ -1,16 +1,34 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
-import type { ListOrgsOptions } from '@cloudcannon/sdk';
+import type { ListOrgsOptions, Org } from '@cloudcannon/sdk';
 import { printJson } from '../configure/utility.ts';
 import { handleAPIError } from '../sdk-client.ts';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function resolveOrgUuid(
+export async function resolveOrg(
 	client: CloudCannonClient,
-	identifier: string
-): Promise<string | undefined> {
+	identifier?: string
+): Promise<Org | undefined> {
+	if (!identifier) {
+		try {
+			const orgs = await client.orgs();
+			if (orgs.items.length === 1) {
+				return orgs.items[0];
+			}
+			return;
+		} catch (err: unknown) {
+			handleAPIError(err);
+			return;
+		}
+	}
+
 	if (UUID_REGEX.test(identifier)) {
-		return identifier;
+		try {
+			return await client.org(identifier).get();
+		} catch (err: unknown) {
+			handleAPIError(err);
+			return;
+		}
 	}
 
 	const filters: ListOrgsOptions['filters'] = {};
@@ -21,6 +39,7 @@ export async function resolveOrgUuid(
 	} else {
 		filters.search = identifier;
 	}
+
 	try {
 		const orgs = await client.orgs({ filters });
 
@@ -35,7 +54,7 @@ export async function resolveOrgUuid(
 			return;
 		}
 
-		return orgs.items[0].uuid;
+		return orgs.items[0];
 	} catch (err: unknown) {
 		handleAPIError(err);
 		return;
