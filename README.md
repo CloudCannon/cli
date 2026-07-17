@@ -314,7 +314,7 @@ cloudcannon orgs sites list
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 | `--page <n>` | Page number to fetch |
 | `--items <n>` | Number of items per page |
 | `--sort-by <field>` | Field name to sort by |
