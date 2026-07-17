@@ -13,7 +13,8 @@
 			"!package.json",
 			"!package-lock.json",
 			"!.github",
-			"!toolproof-tests/test-sites"
+			"!toolproof-tests/test-sites",
+			"!src/templates"
 		]
 	},
 	"formatter": {

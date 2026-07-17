@@ -284,35 +284,37 @@ cloudcannon orgs list
 
 ---
 
-### `orgs get --org <name|id|uuid>`
+### `orgs get [org]`
 
-Get an organisation by name, ID, or UUID.
+Get an organization by name, ID, or UUID. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs get --org my-org
+cloudcannon orgs get
 ```
 
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 
 ---
 
-### `orgs sites list --org <name|id|uuid>`
+### `orgs sites list [org]`
 
-List all sites for an organisation.
+List all sites for an organization. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs sites list --org my-org
+cloudcannon orgs sites list
 ```
 
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 | `--page <n>` | Page number to fetch |
 | `--items <n>` | Number of items per page |
 | `--sort-by <field>` | Field name to sort by |
@@ -321,19 +323,20 @@ cloudcannon orgs sites list --org my-org
 
 ---
 
-### `orgs inboxes list --org <name|id|uuid>`
+### `orgs inboxes list [org]`
 
-List all inboxes for an organisation.
+List all inboxes for an organization. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs inboxes list --org my-org
+cloudcannon orgs inboxes list
 ```
 
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 | `--page <n>` | Page number to fetch |
 | `--items <n>` | Number of items per page |
 | `--sort-by <field>` | Field name to sort by |
@@ -349,6 +352,31 @@ List all sites across all organisations.
 ```sh
 cloudcannon sites list
 ```
+
+---
+
+### `sites create [source]`
+
+Create a new site connected to a git repository. The `source` positional is a git remote URL with an optional `#branch` suffix.
+
+```sh
+# Interactive — prompts for org, name, and source
+cloudcannon sites create
+
+# Non-interactive — all fields provided
+cloudcannon sites create --org my-org --name my-site https://github.com/owner/repo.git#main
+```
+
+Run without all required fields to get interactive prompts for the missing pieces. If you belong to only one organization, it is selected automatically — use `--org` to override. The source URL defaults to your local `git remote get-url origin` if available. After creating the site, a link to open it in CloudCannon is printed.
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
+| `--name <string>` | The site name |
+
+Supported git hosts: `github.com`, `gitlab.com`, `bitbucket.org`.
 
 ---
 
