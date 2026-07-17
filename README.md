@@ -367,7 +367,7 @@ cloudcannon sites create
 cloudcannon sites create --org my-org --name my-site https://github.com/owner/repo.git#main
 ```
 
-Run without all required fields to get interactive prompts for the missing pieces. If you belong to only one organisation, it is selected automatically — use `--org` to override. The source URL defaults to your local `git remote get-url origin` if available. After creating the site, a link to open it in CloudCannon is printed.
+Run without all required fields to get interactive prompts for the missing pieces. If you belong to only one organization, it is selected automatically — use `--org` to override. The source URL defaults to your local `git remote get-url origin` if available. After creating the site, a link to open it in CloudCannon is printed.
 
 **Flags**
 
