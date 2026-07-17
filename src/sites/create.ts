@@ -90,7 +90,7 @@ async function promptOrg(client: CloudCannonClient, prefilled?: string): Promise
 	try {
 		const orgs = await client.orgs();
 		if (orgs.items.length === 0) {
-			console.error('No organisations found for this account.');
+			console.error('No organizations found for this account.');
 			return;
 		}
 
