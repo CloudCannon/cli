@@ -100,7 +100,7 @@ async function promptOrg(client: CloudCannonClient, prefilled?: string): Promise
 		}));
 
 		const choice = await p.select({
-			message: 'Select an organisation:',
+			message: 'Select an organization:',
 			options,
 		});
 		exitOnCancel(choice);
