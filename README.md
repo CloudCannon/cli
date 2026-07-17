@@ -286,7 +286,7 @@ cloudcannon orgs list
 
 ### `orgs get [org]`
 
-Get an organisation by name, ID, or UUID. If you belong to only one organisation, it is selected automatically.
+Get an organization by name, ID, or UUID. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs get --org my-org
