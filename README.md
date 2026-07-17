@@ -303,7 +303,7 @@ cloudcannon orgs get
 
 ### `orgs sites list [org]`
 
-List all sites for an organisation. If you belong to only one organisation, it is selected automatically.
+List all sites for an organization. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs sites list --org my-org
