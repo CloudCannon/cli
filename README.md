@@ -373,7 +373,7 @@ Run without all required fields to get interactive prompts for the missing piece
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 | `--name <string>` | The site name |
 
 Supported git hosts: `github.com`, `gitlab.com`, `bitbucket.org`.
