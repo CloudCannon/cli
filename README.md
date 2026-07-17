@@ -297,7 +297,7 @@ cloudcannon orgs get
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 
 ---
 
