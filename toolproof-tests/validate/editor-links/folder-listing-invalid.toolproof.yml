@@ -1,0 +1,26 @@
+name: cloudcannon validate --editor-links [folder-listing mistake]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        pages:
+          path: src/content/pages
+  - step: I have a "src/content/pages/index.md" file with the content {content}
+    content: |-
+      ---
+      title: Home
+      ---
+  - step: I have a ".cloudcannon/README.md" file with the content {content}
+    content: |-
+      - [Home](cloudcannon:collections/pages/index.md)
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --editor-links 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: editor links (1 checked)
+      ╎  error .cloudcannon/README.md
+      ╎    cloudcannon:collections/pages/index.md
+      ╎    "pages" is a collection, but "pages/index.md" is not a file in your repository. Editor links resolve the path as a real repository path, not relative to the collection — use the real path, or the "collections/pages:/edit?path=/…" form

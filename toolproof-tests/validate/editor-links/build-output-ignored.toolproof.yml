@@ -1,0 +1,24 @@
+name: cloudcannon validate --editor-links [build output ignored]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        pages:
+          path: src/content/pages
+  - step: I have a "dist/pages/index.html" file with the content {content}
+    content: |-
+      <html></html>
+  - step: I have a ".cloudcannon/README.md" file with the content {content}
+    content: |-
+      - [x](cloudcannon:collections/pages:/edit?collection=pages&path=%2Fdist%2Fpages%2Findex.html)
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --editor-links 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎✗ invalid: editor links (1 checked)
+      ╎  error .cloudcannon/README.md
+      ╎    cloudcannon:collections/pages:/edit?collection=pages&path=%2Fdist%2Fpages%2Findex.html
+      ╎    file not found: "/dist/pages/index.html"

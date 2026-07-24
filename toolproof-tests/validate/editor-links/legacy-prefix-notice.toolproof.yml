@@ -1,0 +1,21 @@
+name: cloudcannon validate --editor-links [legacy prefix notice]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        pages:
+          path: src/pages
+  - step: I have a ".cloudcannon/README.md" file with the content {content}
+    content: |-
+      - [old](cloudcannon:explore/src/pages/index.md)
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --editor-links 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎ℹ notices: editor links (1 checked)
+      ╎  notice .cloudcannon/README.md
+      ╎    cloudcannon:explore/src/pages/index.md
+      ╎    "explore/…" is a legacy editor-route prefix; prefer the "collections/<key>:/edit?path=/…" form

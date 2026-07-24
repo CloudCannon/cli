@@ -1,6 +1,7 @@
 import { relative, resolve } from 'node:path';
 import { type CommandContext, defineCommand } from 'citty';
 import { pathArg, text } from './utility.ts';
+import { validateEditorLinks } from './validate-editor-links.ts';
 import {
 	CONFIG_FILENAMES,
 	checkFile,
@@ -34,6 +35,11 @@ const args = {
 		default: false,
 		description: `Validate only ${text.em(ROUTING_PATH)}`,
 	},
+	'editor-links': {
+		type: 'boolean',
+		default: false,
+		description: 'Validate only the CloudCannon editor links in the config and README',
+	},
 	'configuration-path': {
 		type: 'string',
 		description: `Path to the CloudCannon configuration file, overrides ${text.em('PATH')} search`,
@@ -54,6 +60,13 @@ export const validateCommand = defineCommand({
 	args,
 	async run(ctx: CommandContext<typeof args>): Promise<void> {
 		const targetPath = resolve(ctx.args.path ?? '.');
+
+		if (ctx.args['editor-links'] && ctx.args.stdin) {
+			console.error(
+				`${text.em('--editor-links')} cannot be combined with ${text.em('--stdin')} — it needs the README and files on disk.`
+			);
+			process.exit(1);
+		}
 
 		if (ctx.args.stdin) {
 			const explicit = [
@@ -82,22 +95,30 @@ export const validateCommand = defineCommand({
 			return;
 		}
 
-		const none = !ctx.args.configuration && !ctx.args['initial-site-settings'] && !ctx.args.routing;
+		const none =
+			!ctx.args.configuration &&
+			!ctx.args['initial-site-settings'] &&
+			!ctx.args.routing &&
+			!ctx.args['editor-links'];
 		const doConfig = ctx.args.configuration || none;
 		const doSettings = ctx.args['initial-site-settings'] || none;
 		const doRouting = ctx.args.routing || none;
+		const doLinks = ctx.args['editor-links'] || none;
 
 		let allValid = true;
 
-		if (doConfig) {
-			const configPath = await findConfigFile(targetPath, ctx.args['configuration-path']);
+		let configPath: string | undefined;
+		if (doConfig || doLinks) {
+			configPath = await findConfigFile(targetPath, ctx.args['configuration-path']);
 
 			if (!configPath) {
 				const searched = ctx.args['configuration-path'] ?? CONFIG_FILENAMES.map(text.em).join(', ');
 				console.error(`No CloudCannon configuration file found. Searched: ${searched}`);
 				process.exit(1);
 			}
+		}
 
+		if (doConfig && configPath) {
 			const configDisplayName = relative(targetPath, configPath);
 			const parsedConfig = await readAndParseFile(configPath, configDisplayName);
 			if (!parsedConfig) {
@@ -125,6 +146,10 @@ export const validateCommand = defineCommand({
 		if (doRouting) {
 			const routingPath = resolve(targetPath, ROUTING_PATH);
 			allValid = (await checkFile(routingPath, validateRouting, targetPath, none)) && allValid;
+		}
+
+		if (doLinks && configPath) {
+			allValid = (await validateEditorLinks(targetPath, configPath)) && allValid;
 		}
 
 		if (!allValid) {
