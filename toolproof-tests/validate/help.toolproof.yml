@@ -18,6 +18,7 @@ steps:
       ╎              --configuration    Validate only the CloudCannon configuration file and any split configuration files (Default: false)
       ╎      --initial-site-settings    Validate only .cloudcannon/initial-site-settings.json (Default: false)
       ╎                    --routing    Validate only .cloudcannon/routing.json (Default: false)
+      ╎               --editor-links    Validate only the CloudCannon editor links in the config and README (Default: false)
       ╎  --configuration-path=<path>    Path to the CloudCannon configuration file, overrides PATH search
       ╎                      --stdin    Read from stdin instead of files on disk (Default: false)
       ╎

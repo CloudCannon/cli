@@ -26,3 +26,4 @@ steps:
     snapshot_content: |-
       ╎✓ valid: cloudcannon.config.yml
       ╎✓ valid: .cloudcannon/initial-site-settings.json
+      ╎✓ valid: editor links (none found)

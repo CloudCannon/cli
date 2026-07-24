@@ -13,3 +13,4 @@ steps:
   - snapshot: stdout
     snapshot_content: |-
       ╎✓ valid: cloudcannon.config.yml
+      ╎✓ valid: editor links (none found)

@@ -37,3 +37,4 @@ steps:
       ╎  $.collections_config.data: must have required property path
       ╎  $.collections_config.data.icon: unexpected value date_usage, allowed values: 3584 values (closest: data_usage)
       ╎  $._inputs.date.instance_value: unexpected value now, allowed values: UUID, NOW
+      ╎✓ valid: editor links (none found)

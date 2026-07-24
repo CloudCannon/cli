@@ -1,0 +1,28 @@
+name: cloudcannon validate --editor-links [editor not enabled warning]
+
+steps:
+  - step: I have a "cloudcannon.config.yml" file with the content {yaml}
+    yaml: |-
+      collections_config:
+        pages:
+          path: src/content/pages
+          _enabled_editors:
+            - visual
+  - step: I have a "src/content/pages/index.md" file with the content {content}
+    content: |-
+      ---
+      title: Home
+      ---
+  - step: I have a ".cloudcannon/README.md" file with the content {content}
+    content: |-
+      - [Home](cloudcannon:collections/pages:/edit?collection=pages&path=%2Fsrc%2Fcontent%2Fpages%2Findex.md&editor=data)
+  - ref: ../../core/run-cli.toolproof.yml
+  - step: I run {command}
+    command: |
+      npm -s run cloudcannon -- validate . --editor-links 2>&1 || true
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎! warnings: editor links (1 checked)
+      ╎  warning .cloudcannon/README.md
+      ╎    cloudcannon:collections/pages:/edit?collection=pages&path=%2Fsrc%2Fcontent%2Fpages%2Findex.md&editor=data
+      ╎    editor "data" is not in _enabled_editors for collection "pages" ("visual")
