@@ -6,6 +6,7 @@ import CloudCannonClient, {
 	type CloudCannonClientConfig,
 	type UserAccessKey,
 } from '@cloudcannon/sdk';
+import pkg from '../package.json' with { type: 'json' };
 import { printErrorJson, text } from './configure/utility.ts';
 
 function getWindowsDataDir(): string | undefined {
@@ -157,11 +158,12 @@ export async function getSdkClient(): Promise<CloudCannonClient> {
 		}
 	}
 	const apiKey = process.env.CLOUDCANNON_API_KEY;
+	const client = `cli/${pkg.version}`;
 	let options: CloudCannonClientConfig;
 	if (userAccessKey) {
-		options = { userAccessKey: userAccessKey };
+		options = { userAccessKey: userAccessKey, client };
 	} else if (apiKey) {
-		options = { key: apiKey };
+		options = { key: apiKey, client };
 	} else {
 		console.log(
 			`You must log in to run this command. Either run ${text.em('cloudcannon login')} to authorise with your CloudCannon account, or provide an API key through the CLOUDCANNON_API_KEY environment variable.`
