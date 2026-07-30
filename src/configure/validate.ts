@@ -106,11 +106,8 @@ export const validateCommand = defineCommand({
 			const splitConfigFiles = await findSplitConfigFiles(configPath, parsedConfig, targetPath);
 			for (let i = 0; i < splitConfigFiles.length; i++) {
 				allValid =
-					(await checkFile(
-						splitConfigFiles[i].filePath,
-						splitConfigFiles[i].name,
-						targetPath
-					)) && allValid;
+					(await checkFile(splitConfigFiles[i].filePath, splitConfigFiles[i].name, targetPath)) &&
+					allValid;
 			}
 		}
 
