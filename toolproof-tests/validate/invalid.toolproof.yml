@@ -32,8 +32,8 @@ steps:
       ╎✗ invalid: cloudcannon.config.yml
       ╎  $: unexpected property _select_datasets
       ╎  $.version: value newest should be latest
-      ╎  $.collections_config.posts.icon: unexpected value nature_person, allowed values: 3584 values (closest: nature_people)
-      ╎  $.collections_config.posts.create: unexpected type number, allowed types: object
+      ╎  $._inputs.date.instance_value: unexpected value now, allowed values: UUID, NOW
       ╎  $.collections_config.data: must have required property path
       ╎  $.collections_config.data.icon: unexpected value date_usage, allowed values: 3584 values (closest: data_usage)
-      ╎  $._inputs.date.instance_value: unexpected value now, allowed values: UUID, NOW
+      ╎  $.collections_config.posts.icon: unexpected value nature_person, allowed values: 3584 values (closest: nature_people)
+      ╎  $.collections_config.posts.create: unexpected type number, allowed types: object

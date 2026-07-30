@@ -11,6 +11,7 @@ steps:
             blockquote: false
             bold: true
             format:
+              - h1
             italic: true
             link: true
             strike: false
@@ -26,4 +27,4 @@ steps:
   - snapshot: stdout
     snapshot_content: |-
       ╎✗ invalid: cloudcannon.config.yml
-      ╎  $._inputs.text.options.format: unexpected type null, allowed types: string
+      ╎  $._inputs.text.options.format: unexpected type array, allowed types: string, boolean

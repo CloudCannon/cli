@@ -11,9 +11,6 @@ import {
 	readAndParseFile,
 	readAndParseStdin,
 	SETTINGS_PATH,
-	validateConfig,
-	validateRouting,
-	validateSettings,
 } from './validator.ts';
 
 const args = {
@@ -68,14 +65,14 @@ export const validateCommand = defineCommand({
 				process.exit(1);
 			}
 
-			const validator = ctx.args.configuration
-				? validateConfig
+			const name = ctx.args.configuration
+				? 'global'
 				: ctx.args['initial-site-settings']
-					? validateSettings
-					: validateRouting;
+					? 'settings'
+					: 'routing';
 
 			const parsed = await readAndParseStdin();
-			if (!parsed || !checkParsed('<stdin>', validator, parsed)) {
+			if (!parsed || !(await checkParsed('<stdin>', name, parsed))) {
 				process.exit(1);
 			}
 
@@ -104,27 +101,24 @@ export const validateCommand = defineCommand({
 				process.exit(1);
 			}
 
-			allValid = checkParsed(configDisplayName, validateConfig, parsedConfig) && allValid;
+			allValid = (await checkParsed(configDisplayName, 'global', parsedConfig)) && allValid;
 
 			const splitConfigFiles = await findSplitConfigFiles(configPath, parsedConfig, targetPath);
 			for (let i = 0; i < splitConfigFiles.length; i++) {
 				allValid =
-					(await checkFile(
-						splitConfigFiles[i].filePath,
-						splitConfigFiles[i].validate,
-						targetPath
-					)) && allValid;
+					(await checkFile(splitConfigFiles[i].filePath, splitConfigFiles[i].name, targetPath)) &&
+					allValid;
 			}
 		}
 
 		if (doSettings) {
 			const settingsPath = resolve(targetPath, SETTINGS_PATH);
-			allValid = (await checkFile(settingsPath, validateSettings, targetPath, none)) && allValid;
+			allValid = (await checkFile(settingsPath, 'settings', targetPath, none)) && allValid;
 		}
 
 		if (doRouting) {
 			const routingPath = resolve(targetPath, ROUTING_PATH);
-			allValid = (await checkFile(routingPath, validateRouting, targetPath, none)) && allValid;
+			allValid = (await checkFile(routingPath, 'routing', targetPath, none)) && allValid;
 		}
 
 		if (!allValid) {

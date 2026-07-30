@@ -7,7 +7,7 @@ steps:
         team:
           path: src/content/team
           preview:
-            image:
+            image: 1
   - ref: ../core/run-cli.toolproof.yml
   - step: I run {command}
     command: |
@@ -15,4 +15,4 @@ steps:
   - snapshot: stdout
     snapshot_content: |-
       ╎✗ invalid: cloudcannon.config.yml
-      ╎  $.collections_config.team.preview.image: unexpected type null, allowed types: array, string, boolean (false)
+      ╎  $.collections_config.team.preview.image: unexpected type number, allowed types: array, object, string, boolean (false)
