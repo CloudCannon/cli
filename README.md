@@ -10,6 +10,7 @@ Command line interface for the CloudCannon CMS.
 - Detects your static site generator automatically, works with Astro, Bridgetown, Docusaurus, Eleventy, Gatsby, Hexo, Hugo, Jekyll, Lume, MkDocs, Next.js, Nuxt, Sphinx, SvelteKit.
 - Suggests collections, build commands, and output paths based on your project.
 - Validates CloudCannon configuration files against the schema, including split configuration files.
+- Runs a local dev server that loads the CloudCannon app against your local files, with live sync in both directions.
 - Manage organisations, sites, builds, files, and form submissions via the CloudCannon API.
 
 ## Install
@@ -241,6 +242,28 @@ cat cloudcannon.config.yml | cloudcannon validate --stdin --configuration
 
 ---
 
+### `dev [outputPath]`
+
+Run a local dev server that loads the CloudCannon app in your browser, pointed at your local site files. This lets you preview and edit your site in CloudCannon without deploying.
+
+File changes on disk are pushed to the app in real time, and edits made in the app are written back to disk.
+
+```sh
+cloudcannon dev output
+cloudcannon dev ./_site --port 3000
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--port <port>` | Port to run the dev server on | `10101` |
+| `--live-sync` / `--no-live-sync` | Push disk file changes to the app | `true` |
+| `--app-sync` / `--no-app-sync` | Accept app-initiated file writes (uploads, moves, deletes) to disk | `true` |
+| `--verbose` | Log every request (method, path, status, duration) | `false` |
+
+---
+
 ### `orgs list`
 
 List all organisations.
@@ -261,35 +284,37 @@ cloudcannon orgs list
 
 ---
 
-### `orgs get --org <name|id|uuid>`
+### `orgs get [org]`
 
-Get an organisation by name, ID, or UUID.
+Get an organization by name, ID, or UUID. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs get --org my-org
+cloudcannon orgs get
 ```
 
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 
 ---
 
-### `orgs sites list --org <name|id|uuid>`
+### `orgs sites list [org]`
 
-List all sites for an organisation.
+List all sites for an organization. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs sites list --org my-org
+cloudcannon orgs sites list
 ```
 
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 | `--page <n>` | Page number to fetch |
 | `--items <n>` | Number of items per page |
 | `--sort-by <field>` | Field name to sort by |
@@ -298,19 +323,20 @@ cloudcannon orgs sites list --org my-org
 
 ---
 
-### `orgs inboxes list --org <name|id|uuid>`
+### `orgs inboxes list [org]`
 
-List all inboxes for an organisation.
+List all inboxes for an organization. If you belong to only one organization, it is selected automatically.
 
 ```sh
 cloudcannon orgs inboxes list --org my-org
+cloudcannon orgs inboxes list
 ```
 
 **Flags**
 
 | Flag | Description |
 |---|---|
-| `--org <name\|id\|uuid>` | The organisation name, ID, or UUID (required) |
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 | `--page <n>` | Page number to fetch |
 | `--items <n>` | Number of items per page |
 | `--sort-by <field>` | Field name to sort by |
@@ -326,6 +352,31 @@ List all sites across all organisations.
 ```sh
 cloudcannon sites list
 ```
+
+---
+
+### `sites create [source]`
+
+Create a new site connected to a git repository. The `source` positional is a git remote URL with an optional `#branch` suffix.
+
+```sh
+# Interactive — prompts for org, name, and source
+cloudcannon sites create
+
+# Non-interactive — all fields provided
+cloudcannon sites create --org my-org --name my-site https://github.com/owner/repo.git#main
+```
+
+Run without all required fields to get interactive prompts for the missing pieces. If you belong to only one organization, it is selected automatically — use `--org` to override. The source URL defaults to your local `git remote get-url origin` if available. After creating the site, a link to open it in CloudCannon is printed.
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
+| `--name <string>` | The site name |
+
+Supported git hosts: `github.com`, `gitlab.com`, `bitbucket.org`.
 
 ---
 
@@ -430,6 +481,7 @@ Upload a file to a site.
 
 ```sh
 cloudcannon sites files upload --site my-site ./local-file.html /uploaded-file.html
+cloudcannon sites files upload --site my-site ./local-file.html /uploaded-file.html --allow-overwrite
 ```
 
 **Flags**
@@ -438,7 +490,132 @@ cloudcannon sites files upload --site my-site ./local-file.html /uploaded-file.h
 |---|---|---|
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 | `--type <mime>` | MIME type of the file | |
-| `--overwrite` | Overwrite if the file already exists | `false` |
+| `--allow-overwrite` | Overwrite the destination if it already exists | `false` |
+
+---
+
+### `sites files move --site <name|id|uuid|domain> [src] [dest]`
+
+Move a file within a site editing session.
+
+```sh
+cloudcannon sites files move --site my-site content/old.md content/new.md
+cloudcannon sites files move --site my-site content/old.md content/new.md --allow-overwrite
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| `--allow-overwrite` | Overwrite the destination if it already exists | `false` |
+
+---
+
+### `sites files clone --site <name|id|uuid|domain> [src] [dest]`
+
+Clone a file to a new path within a site editing session. The source file is left unchanged.
+
+```sh
+cloudcannon sites files clone --site my-site content/post.md content/post-copy.md
+cloudcannon sites files clone --site my-site content/post.md content/post-copy.md --allow-overwrite
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| `--allow-overwrite` | Overwrite the destination if it already exists | `false` |
+
+---
+
+### `sites files delete --site <name|id|uuid|domain> [target]...`
+
+Delete one or more files within a site editing session. The files are removed from the repository on commit.
+
+```sh
+cloudcannon sites files delete --site my-site content/old.md
+cloudcannon sites files delete --site my-site content/a.md content/b.md --discard-unsaved
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| `--discard-unsaved` | Discard any unsaved edits to the files | `false` |
+
+---
+
+### `sites files restore --site <name|id|uuid|domain> [target]...`
+
+Restore one or more deleted files within a site editing session, removing the pending delete entries.
+
+```sh
+cloudcannon sites files restore --site my-site content/old.md
+cloudcannon sites files restore --site my-site content/a.md content/b.md
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+
+---
+
+### `sites files discard --site <name|id|uuid|domain> [target]...`
+
+Discard one or more session files from a site editing session, permanently deleting their pending edits.
+
+```sh
+cloudcannon sites files discard --site my-site content/old.md
+cloudcannon sites files discard --site my-site content/a.md content/b.md
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+
+---
+
+### `sites files list-edits --site <name|id|uuid|domain>`
+
+List pending edits on the site's current editing session.
+
+```sh
+cloudcannon sites files list-edits --site my-site
+cloudcannon sites files list-edits --site my-site --verbose
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| `--verbose` | Print the full objects returned by the API | `false` |
+
+---
+
+### `sites files commit --site <name|id|uuid|domain> [path]...`
+
+Commit a site editing session, pushing changes to the connected repository.
+
+```sh
+cloudcannon sites files commit --site my-site --all
+cloudcannon sites files commit --site my-site content/a.md content/b.md --message "Publish posts"
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| `--all` | Commit all files in the editing session | `false` |
+| `--message <msg>` | Commit message | |
 
 ---
 

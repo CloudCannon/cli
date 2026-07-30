@@ -6,6 +6,7 @@ import pkg from '../package.json' with { type: 'json' };
 import { buildsCommand } from './builds.ts';
 import { validateCommand } from './configure/validate.ts';
 import { configureCommand } from './configure.ts';
+import { devCommand } from './dev.ts';
 import { inboxesCommand } from './inboxes.ts';
 import { loginCommand } from './login.ts';
 import { logoutCommand } from './logout.ts';
@@ -21,6 +22,7 @@ const main = defineCommand({
 	subCommands: {
 		builds: buildsCommand,
 		configure: configureCommand,
+		dev: devCommand,
 		inboxes: inboxesCommand,
 		orgs: orgsCommand,
 		sites: sitesCommand,

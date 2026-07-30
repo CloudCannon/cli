@@ -26,6 +26,7 @@ export async function resolveSiteUuid(
 	}
 
 	try {
+		const candidateSites = [];
 		const orgs = await client.orgs();
 		for (const org of orgs.items) {
 			if (!org.uuid) {
@@ -35,19 +36,21 @@ export async function resolveSiteUuid(
 				filters,
 			});
 
-			if (sites.items.length > 1) {
-				console.error(`Site identifier "${identifier}" is ambiguous. Potential matches are:`);
-				printJson(sites.items);
-				return;
-			}
-
-			if (sites.items.length === 0) {
-				console.error(`No site found matching "${identifier}".`);
-				return;
-			}
-
-			return sites.items[0].uuid;
+			candidateSites.push(...sites.items);
 		}
+
+		if (candidateSites.length > 1) {
+			console.error(`Site identifier "${identifier}" is ambiguous. Potential matches are:`);
+			printJson(candidateSites);
+			return;
+		}
+
+		if (candidateSites.length === 0) {
+			console.error(`No site found matching "${identifier}".`);
+			return;
+		}
+
+		return candidateSites[0].uuid;
 	} catch (err: unknown) {
 		handleAPIError(err);
 		return;

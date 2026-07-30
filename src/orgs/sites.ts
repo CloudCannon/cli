@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
 import { buildListOptions, listFlagDefs } from '../list-options.ts';
 import { getSdkClient, handleAPIError } from '../sdk-client.ts';
-import { resolveOrgUuid } from './resolve.ts';
+import { resolveOrg } from './resolve.ts';
 
 export const orgsSitesListCommand = defineCommand({
 	meta: {
@@ -15,21 +15,20 @@ export const orgsSitesListCommand = defineCommand({
 			type: 'string',
 			description: 'The organisation name, ID, or UUID',
 			valueHint: 'name|id|uuid',
-			required: true,
 		},
 		...listFlagDefs,
 	},
 	async run(ctx): Promise<void> {
 		const client = await getSdkClient();
-		const orgUuid = await resolveOrgUuid(client, ctx.args.org);
-		if (!orgUuid) {
+		const org = await resolveOrg(client, ctx.args.org as string | undefined);
+		if (!org) {
 			process.exitCode = 1;
 			return;
 		}
-		const org = client.org(orgUuid);
+		const orgClient = client.org(org.uuid);
 		const options = buildListOptions(ctx.args);
 		try {
-			const sites = await org.sites(options as ListOrgSitesOptions);
+			const sites = await orgClient.sites(options as ListOrgSitesOptions);
 			printJson({
 				current_page: sites.current_page,
 				total_pages: sites.total_pages,

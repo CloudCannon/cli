@@ -2,3 +2,5 @@ dist/
 node_modules/
 lcov.info
 tmp/
+.env*
+test_site*
