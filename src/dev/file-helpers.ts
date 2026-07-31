@@ -115,18 +115,13 @@ export async function getFileInfo(path: string): Promise<FileInfo> {
 	return { content, file_size: stats.size, last_modified: stats.mtime.toISOString() };
 }
 
-export async function getGitignorePatterns(
-	cwd: string,
-	outputPath: string
-): Promise<Ignore | undefined> {
-	const outputDir = relative(cwd, outputPath);
+export async function getGitignorePatterns(cwd: string): Promise<Ignore | undefined> {
 	try {
 		const content = await readFile(join(cwd, '.gitignore'), 'utf-8');
 		const patterns = content
 			.split('\n')
 			.map((line) => line.trim())
 			.filter((line) => line && !line.startsWith('#'));
-		patterns.push(`!${outputDir}`);
 		return ignore().add(patterns);
 	} catch {
 		return;
@@ -135,19 +130,27 @@ export async function getGitignorePatterns(
 
 export async function listFiles(cwd: string, outputPath: string): Promise<string[]> {
 	const files: string[] = [];
-	const gitIgnore = await getGitignorePatterns(cwd, outputPath);
+	const gitIgnore = await getGitignorePatterns(cwd);
 
 	async function walk(currentPath: string): Promise<void> {
 		const entries = await readdir(currentPath, { withFileTypes: true });
 		for (const entry of entries) {
 			const fullPath = join(currentPath, entry.name);
 			const relPath = relative(cwd, fullPath);
-			if (relPath && gitIgnore?.ignores(relPath)) {
+			if (!relPath || relPath === '.git') {
 				continue;
 			}
+
+			const isIgnored = gitIgnore?.ignores(relPath) && !fullPath.startsWith(outputPath);
 			if (entry.isFile()) {
+				if (isIgnored) {
+					continue;
+				}
 				files.push(fullPath);
 			} else if (entry.isDirectory()) {
+				if (isIgnored && !outputPath.startsWith(fullPath)) {
+					continue;
+				}
 				await walk(fullPath);
 			}
 		}

@@ -274,7 +274,7 @@ async function handleDeletePathRequest(cwd: string, req: IncomingMessage): Promi
 }
 
 async function startFileWatcher(cwd: string, outputPath: string): Promise<FSWatcher> {
-	const gitIgnore = await getGitignorePatterns(cwd, outputPath);
+	const gitIgnore = await getGitignorePatterns(cwd);
 
 	const watcher = chokidar.watch(cwd, {
 		ignoreInitial: true,
@@ -286,6 +286,10 @@ async function startFileWatcher(cwd: string, outputPath: string): Promise<FSWatc
 
 			const relativePath = relative(cwd, path);
 			if (!relativePath || !gitIgnore) {
+				return false;
+			}
+
+			if (path.startsWith(outputPath) || outputPath.startsWith(path)) {
 				return false;
 			}
 
