@@ -121,10 +121,6 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 			type: 'boolean',
 			description: 'Lock the site from building',
 		},
-		'uses-i18n': {
-			type: 'boolean',
-			description: 'Enable i18n support',
-		},
 		'default-locale': {
 			type: 'string',
 			description: 'Default locale for i18n',
@@ -184,9 +180,6 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 		}
 		if (ctx.args.buildingLocked !== undefined) {
 			options.building_locked = !!ctx.args.buildingLocked;
-		}
-		if (ctx.args.usesI18n !== undefined) {
-			options.uses_i18n = !!ctx.args.usesI18n;
 		}
 		if (typeof ctx.args.defaultLocale === 'string') {
 			options.default_locale = ctx.args.defaultLocale;
