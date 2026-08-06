@@ -426,7 +426,7 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 |---|---|
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 | `--ssg <name>` | Static site generator name |
-| `--building-locked <true\|false>` | Lock the site from building |
+| `--building-locked` / `--no-building-locked` | Lock the site from building |
 | `--default-locale <locale>` | Default locale for i18n |
 | `--install-command <cmd>` | Override install command |
 | `--build-command <cmd>` | Override build command |
@@ -436,8 +436,8 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 | `--node-version <version>` | Node version |
 | `--ruby-version <version>` | Ruby version |
 | `--deno-version <version>` | Deno version |
-| `--preserve-output <true\|false>` | Preserve previous output |
-| `--include-git <true\|false>` | Include git history in build |
+| `--preserve-output` / `--no-preserve-output` | Preserve previous output |
+| `--include-git` / `--no-include-git` | Include git history in build |
 
 ---
 

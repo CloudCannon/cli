@@ -30,12 +30,12 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "tsc && cp -R ./src/templates/ ./dist/templates",
+		"build": "tsc && cp -R ./src/templates/ ./dist/templates && node scripts/generate-docs.ts",
 		"test": "node --test",
 		"test:watch": "node --test --watch",
 		"test:coverage": "node --test --test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info",
 		"test:toolproof": "toolproof --placeholders dist_dir=$PWD/dist test_sites=$PWD/toolproof-tests/test-sites",
-		"lint": "biome check && tsc --noEmit",
+		"lint": "biome check && tsc --noEmit && tsc -p tests && tsc -p scripts",
 		"lint:fix": "biome check --fix"
 	},
 	"author": "CloudCannon <support@cloudcannon.com>",
