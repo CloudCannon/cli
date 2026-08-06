@@ -2,6 +2,7 @@ import type { BuildConfiguration } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from './configure/utility.ts';
 import { getSdkClient, handleAPIError } from './sdk-client.ts';
+import { parseEnvironmentVariables, upsertEnvironmentVariable } from './sites/build-config.ts';
 import { sitesBuildsCommand } from './sites/builds.ts';
 import { sitesCreateCommand } from './sites/create.ts';
 import { sitesFilesCommand } from './sites/files.ts';
@@ -174,9 +175,29 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 			type: 'boolean',
 			description: 'Include git history in build',
 		},
+		'env-name': {
+			type: 'string',
+			description: 'Environment variable name to set or update',
+			valueHint: 'name',
+		},
+		'env-value': {
+			type: 'string',
+			description: 'Environment variable value to set or update',
+			valueHint: 'value',
+		},
 	},
 	async run(ctx): Promise<void> {
 		const client = await getSdkClient();
+
+		const envName = typeof ctx.args.envName === 'string' ? ctx.args.envName : undefined;
+		const envValueProvided = ctx.args.envValue !== undefined;
+		const envValue = typeof ctx.args.envValue === 'string' ? ctx.args.envValue : undefined;
+
+		if ((envName !== undefined) !== envValueProvided) {
+			console.error('Both --env-name and --env-value must be provided together');
+			process.exitCode = 1;
+			return;
+		}
 
 		const options: BuildConfiguration = {};
 		if (ctx.args.ssg !== undefined) {
@@ -224,14 +245,30 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 			compile.includeGit = !!ctx.args.includeGit;
 		}
 
-		if (Object.keys(compile).length > 0) {
-			options.compile = compile as BuildConfiguration['compile'];
-		}
-
 		const siteUuid = await resolveSiteUuid(client, ctx.args.site);
 		if (!siteUuid) {
 			process.exitCode = 1;
 			return;
+		}
+
+		if (envName !== undefined && envValue !== undefined) {
+			try {
+				const currentSite = await client.site(siteUuid).get();
+				const existing = parseEnvironmentVariables(currentSite.build_configuration);
+				compile.environment_variables = upsertEnvironmentVariable(
+					existing,
+					envName,
+					envValue
+				) as NonNullable<BuildConfiguration['compile']>['environment_variables'];
+			} catch (err: unknown) {
+				handleAPIError(err);
+				process.exitCode = 1;
+				return;
+			}
+		}
+
+		if (Object.keys(compile).length > 0) {
+			options.compile = compile as BuildConfiguration['compile'];
 		}
 
 		try {
