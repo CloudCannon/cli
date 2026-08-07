@@ -20,7 +20,8 @@
 		"email": "support@cloudcannon.com"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./documentation.json": "./dist/documentation.json"
 	},
 	"main": "dist/index.js",
 	"bin": {
