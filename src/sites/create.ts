@@ -90,7 +90,7 @@ async function promptOrg(client: CloudCannonClient, prefilled?: string): Promise
 	try {
 		const orgs = await client.orgs();
 		if (orgs.items.length === 0) {
-			console.error('No organizations found for this account.');
+			console.error('No Organizations found for this account.');
 			return;
 		}
 
@@ -100,7 +100,7 @@ async function promptOrg(client: CloudCannonClient, prefilled?: string): Promise
 		}));
 
 		const choice = await p.select({
-			message: 'Select an organization:',
+			message: 'Select an Organization:',
 			options,
 		});
 		exitOnCancel(choice);
@@ -127,7 +127,7 @@ export const sitesCreateCommand = defineCommand({
 		},
 		org: {
 			type: 'string',
-			description: 'The organization name, ID, or UUID',
+			description: 'The Organization name, ID, or UUID',
 			valueHint: 'name|id|uuid',
 		},
 		name: {
