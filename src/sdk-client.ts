@@ -177,7 +177,7 @@ export async function getSdkClient(): Promise<CloudCannonClient> {
 		options = { key: apiKey, client };
 	} else {
 		console.log(
-			`You must log in to run this command. Either run ${text.em('cloudcannon login')} to authorise with your CloudCannon account, or provide an API key through the CLOUDCANNON_API_KEY environment variable.`
+			`You must log in to run this command. Either run ${text.em('cloudcannon login')} to authorize with your CloudCannon account, or provide an API key through the CLOUDCANNON_API_KEY environment variable.`
 		);
 		process.exit(1);
 	}
