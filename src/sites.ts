@@ -16,7 +16,7 @@ import { resolveSiteUuid } from './sites/resolve.ts';
 export const sitesListCommand = defineCommand({
 	meta: {
 		name: 'list',
-		description: 'List all sites across all organizations.',
+		description: 'List all sites across all Organizations.',
 	},
 	async run(): Promise<void> {
 		const client = await getSdkClient();

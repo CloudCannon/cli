@@ -8,12 +8,12 @@ import { resolveOrg } from './resolve.ts';
 export const orgsSitesListCommand = defineCommand({
 	meta: {
 		name: 'list',
-		description: 'List all sites for an organization.',
+		description: 'List all sites for an Organization.',
 	},
 	args: {
 		org: {
 			type: 'string',
-			description: 'The organization name, ID, or UUID',
+			description: 'The Organization name, ID, or UUID',
 			valueHint: 'name|id|uuid',
 		},
 		...listFlagDefs,
@@ -45,7 +45,7 @@ export const orgsSitesListCommand = defineCommand({
 export const orgsSitesCommand = defineCommand({
 	meta: {
 		name: 'sites',
-		description: 'Manage sites for an organization.',
+		description: 'Manage sites for an Organization.',
 	},
 	subCommands: {
 		list: orgsSitesListCommand,

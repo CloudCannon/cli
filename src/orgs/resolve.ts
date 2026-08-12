@@ -50,7 +50,7 @@ export async function resolveOrg(
 		}
 
 		if (orgs.items.length === 0) {
-			console.error(`No organization found matching "${identifier}".`);
+			console.error(`No Organization found matching "${identifier}".`);
 			return;
 		}
 
