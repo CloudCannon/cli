@@ -100,13 +100,24 @@ export function handleAPIError(err: unknown): void {
 	}
 }
 
+const ACCESS_KEY_ID_PATTERN = /^ccu_[A-Za-z0-9]{36}$/;
+const LEGACY_ACCESS_KEY_ID_PATTERN = /^ccu_[A-Za-z0-9_-]{32}$/;
+const STRUCTURED_SECRET_PATTERN = /^ccs_[A-Za-z0-9]{36}$/;
+const LEGACY_SECRET_PATTERN = /^[A-Za-z0-9+/]{43}=$/;
+
 export function validateUserAccessKey(accessKey: UserAccessKey): boolean {
-	if (!/ccu_[a-zA-z0-9=_-]{24}/.test(accessKey.id)) {
+	if (
+		!ACCESS_KEY_ID_PATTERN.test(accessKey.id) &&
+		!LEGACY_ACCESS_KEY_ID_PATTERN.test(accessKey.id)
+	) {
 		console.error("Error: Access key id is invalid. Please check it's correct and try again.");
 		return false;
 	}
 
-	if (!/[a-zA-z0-9=+/]{32}/.test(accessKey.secret)) {
+	if (
+		!STRUCTURED_SECRET_PATTERN.test(accessKey.secret) &&
+		!LEGACY_SECRET_PATTERN.test(accessKey.secret)
+	) {
 		console.error("Error: Access key secret is invalid. Please check it's correct and try again.");
 		return false;
 	}
