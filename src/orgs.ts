@@ -10,7 +10,7 @@ import { getSdkClient, handleAPIError } from './sdk-client.ts';
 export const orgsListCommand = defineCommand({
 	meta: {
 		name: 'list',
-		description: 'List all organisations.',
+		description: 'List all organizations.',
 	},
 	args: listFlagDefs,
 	async run(ctx): Promise<void> {
@@ -34,12 +34,12 @@ export const orgsListCommand = defineCommand({
 export const orgsGetCommand = defineCommand({
 	meta: {
 		name: 'get',
-		description: 'Get an organisation by name, ID, or UUID.',
+		description: 'Get an organization by name, ID, or UUID.',
 	},
 	args: {
 		org: {
 			type: 'string',
-			description: 'The organisation name, ID, or UUID',
+			description: 'The organization name, ID, or UUID',
 			valueHint: 'name|id|uuid',
 		},
 	},
@@ -57,7 +57,7 @@ export const orgsGetCommand = defineCommand({
 export const orgsCommand = defineCommand({
 	meta: {
 		name: 'orgs',
-		description: 'Manage CloudCannon organisations.',
+		description: 'Manage CloudCannon organizations.',
 	},
 	subCommands: {
 		list: orgsListCommand,

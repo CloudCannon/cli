@@ -157,7 +157,7 @@ export const modeArg = {
 
 export function exitOnCancel<T>(value: T | symbol): asserts value is T {
 	if (isCancel(value)) {
-		cancel('Operation cancelled.');
+		cancel('Operation canceled.');
 		process.exit(0);
 	}
 }

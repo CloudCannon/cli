@@ -8,12 +8,12 @@ import { resolveOrg } from './resolve.ts';
 export const orgsInboxesListCommand = defineCommand({
 	meta: {
 		name: 'list',
-		description: 'List all inboxes for an organisation.',
+		description: 'List all inboxes for an organization.',
 	},
 	args: {
 		org: {
 			type: 'string',
-			description: 'The organisation name, ID, or UUID',
+			description: 'The organization name, ID, or UUID',
 			valueHint: 'name|id|uuid',
 		},
 		...listFlagDefs,
@@ -45,7 +45,7 @@ export const orgsInboxesListCommand = defineCommand({
 export const orgsInboxesCommand = defineCommand({
 	meta: {
 		name: 'inboxes',
-		description: 'Manage inboxes for an organisation.',
+		description: 'Manage inboxes for an organization.',
 	},
 	subCommands: {
 		list: orgsInboxesListCommand,

@@ -4,7 +4,7 @@ import { getSdkClient, handleAPIError } from './sdk-client.ts';
 export const buildsPrintLogsCommand = defineCommand({
 	meta: {
 		name: 'print-logs',
-		description: 'Prints the logs for a build.',
+		description: 'Print the logs for a build.',
 	},
 	args: {
 		build: {
