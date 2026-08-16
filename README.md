@@ -355,6 +355,55 @@ cloudcannon sites list
 
 ---
 
+### `sites status`
+
+Show the latest sync/build status for sites. By default, prints a JSON array of status rows. Use `--format` for human-readable or custom output.
+
+Each site is reported as one of: `No New Build`, `Syncing`, `Building`, `Built`, or `Failed`. “Today” is the local calendar day of the machine running the CLI.
+
+```sh
+# JSON (default)
+cloudcannon sites status
+cloudcannon sites status --branch=production
+
+# Presets
+cloudcannon sites status --format lines
+cloudcannon sites status --format table
+cloudcannon sites status --format csv
+
+# Custom template
+cloudcannon sites status --format '{site_name}: {status}'
+cloudcannon sites status --format '{site_name}\t{branch}\t{status}'
+
+# Filter and watch
+cloudcannon sites status --org my-org --branch=production --match='Today Cash'
+cloudcannon sites status --branch=production --format lines --watch
+cloudcannon sites status --watch --interval=5 --format table
+```
+
+**Flags**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--branch <name>` | Only include sites syncing from this git branch | |
+| `--match <regex>` | Case-insensitive regex against site name, UUID, ID, domain, stable domain, or branch | |
+| `--org <name\|id\|uuid>` | Limit to one Organization; omit to scan all Organizations | |
+| `--format <preset\|template>` | Output format (see below). Omit for JSON | |
+| `--watch` | Refresh the filtered status list until interrupted | `false` |
+| `--interval <seconds>` | Watch refresh interval in seconds | `10` |
+
+**`--format` values**
+
+| Value | Output |
+|---|---|
+| *(omitted)* | JSON array of `{ site_name, uuid, id, branch, status }` |
+| `lines` | `Site Name: Status` (duplicate names become `Site Name (branch): Status`) |
+| `table` | Aligned columns: `SITE_NAME`, `BRANCH`, `STATUS` |
+| `csv` | CSV with header row (`site_name,uuid,id,branch,status`) |
+| *template* | Named placeholders: `{site_name}`, `{uuid}`, `{id}`, `{branch}`, `{status}`. Use `{{` / `}}` for literal braces. Unknown placeholders exit with an error. |
+
+---
+
 ### `sites create [source]`
 
 Create a new site connected to a git repository. The `source` positional is a git remote URL with an optional `#branch` suffix.
