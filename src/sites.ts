@@ -245,13 +245,13 @@ export const sitesUpdateBuildConfigCommand = defineCommand({
 						continue;
 					}
 
-					const [key, value] = part.split('=');
-					if (typeof key === 'undefined' || typeof value === 'undefined') {
+					const match = /^(?<key>[^=]+)=(?<value>.*)$/.exec(part);
+					if (!match?.groups) {
 						console.error(text.bad(`Error: Unable to parse environment variable ${part}`));
 						process.exitCode = 1;
 						return;
 					}
-					envVars.push({ key, value });
+					envVars.push({ key: match.groups.key, value: match.groups.value });
 				}
 				compile.environment_variables = envVars;
 			}

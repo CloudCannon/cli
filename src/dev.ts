@@ -14,7 +14,7 @@ const args = {
 		type: 'string',
 		description: 'The IP address for the dev server to listen on.',
 		default: '127.0.0.1',
-		valueHint: 'port',
+		valueHint: 'host',
 	},
 	port: {
 		type: 'string',

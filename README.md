@@ -257,6 +257,7 @@ cloudcannon dev ./_site --port 3000
 
 | Flag | Description | Default |
 |---|---|---|
+| `--host <host>` | The IP address for the dev server to listen on | `127.0.0.1` |
 | `--port <port>` | Port to run the dev server on | `10101` |
 | `--live-sync` / `--no-live-sync` | Push disk file changes to the app | `true` |
 | `--app-sync` / `--no-app-sync` | Accept app-initiated file writes (uploads, moves, deletes) to disk | `true` |
@@ -438,6 +439,25 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 | `--deno-version <version>` | Deno version |
 | `--preserve-output` / `--no-preserve-output` | Preserve previous output |
 | `--include-git` / `--no-include-git` | Include git history in build |
+| `--environment-variables <key=value>` | Comma-separated environment variables |
+
+`--environment-variables` accepts a comma-separated list of `key=value` pairs:
+
+```sh
+cloudcannon sites update-build-config --site my-site --environment-variables "NODE_ENV=production,API_KEY=secret"
+```
+
+The `...` token inserts the site's existing environment variables in place, so you can add to them rather than replace them:
+
+```sh
+cloudcannon sites update-build-config --site my-site --environment-variables "API_KEY=secret,..."
+```
+
+Pass an empty string to clear all environment variables:
+
+```sh
+cloudcannon sites update-build-config --site my-site --environment-variables ""
+```
 
 ---
 
