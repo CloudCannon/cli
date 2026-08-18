@@ -17,8 +17,8 @@ export async function readRequestBodyToJSON(req: IncomingMessage): Promise<unkno
 	return JSON.parse(buffer.toString());
 }
 
-export function getRequestURL(req: IncomingMessage): URL {
-	const host = req.headers.host ?? 'localhost';
+export function getRequestURL(req: IncomingMessage, devServerHost: string): URL {
+	const host = req.headers.host ?? devServerHost;
 	return new URL(req.url ?? '/', `http://${host}`);
 }
 

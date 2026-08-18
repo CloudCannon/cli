@@ -130,10 +130,10 @@ async function serveMegafile(cwd: string, outputPath: string): Promise<Response>
 	});
 }
 
-async function serveTemplate(filename: string, port: number): Promise<Response> {
+async function serveTemplate(filename: string, host: string, port: number): Promise<Response> {
 	let contents = await readFile(join(TEMPLATES_DIR, filename), 'utf-8');
 	for (const [placeholder, resolve] of Object.entries(TEMPLATE_SUBSTITUTIONS)) {
-		contents = contents.replaceAll(placeholder, resolve(port));
+		contents = contents.replaceAll(placeholder, resolve(host, port));
 	}
 	return new Response(contents, {
 		headers: { 'Content-Type': 'text/html' },
@@ -370,14 +370,15 @@ async function startFileWatcher(cwd: string, outputPath: string): Promise<FSWatc
 async function handleGetRoute(
 	url: URL,
 	cwd: string,
+	host: string,
 	port: number,
 	outputPath: string
 ): Promise<Response> {
 	if (testRoute(ROUTES.index, url)) {
-		return serveTemplate('index.html', port);
+		return serveTemplate('index.html', host, port);
 	}
 	if (testRoute(ROUTES.editor, url)) {
-		return serveTemplate('editor.html', port);
+		return serveTemplate('editor.html', host, port);
 	}
 
 	const sourceMatch = execRoute(ROUTES.source, url);
@@ -426,13 +427,14 @@ function logRequest(req: IncomingMessage, url: URL, status: number, duration: nu
 async function handleGetRequest(
 	req: IncomingMessage,
 	cwd: string,
+	host: string,
 	port: number,
 	outputPath: string,
 	verbose: boolean
 ): Promise<Response> {
-	const url = getRequestURL(req);
+	const url = getRequestURL(req, host);
 	const start = performance.now();
-	const response = await handleGetRoute(url, cwd, port, outputPath);
+	const response = await handleGetRoute(url, cwd, host, port, outputPath);
 	if (verbose) {
 		logRequest(req, url, response.status, performance.now() - start);
 	}
@@ -466,6 +468,7 @@ async function handlePostRequest(
 }
 
 export async function startDevServer(
+	host: string,
 	port: number,
 	outputPath: UncheckedPath,
 	options: DevServerOptions
@@ -476,7 +479,7 @@ export async function startDevServer(
 
 	const watcher = liveSync ? await startFileWatcher(cwd, checkedOutputPath) : null;
 	const server = createServer(async (req, res) => {
-		const url = getRequestURL(req);
+		const url = getRequestURL(req, host);
 
 		try {
 			if (testRoute(ROUTES.apiEvents, url)) {
@@ -495,7 +498,7 @@ export async function startDevServer(
 				return;
 			}
 
-			const response = await handleGetRequest(req, cwd, port, checkedOutputPath, verbose);
+			const response = await handleGetRequest(req, cwd, host, port, checkedOutputPath, verbose);
 			await sendResponse(res, response);
 		} catch (err: unknown) {
 			console.error(err);
@@ -509,7 +512,7 @@ export async function startDevServer(
 
 	await new Promise<void>((resolve, reject) => {
 		server.once('error', reject);
-		server.listen(port, () => {
+		server.listen(port, host, () => {
 			server.off('error', reject);
 			resolve();
 		});
@@ -517,7 +520,8 @@ export async function startDevServer(
 
 	const addr = server.address();
 	const actualPort = typeof addr === 'object' && addr ? addr.port : port;
-	const url = `http://localhost:${actualPort}`;
+	const actualAddr = typeof addr === 'object' && addr ? addr.address : host;
+	const url = `http://${actualAddr}:${actualPort}`;
 
 	console.log(`${text.good('CloudCannon dev server running at')} ${text.em(url)}`);
 	console.log(`${text.secondary('Serving output from')} ${text.value(checkedOutputPath)}`);

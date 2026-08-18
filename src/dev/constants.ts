@@ -16,8 +16,9 @@ if (!DEV_SERVER_PREFIX) {
 	DEV_SERVER_PREFIX = '/production-dev-server';
 }
 
-const TEMPLATE_SUBSTITUTIONS: Readonly<Record<string, (port: number) => string>> = {
-	'{{ DEV_SERVER_PORT }}': (port: number) => String(port),
+const TEMPLATE_SUBSTITUTIONS: Readonly<Record<string, (host: string, port: number) => string>> = {
+	'{{ DEV_SERVER_HOST }}': (host: string, _port: number) => host,
+	'{{ DEV_SERVER_PORT }}': (_host: string, port: number) => String(port),
 	'{{ DEV_SERVER_ENTRYPOINT }}': () =>
 		`${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_ENTRYPOINT}`,
 	'{{ DEV_SERVER_SHARED_ENTRYPOINT }}': () =>
