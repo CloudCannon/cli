@@ -133,7 +133,7 @@ async function serveMegafile(cwd: string, outputPath: string): Promise<Response>
 async function serveTemplate(filename: string): Promise<Response> {
 	let contents = await readFile(join(TEMPLATES_DIR, filename), 'utf-8');
 	for (const [placeholder, resolve] of Object.entries(TEMPLATE_SUBSTITUTIONS)) {
-		contents = contents.replaceAll(placeholder, resolve());
+		contents = contents.replaceAll(placeholder, await resolve());
 	}
 	return new Response(contents, {
 		headers: { 'Content-Type': 'text/html' },
