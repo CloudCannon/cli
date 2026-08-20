@@ -34,8 +34,7 @@ async function resolveEntrypoint(entrypoint: string): Promise<string> {
 	return `${DEV_SERVER_ORIGIN}/${url}`;
 }
 
-const TEMPLATE_SUBSTITUTIONS: Readonly<Record<string, (port: number) => Promise<string>>> = {
-	'{{ DEV_SERVER_PORT }}': async (port: number) => String(port),
+const TEMPLATE_SUBSTITUTIONS: Readonly<Record<string, () => Promise<string>>> = {
 	'{{ DEV_SERVER_ENTRYPOINT }}': async () =>
 		DEV_SERVER_ENTRYPOINT
 			? `${DEV_SERVER_ORIGIN}${DEV_SERVER_PREFIX}${DEV_SERVER_ENTRYPOINT}`

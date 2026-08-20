@@ -64,7 +64,7 @@
 		"@cloudcannon/configuration-loader": "0.0.10",
 		"@cloudcannon/configuration-types": "0.0.60",
 		"@cloudcannon/gadget": "0.0.33",
-		"@cloudcannon/sdk": "0.0.12",
+		"@cloudcannon/sdk": "0.0.13",
 		"chokidar": "^4.0.3",
 		"citty": "0.2.2",
 		"ignore": "7.0.5",
