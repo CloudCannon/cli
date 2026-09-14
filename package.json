@@ -41,8 +41,8 @@
 	},
 	"author": "CloudCannon <support@cloudcannon.com>",
 	"devDependencies": {
-		"@biomejs/biome": "2.5.12",
-		"@types/node": "26.5.0",
+		"@biomejs/biome": "2.5.13",
+		"@types/node": "26.5.1",
 		"toolproof": "0.20.0",
 		"typescript": "7.0.2"
 	},
@@ -61,13 +61,13 @@
 	"dependencies": {
 		"@bomb.sh/tab": "0.0.22",
 		"@clack/prompts": "1.8.0",
-		"@cloudcannon/configuration-loader": "0.0.12",
+		"@cloudcannon/configuration-loader": "0.0.13",
 		"@cloudcannon/configuration-types": "0.0.62",
 		"@cloudcannon/gadget": "0.0.34",
 		"@cloudcannon/sdk": "0.0.13",
 		"chokidar": "^5.0.0",
 		"citty": "0.2.2",
-		"ignore": "7.0.8",
+		"ignore": "7.0.9",
 		"yaml": "2.9.0"
 	}
 }
