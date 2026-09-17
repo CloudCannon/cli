@@ -63,7 +63,7 @@
 		"@clack/prompts": "1.8.0",
 		"@cloudcannon/configuration-loader": "0.0.13",
 		"@cloudcannon/configuration-types": "0.0.62",
-		"@cloudcannon/gadget": "0.0.34",
+		"@cloudcannon/gadget": "0.0.35",
 		"@cloudcannon/sdk": "0.0.13",
 		"chokidar": "^5.0.0",
 		"citty": "0.2.2",
