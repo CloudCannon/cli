@@ -60,7 +60,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@bomb.sh/tab": "0.0.22",
-		"@clack/prompts": "1.8.0",
+		"@clack/prompts": "1.8.1",
 		"@cloudcannon/configuration-loader": "0.0.13",
 		"@cloudcannon/configuration-types": "0.0.62",
 		"@cloudcannon/gadget": "0.0.35",
