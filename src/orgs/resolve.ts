@@ -1,6 +1,6 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
 import type { ListOrgsOptions, Org } from '@cloudcannon/sdk';
-import { printJson } from '../configure/utility.ts';
+import { printErrorJson } from '../configure/utility.ts';
 import { handleAPIError } from '../sdk-client.ts';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -15,6 +15,16 @@ export async function resolveOrg(
 			if (orgs.items.length === 1) {
 				return orgs.items[0];
 			}
+
+			if (orgs.items.length === 0) {
+				console.error('This account is not a member of any Organization.');
+				return;
+			}
+
+			console.error(
+				'This account is a member of more than one Organization. Choose one with --org:'
+			);
+			printErrorJson(orgs.items);
 			return;
 		} catch (err: unknown) {
 			handleAPIError(err);
@@ -45,7 +55,7 @@ export async function resolveOrg(
 
 		if (orgs.items.length > 1) {
 			console.error(`Org identifier "${identifier}" is ambiguous. Potential matches are:`);
-			printJson(orgs.items);
+			printErrorJson(orgs.items);
 			return;
 		}
 

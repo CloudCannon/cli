@@ -86,12 +86,23 @@ export function stringify(config: Record<string, any>, format: Format): string {
 	});
 }
 
+// citty gives a flag passed without a value as an empty string, which is never a value
+// any of these settings can take.
+export function blankFlag(value: unknown, flag: string): boolean {
+	if (typeof value === 'string' && !value.trim()) {
+		console.error(`${flag} needs a value.`);
+		return true;
+	}
+
+	return false;
+}
+
 export function printJson(data: unknown): void {
 	console.log(JSON.stringify(data, null, 2));
 }
 
 export function printErrorJson(data: unknown): void {
-	console.log(text.bad(JSON.stringify(data, null, 2)));
+	console.error(styleText(['red'], JSON.stringify(data, null, 2), { stream: process.stderr }));
 }
 
 export const text = {
