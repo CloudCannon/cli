@@ -41,10 +41,10 @@
 	},
 	"author": "CloudCannon <support@cloudcannon.com>",
 	"devDependencies": {
-		"@biomejs/biome": "2.4.11",
-		"@types/node": "25.6.0",
-		"toolproof": "0.18.0",
-		"typescript": "6.0.2"
+		"@biomejs/biome": "2.5.13",
+		"@types/node": "26.5.1",
+		"toolproof": "0.20.0",
+		"typescript": "7.0.2"
 	},
 	"engines": {
 		"node": ">=24"
@@ -59,15 +59,15 @@
 	},
 	"license": "ISC",
 	"dependencies": {
-		"@bomb.sh/tab": "0.0.15",
-		"@clack/prompts": "1.2.0",
-		"@cloudcannon/configuration-loader": "0.0.10",
-		"@cloudcannon/configuration-types": "0.0.60",
-		"@cloudcannon/gadget": "0.0.33",
-		"@cloudcannon/sdk": "0.0.12",
-		"chokidar": "^4.0.3",
+		"@bomb.sh/tab": "0.0.22",
+		"@clack/prompts": "1.8.0",
+		"@cloudcannon/configuration-loader": "0.0.13",
+		"@cloudcannon/configuration-types": "0.0.62",
+		"@cloudcannon/gadget": "0.0.35",
+		"@cloudcannon/sdk": "0.0.13",
+		"chokidar": "^5.0.0",
 		"citty": "0.2.2",
-		"ignore": "7.0.5",
-		"yaml": "2.8.3"
+		"ignore": "7.0.9",
+		"yaml": "2.9.1"
 	}
 }
