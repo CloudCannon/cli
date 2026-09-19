@@ -792,7 +792,6 @@ cloudcannon inboxes update --inbox contact --captcha-type turnstile --captcha-ke
 | `--name <name>` | A new name for the inbox |
 | `--key <key>` | A new key for the inbox, which changes where your forms post to |
 | `--allow-uploads`, `--no-allow-uploads` | Accept file uploads from forms posting to this inbox |
-| `--monthly-quota <n>` | The maximum number of submissions to accept per month |
 | `--keep-form-hook-days <days>` | The number of days to retain submissions |
 | `--captcha-type <type>` | The captcha provider checking submissions. One of `google`, `hcaptcha`, `turnstile` |
 | `--captcha-key <key>` | The captcha provider's site key |

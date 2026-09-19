@@ -79,11 +79,6 @@ export const inboxesUpdateCommand = defineCommand({
 			type: 'boolean',
 			description: 'Accept file uploads from forms posting to this inbox',
 		},
-		'monthly-quota': {
-			type: 'string',
-			description: 'The maximum number of submissions to accept per month',
-			valueHint: 'n',
-		},
 		'keep-form-hook-days': {
 			type: 'string',
 			description: 'The number of days to retain submissions',
@@ -162,15 +157,6 @@ export const inboxesUpdateCommand = defineCommand({
 			body.captcha_secret = ctx.args.captchaSecret;
 		}
 
-		const monthlyQuota = parseCount(ctx.args.monthlyQuota, '--monthly-quota');
-		if (monthlyQuota === INVALID_COUNT) {
-			process.exitCode = 1;
-			return;
-		}
-		if (monthlyQuota !== undefined) {
-			body.monthly_quota = monthlyQuota;
-		}
-
 		const keepDays = parseCount(ctx.args.keepFormHookDays, '--keep-form-hook-days');
 		if (keepDays === INVALID_COUNT) {
 			process.exitCode = 1;
@@ -182,7 +168,7 @@ export const inboxesUpdateCommand = defineCommand({
 
 		if (Object.keys(body).length === 0) {
 			console.error(
-				'Nothing to update. Provide --name, --key, --allow-uploads, --monthly-quota, --keep-form-hook-days, --captcha-type, --captcha-key, --captcha-secret, or --no-captcha.'
+				'Nothing to update. Provide --name, --key, --allow-uploads, --keep-form-hook-days, --captcha-type, --captcha-key, --captcha-secret, or --no-captcha.'
 			);
 			process.exitCode = 1;
 			return;
