@@ -41,8 +41,8 @@
 	},
 	"author": "CloudCannon <support@cloudcannon.com>",
 	"devDependencies": {
-		"@biomejs/biome": "2.5.13",
-		"@types/node": "26.5.1",
+		"@biomejs/biome": "2.5.14",
+		"@types/node": "26.6.1",
 		"toolproof": "0.20.0",
 		"typescript": "7.0.2"
 	},
@@ -60,7 +60,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@bomb.sh/tab": "0.0.22",
-		"@clack/prompts": "1.8.0",
+		"@clack/prompts": "1.8.1",
 		"@cloudcannon/configuration-loader": "0.0.13",
 		"@cloudcannon/configuration-types": "0.0.62",
 		"@cloudcannon/gadget": "0.0.35",
