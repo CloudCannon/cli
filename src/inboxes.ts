@@ -17,6 +17,22 @@ function hasCaptchaProvider(inbox: Inbox): boolean {
 
 const MAX_COUNT = 2_147_483_647;
 
+const INVALID_SCORE = Symbol('invalid score');
+
+function parseScore(value: unknown, flag: string): number | undefined | typeof INVALID_SCORE {
+	if (value === undefined) {
+		return undefined;
+	}
+
+	const score = typeof value === 'string' && value.trim() ? Number(value.trim()) : Number.NaN;
+	if (Number.isNaN(score) || score < 0 || score > 1) {
+		console.error(`${flag} needs a number from 0 to 1.`);
+		return INVALID_SCORE;
+	}
+
+	return score;
+}
+
 function parseCount(value: unknown, flag: string): number | undefined | typeof INVALID_COUNT {
 	if (value === undefined) {
 		return undefined;
@@ -110,6 +126,19 @@ export const inboxesUpdateCommand = defineCommand({
 				'The Google Cloud project ID holding the reCAPTCHA key, required for google_enterprise',
 			valueHint: 'project',
 		},
+		'captcha-min-score': {
+			type: 'string',
+			description:
+				'Reject reCAPTCHA tokens scoring below this, from 0 to 1. Applies to google (v3 only) and google_enterprise, and is 0.5 unless set',
+			valueHint: 'score',
+		},
+		'captcha-send-sitekey': {
+			type: 'boolean',
+			description:
+				'Tell hCaptcha which site key to expect, so it rejects a token from a form using another of your site keys. On unless turned off',
+			negativeDescription:
+				'Let hCaptcha accept a token from any site key on your account. Pass --captcha-send-sitekey to turn it back on',
+		},
 		captcha: {
 			type: 'boolean',
 			description:
@@ -153,7 +182,9 @@ export const inboxesUpdateCommand = defineCommand({
 				ctx.args.captchaType ||
 				ctx.args.captchaKey ||
 				ctx.args.captchaSecret ||
-				ctx.args.captchaProjectId
+				ctx.args.captchaProjectId ||
+				ctx.args.captchaMinScore !== undefined ||
+				ctx.args.captchaSendSitekey !== undefined
 			) {
 				console.error('--no-captcha cannot be combined with the other captcha flags.');
 				process.exitCode = 1;
@@ -163,7 +194,7 @@ export const inboxesUpdateCommand = defineCommand({
 			body.captcha_type = null;
 			body.captcha_key = null;
 			body.captcha_secret = null;
-			body.captcha_project_id = null;
+			body.captcha_config = {};
 		}
 		if (typeof ctx.args.captchaType === 'string') {
 			body.captcha_type = ctx.args.captchaType;
@@ -174,8 +205,24 @@ export const inboxesUpdateCommand = defineCommand({
 		if (typeof ctx.args.captchaSecret === 'string') {
 			body.captcha_secret = ctx.args.captchaSecret;
 		}
+		const minScore = parseScore(ctx.args.captchaMinScore, '--captcha-min-score');
+		if (minScore === INVALID_SCORE) {
+			process.exitCode = 1;
+			return;
+		}
+
+		const captchaConfig: Record<string, unknown> = {};
 		if (typeof ctx.args.captchaProjectId === 'string') {
-			body.captcha_project_id = ctx.args.captchaProjectId;
+			captchaConfig.project_id = ctx.args.captchaProjectId;
+		}
+		if (minScore !== undefined) {
+			captchaConfig.min_score = minScore;
+		}
+		if (ctx.args.captchaSendSitekey !== undefined) {
+			captchaConfig.send_sitekey = !!ctx.args.captchaSendSitekey;
+		}
+		if (Object.keys(captchaConfig).length > 0) {
+			body.captcha_config = captchaConfig;
 		}
 
 		const keepDays = parseCount(ctx.args.keepFormHookDays, '--keep-form-hook-days');
@@ -189,7 +236,7 @@ export const inboxesUpdateCommand = defineCommand({
 
 		if (Object.keys(body).length === 0) {
 			console.error(
-				'Nothing to update. Provide --name, --key, --allow-uploads, --keep-form-hook-days, --captcha-type, --captcha-key, --captcha-secret, --captcha-project-id, or --no-captcha.'
+				'Nothing to update. Provide --name, --key, --allow-uploads, --keep-form-hook-days, --captcha-type, --captcha-key, --captcha-secret, --captcha-project-id, --captcha-min-score, --captcha-send-sitekey, or --no-captcha.'
 			);
 			process.exitCode = 1;
 			return;

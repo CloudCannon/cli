@@ -798,6 +798,8 @@ cloudcannon inboxes update --inbox contact --captcha-type google_enterprise --ca
 | `--captcha-key <key>` | The captcha provider's site key, or the reCAPTCHA key ID for `google_enterprise` |
 | `--captcha-secret <secret>` | The captcha provider's secret key, or a Google Cloud API key for `google_enterprise`. It is never shown again |
 | `--captcha-project-id <project>` | The Google Cloud project ID holding the reCAPTCHA key, required for `google_enterprise` |
+| `--captcha-min-score <score>` | Reject reCAPTCHA tokens scoring below this, from 0 to 1. Applies to `google` (v3 only) and `google_enterprise`, and is 0.5 unless set |
+| `--captcha-send-sitekey`, `--no-captcha-send-sitekey` | Tell hCaptcha which site key to expect, so it rejects a token from a form using another of your site keys. On unless turned off |
 | `--no-captcha` | Stop checking submissions to this inbox with a captcha, which clears the provider and its keys |
 
 ---
