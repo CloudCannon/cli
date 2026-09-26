@@ -1,6 +1,6 @@
 import type CloudCannonClient from '@cloudcannon/sdk';
 import type { ListOrgSitesOptions } from '@cloudcannon/sdk';
-import { printJson } from '../configure/utility.ts';
+import { printErrorJson } from '../configure/utility.ts';
 import { handleAPIError } from '../sdk-client.ts';
 
 const STABLE_DOMAIN_SUFFIX = '.cloudvent.net';
@@ -41,7 +41,7 @@ export async function resolveSiteUuid(
 
 		if (candidateSites.length > 1) {
 			console.error(`Site identifier "${identifier}" is ambiguous. Potential matches are:`);
-			printJson(candidateSites);
+			printErrorJson(candidateSites);
 			return;
 		}
 
