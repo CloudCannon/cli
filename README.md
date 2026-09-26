@@ -782,6 +782,7 @@ Update an inbox's settings. Only the flags you pass are changed. Changing the ke
 cloudcannon inboxes update --inbox contact --name "Sales enquiries"
 cloudcannon inboxes update --inbox contact --allow-uploads
 cloudcannon inboxes update --inbox contact --captcha-type turnstile --captcha-key SITE_KEY --captcha-secret SECRET
+cloudcannon inboxes update --inbox contact --captcha-type google_enterprise --captcha-key KEY_ID --captcha-secret API_KEY --captcha-project-id my-project
 ```
 
 **Flags**
@@ -793,10 +794,11 @@ cloudcannon inboxes update --inbox contact --captcha-type turnstile --captcha-ke
 | `--key <key>` | A new key for the inbox, which changes where your forms post to |
 | `--allow-uploads`, `--no-allow-uploads` | Accept file uploads from forms posting to this inbox |
 | `--keep-form-hook-days <days>` | The number of days to retain submissions |
-| `--captcha-type <type>` | The captcha provider checking submissions. One of `google`, `hcaptcha`, `turnstile` |
-| `--captcha-key <key>` | The captcha provider's site key |
-| `--captcha-secret <secret>` | The captcha provider's secret key |
-| `--no-captcha` | Stop checking submissions to this inbox with a captcha |
+| `--captcha-type <type>` | The captcha provider checking submissions. One of `google`, `google_enterprise`, `hcaptcha`, `turnstile` |
+| `--captcha-key <key>` | The captcha provider's site key, or the reCAPTCHA key ID for `google_enterprise` |
+| `--captcha-secret <secret>` | The captcha provider's secret key, or a Google Cloud API key for `google_enterprise`. It is never shown again |
+| `--captcha-project-id <project>` | The Google Cloud project ID holding the reCAPTCHA key, required for `google_enterprise` |
+| `--no-captcha` | Stop checking submissions to this inbox with a captcha, which clears the provider and its keys |
 
 ---
 
@@ -823,6 +825,7 @@ Connect a site to an inbox so its forms can post submissions.
 
 ```sh
 cloudcannon inboxes connect --inbox contact --site example.com
+cloudcannon inboxes connect --inbox contact --site example.com --no-require-captcha
 ```
 
 **Flags**
@@ -832,6 +835,7 @@ cloudcannon inboxes connect --inbox contact --site example.com
 | `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 | `--default` | Make this the site's default inbox |
+| `--require-captcha`, `--no-require-captcha` | Reject submissions from this site without the inbox's captcha. Defaults to on when the inbox has a captcha provider, so add the provider's widget to your forms first |
 
 ---
 

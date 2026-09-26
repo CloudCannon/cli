@@ -1,4 +1,4 @@
-import type { ConnectInboxOptions, UpdateInboxSettingsOptions } from '@cloudcannon/sdk';
+import type { ConnectInboxOptions, Inbox, UpdateInboxSettingsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { blankFlag, printJson } from './configure/utility.ts';
 import { inboxArg, resolveInboxUuid } from './inboxes/resolve.ts';
@@ -7,9 +7,13 @@ import { inboxesTargetsCommand } from './inboxes/targets.ts';
 import { getSdkClient, handleAPIError } from './sdk-client.ts';
 import { resolveSiteUuid } from './sites/resolve.ts';
 
-const CAPTCHA_TYPES = ['google', 'hcaptcha', 'turnstile'] as const;
+const CAPTCHA_TYPES = ['google', 'google_enterprise', 'hcaptcha', 'turnstile'] as const;
 
 const INVALID_COUNT = Symbol('invalid count');
+
+function hasCaptchaProvider(inbox: Inbox): boolean {
+	return !!inbox.captcha_type && !!inbox.captcha_key && !!inbox.has_captcha_secret;
+}
 
 const MAX_COUNT = 2_147_483_647;
 
@@ -18,8 +22,8 @@ function parseCount(value: unknown, flag: string): number | undefined | typeof I
 		return undefined;
 	}
 
-	// A flag passed without a value arrives as an empty string, which Number() reads as 0.
-	// A quota of 0 rejects every submission, so digits are required rather than inferred.
+	// A flag passed without a value arrives as an empty string, which Number() reads as 0,
+	// so digits are required rather than inferred.
 	if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) {
 		console.error(`${flag} needs a whole number of 0 or more.`);
 		return INVALID_COUNT;
@@ -96,8 +100,15 @@ export const inboxesUpdateCommand = defineCommand({
 		},
 		'captcha-secret': {
 			type: 'string',
-			description: "The captcha provider's secret key",
+			description:
+				"The captcha provider's secret key, or a Google Cloud API key for google_enterprise. It is never shown again",
 			valueHint: 'secret',
+		},
+		'captcha-project-id': {
+			type: 'string',
+			description:
+				'The Google Cloud project ID holding the reCAPTCHA key, required for google_enterprise',
+			valueHint: 'project',
 		},
 		captcha: {
 			type: 'boolean',
@@ -112,6 +123,7 @@ export const inboxesUpdateCommand = defineCommand({
 				['--key', ctx.args.key],
 				['--captcha-key', ctx.args.captchaKey],
 				['--captcha-secret', ctx.args.captchaSecret],
+				['--captcha-project-id', ctx.args.captchaProjectId],
 			] as const
 		).some(([flag, value]) => blankFlag(value, flag));
 		if (blank) {
@@ -131,13 +143,18 @@ export const inboxesUpdateCommand = defineCommand({
 		}
 		if (ctx.args.captcha === true) {
 			console.error(
-				'A captcha is turned on by naming its provider. Use --captcha-type with --captcha-key and --captcha-secret.'
+				'A captcha is turned on by naming its provider. Use --captcha-type with --captcha-key and --captcha-secret, and --captcha-project-id for google_enterprise.'
 			);
 			process.exitCode = 1;
 			return;
 		}
 		if (ctx.args.captcha === false) {
-			if (ctx.args.captchaType || ctx.args.captchaKey || ctx.args.captchaSecret) {
+			if (
+				ctx.args.captchaType ||
+				ctx.args.captchaKey ||
+				ctx.args.captchaSecret ||
+				ctx.args.captchaProjectId
+			) {
 				console.error('--no-captcha cannot be combined with the other captcha flags.');
 				process.exitCode = 1;
 				return;
@@ -146,6 +163,7 @@ export const inboxesUpdateCommand = defineCommand({
 			body.captcha_type = null;
 			body.captcha_key = null;
 			body.captcha_secret = null;
+			body.captcha_project_id = null;
 		}
 		if (typeof ctx.args.captchaType === 'string') {
 			body.captcha_type = ctx.args.captchaType;
@@ -155,6 +173,9 @@ export const inboxesUpdateCommand = defineCommand({
 		}
 		if (typeof ctx.args.captchaSecret === 'string') {
 			body.captcha_secret = ctx.args.captchaSecret;
+		}
+		if (typeof ctx.args.captchaProjectId === 'string') {
+			body.captcha_project_id = ctx.args.captchaProjectId;
 		}
 
 		const keepDays = parseCount(ctx.args.keepFormHookDays, '--keep-form-hook-days');
@@ -168,7 +189,7 @@ export const inboxesUpdateCommand = defineCommand({
 
 		if (Object.keys(body).length === 0) {
 			console.error(
-				'Nothing to update. Provide --name, --key, --allow-uploads, --keep-form-hook-days, --captcha-type, --captcha-key, --captcha-secret, or --no-captcha.'
+				'Nothing to update. Provide --name, --key, --allow-uploads, --keep-form-hook-days, --captcha-type, --captcha-key, --captcha-secret, --captcha-project-id, or --no-captcha.'
 			);
 			process.exitCode = 1;
 			return;
@@ -250,6 +271,11 @@ export const inboxesConnectCommand = defineCommand({
 			type: 'boolean',
 			description: "Make this the site's default inbox",
 		},
+		'require-captcha': {
+			type: 'boolean',
+			description:
+				"Reject submissions from this site without the inbox's captcha. Defaults to on when the inbox has a captcha provider, so add the provider's widget to your forms first",
+		},
 	},
 	async run(ctx): Promise<void> {
 		const client = await getSdkClient();
@@ -271,6 +297,11 @@ export const inboxesConnectCommand = defineCommand({
 		}
 
 		try {
+			body.require_captcha =
+				ctx.args.requireCaptcha === undefined
+					? hasCaptchaProvider(await client.inbox(inboxUuid).get())
+					: !!ctx.args.requireCaptcha;
+
 			const siteInbox = await client.site(siteUuid).connectInbox(body);
 			printJson(siteInbox);
 		} catch (err: unknown) {
