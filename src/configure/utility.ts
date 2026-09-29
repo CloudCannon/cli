@@ -155,7 +155,7 @@ export const modeArg = {
 	},
 } as const;
 
-export function exitOnCancel<T>(value: T | symbol): asserts value is T {
+export function exitOnCancel<T>(value: T): asserts value is Exclude<T, symbol> {
 	if (isCancel(value)) {
 		cancel('Operation canceled.');
 		process.exit(0);
