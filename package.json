@@ -62,7 +62,7 @@
 		"@bomb.sh/tab": "0.0.22",
 		"@clack/prompts": "1.8.1",
 		"@cloudcannon/configuration-loader": "0.0.14",
-		"@cloudcannon/configuration-types": "0.0.64",
+		"@cloudcannon/configuration-types": "0.0.65",
 		"@cloudcannon/gadget": "0.0.36",
 		"@cloudcannon/sdk": "0.0.13",
 		"chokidar": "5.0.0",
