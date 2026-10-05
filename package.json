@@ -41,8 +41,8 @@
 	},
 	"author": "CloudCannon <support@cloudcannon.com>",
 	"devDependencies": {
-		"@biomejs/biome": "2.5.14",
-		"@types/node": "26.6.3",
+		"@biomejs/biome": "2.5.15",
+		"@types/node": "26.6.4",
 		"toolproof": "0.20.0",
 		"typescript": "7.0.2"
 	},
@@ -67,7 +67,7 @@
 		"@cloudcannon/sdk": "0.0.13",
 		"chokidar": "5.0.0",
 		"citty": "0.2.2",
-		"ignore": "7.0.10",
+		"ignore": "7.0.11",
 		"yaml": "2.9.1"
 	}
 }
