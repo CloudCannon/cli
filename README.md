@@ -324,6 +324,24 @@ cloudcannon orgs sites list
 
 ---
 
+### `orgs inboxes create --name <name>`
+
+Create an inbox for an organization. If you belong to only one organization, it is selected automatically. The key defaults to a slug of the name, so `--name "Contact form"` becomes `contact-form`.
+
+```sh
+cloudcannon orgs inboxes create --org my-org --name "Contact form" --key contact
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
+| `--name <name>` | The inbox name (required) |
+| `--key <key>` | The inbox key your forms post to, which defaults to a slug of the name |
+
+---
+
 ### `orgs inboxes list [org]`
 
 List all inboxes for an organization. If you belong to only one organization, it is selected automatically.
@@ -737,6 +755,207 @@ cloudcannon builds print-logs --build <uuid>
 | Flag | Description |
 |---|---|
 | `--build <uuid>` | The build UUID (required) |
+
+---
+
+### `inboxes get --inbox <name|id|key|uuid>`
+
+Get an inbox, including the key your forms post to.
+
+```sh
+cloudcannon inboxes get --inbox contact
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+
+---
+
+### `inboxes update --inbox <name|id|key|uuid>`
+
+Update an inbox's settings. Only the flags you pass are changed. Changing the key stops every form posting to the old one from reaching this inbox.
+
+```sh
+cloudcannon inboxes update --inbox contact --name "Sales enquiries"
+cloudcannon inboxes update --inbox contact --allow-uploads
+cloudcannon inboxes update --inbox contact --captcha-type turnstile --captcha-key SITE_KEY --captcha-secret SECRET
+cloudcannon inboxes update --inbox contact --captcha-type google_enterprise --captcha-key KEY_ID --captcha-secret API_KEY --captcha-project-id my-project
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--name <name>` | A new name for the inbox |
+| `--key <key>` | A new key for the inbox, which changes where your forms post to |
+| `--allow-uploads`, `--no-allow-uploads` | Accept file uploads from forms posting to this inbox |
+| `--keep-form-hook-days <days>` | The number of days to retain submissions |
+| `--captcha-type <type>` | The captcha provider checking submissions. One of `google`, `google_enterprise`, `hcaptcha`, `turnstile` |
+| `--captcha-key <key>` | The captcha provider's site key, or the reCAPTCHA key ID for `google_enterprise` |
+| `--captcha-secret <secret>` | The captcha provider's secret key, or a Google Cloud API key for `google_enterprise`. It is never shown again |
+| `--captcha-project-id <project>` | The Google Cloud project ID holding the reCAPTCHA key, required for `google_enterprise` |
+| `--captcha-min-score <score>` | Reject reCAPTCHA tokens scoring below this, from 0 to 1. Applies to `google` (v3 only) and `google_enterprise`, and is 0.5 unless set |
+| `--captcha-send-sitekey`, `--no-captcha-send-sitekey` | Tell hCaptcha which site key to expect, so it rejects a token from a form using another of your site keys. On unless turned off |
+| `--no-captcha` | Stop checking submissions to this inbox with a captcha, which clears the provider and its keys |
+
+---
+
+### `inboxes delete --inbox <name|id|key|uuid>`
+
+Delete an inbox, along with its submissions and targets. Requires `--force`.
+
+```sh
+cloudcannon inboxes delete --inbox contact --force
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--force` | Confirm the deletion without being asked |
+
+---
+
+### `inboxes connect --inbox <name|id|key|uuid> --site <name|id|uuid|domain>`
+
+Connect a site to an inbox so its forms can post submissions.
+
+```sh
+cloudcannon inboxes connect --inbox contact --site example.com
+cloudcannon inboxes connect --inbox contact --site example.com --no-require-captcha
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+| `--default` | Make this the site's default inbox |
+| `--require-captcha`, `--no-require-captcha` | Reject submissions from this site without the inbox's captcha. Defaults to on when the inbox has a captcha provider, so add the provider's widget to your forms first |
+
+---
+
+### `inboxes disconnect --inbox <name|id|key|uuid> --site <name|id|uuid|domain>`
+
+Disconnect a site from an inbox so its forms stop posting submissions to it. Requires `--force`.
+
+```sh
+cloudcannon inboxes disconnect --inbox contact --site example.com --force
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
+| `--force` | Confirm the disconnection without being asked |
+
+---
+
+### `inboxes targets list --inbox <name|id|key|uuid>`
+
+List the targets an inbox forwards submissions to, each with its UUID.
+
+```sh
+cloudcannon inboxes targets list --inbox contact
+cloudcannon inboxes targets list --inbox contact --filter target_type=email
+cloudcannon inboxes targets list --inbox contact --filter validated=false
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by, using a target's own fields such as `target_type` or `validated` |
+
+---
+
+### `inboxes targets add --inbox <name|id|key|uuid> --type <type>`
+
+Add a target that an inbox forwards submissions to. A `hubspot` target takes `--portal-id` and `--form-guid` in place of `--target`.
+
+An `email` target forwards nothing until someone opens the validation link CloudCannon emails to that address, and a webhook target that needs domain verification forwards nothing until its DNS TXT record is in place. When a new target is not yet validated, the command prints what is still outstanding on stderr, including the record name and value to add.
+
+```sh
+cloudcannon inboxes targets add --inbox contact --type email --target sales@example.com
+cloudcannon inboxes targets add --inbox contact --type slack --target https://hooks.slack.com/services/T0/B0/XXXX
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
+| `--type <type>` | The integration this target sends to (required). One of `email`, `slack`, `zapier`, `make`, `ifttt`, `discord`, `teams`, `hubspot`, `n8n`, `pipedream`, `webhook` |
+| `--target <email\|url>` | The destination email address or webhook URL, not used by HubSpot targets |
+| `--portal-id <id>` | The HubSpot portal ID, used instead of `--target` for HubSpot targets |
+| `--form-guid <guid>` | The HubSpot form GUID, used instead of `--target` for HubSpot targets |
+| `--payload-format <format>` | Override the payload format sent to the target. One of `email`, `raw`, `slack`, `discord`, `teams`, `ifttt`, `hubspot`, `form_encoded` |
+| `--block-spam` | Hold back submissions flagged by spam detection |
+| `--block-spam-list` | Hold back submissions matching the CloudCannon spam blocklist |
+| `--field-map <field=field,field=field>` | Comma-separated hubspot_field=form_field pairs, required when sending the HubSpot payload format |
+
+---
+
+### `inboxes targets update --target-uuid <uuid>`
+
+Update a target's destination and options. A target's type cannot be changed, so remove and add a target to send somewhere of a different type. Changing the destination starts validation again. Passing `--field-map` replaces the whole map rather than adding to it.
+
+```sh
+cloudcannon inboxes targets update --target-uuid 4f5a2c31-9d7e-4a6b-bb02-7c1f0a3e5d84 --block-spam
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--target-uuid <uuid>` | The inbox target UUID (required) |
+| `--target <email\|url>` | A new destination email address or webhook URL |
+| `--payload-format <format>` | Override the payload format sent to the target |
+| `--block-spam` | Hold back submissions flagged by spam detection |
+| `--block-spam-list` | Hold back submissions matching the CloudCannon spam blocklist |
+| `--field-map <field=field,field=field>` | Comma-separated hubspot_field=form_field pairs |
+
+---
+
+### `inboxes targets remove --target-uuid <uuid>`
+
+Remove a target from an inbox. Requires `--force`.
+
+```sh
+cloudcannon inboxes targets remove --target-uuid 4f5a2c31-9d7e-4a6b-bb02-7c1f0a3e5d84 --force
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--target-uuid <uuid>` | The inbox target UUID (required) |
+| `--force` | Confirm the removal without being asked |
+
+---
+
+### `inboxes targets revalidate --target-uuid <uuid>`
+
+Restart validation for a target that is not yet validated. Email targets are sent another verification email, and webhook targets are checked for their DNS TXT record again. A target that is already validated is left alone, so no second email is sent.
+
+```sh
+cloudcannon inboxes targets revalidate --target-uuid 4f5a2c31-9d7e-4a6b-bb02-7c1f0a3e5d84
+```
+
+**Flags**
+
+| Flag | Description |
+|---|---|
+| `--target-uuid <uuid>` | The inbox target UUID (required) |
 
 ---
 

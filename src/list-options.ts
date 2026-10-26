@@ -1,3 +1,11 @@
+export const filterFlagDef = {
+	filter: {
+		type: 'string',
+		description: 'Comma-separated key=value pairs to filter by',
+		valueHint: 'key=value,key=value',
+	},
+} as const;
+
 export const listFlagDefs = {
 	page: {
 		type: 'string',
@@ -19,11 +27,7 @@ export const listFlagDefs = {
 		description: 'Sort direction (ASC or DESC)',
 		valueHint: 'ASC|DESC',
 	},
-	filter: {
-		type: 'string',
-		description: 'Comma-separated key=value pairs to filter by',
-		valueHint: 'key=value,key=value',
-	},
+	...filterFlagDef,
 } as const;
 
 export type ListArgs = {
@@ -53,24 +57,41 @@ export function buildListOptions(args: ListArgs): Record<string, unknown> {
 		options.sort_direction = dir;
 	}
 	if (args.filter !== undefined) {
-		const filters: Record<string, string> = {};
-		for (const pair of String(args.filter).split(',')) {
-			const trimmed = pair.trim();
-			if (!trimmed) {
-				continue;
-			}
-			const eq = trimmed.indexOf('=');
-			if (eq === -1) {
-				throw new Error(`--filter entry "${trimmed}" must be in key=value form.`);
-			}
-			const key = trimmed.slice(0, eq).trim();
-			const value = trimmed.slice(eq + 1).trim();
-			if (!key) {
-				throw new Error(`--filter entry "${trimmed}" must have a key.`);
-			}
-			filters[key] = value;
-		}
-		options.filters = filters;
+		options.filters = parsePairs(String(args.filter), '--filter');
 	}
 	return options;
+}
+
+export function parseListOptions(args: ListArgs): Record<string, unknown> | undefined {
+	try {
+		return buildListOptions(args);
+	} catch (err: unknown) {
+		console.error(err instanceof Error ? err.message : String(err));
+		return undefined;
+	}
+}
+
+export function parsePairs(value: string, flag: string): Record<string, string> {
+	if (!value.trim()) {
+		throw new Error(`${flag} needs at least one key=value pair.`);
+	}
+
+	const pairs: Record<string, string> = {};
+	for (const pair of value.split(',')) {
+		const trimmed = pair.trim();
+		if (!trimmed) {
+			continue;
+		}
+		const eq = trimmed.indexOf('=');
+		if (eq === -1) {
+			throw new Error(`${flag} entry "${trimmed}" must be in key=value form.`);
+		}
+		const key = trimmed.slice(0, eq).trim();
+		const pairValue = trimmed.slice(eq + 1).trim();
+		if (!key) {
+			throw new Error(`${flag} entry "${trimmed}" must have a key.`);
+		}
+		pairs[key] = pairValue;
+	}
+	return pairs;
 }

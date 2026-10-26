@@ -1,7 +1,7 @@
 import type { ListOrgSitesOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
-import { buildListOptions, listFlagDefs } from '../list-options.ts';
+import { listFlagDefs, parseListOptions } from '../list-options.ts';
 import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 import { resolveOrg } from './resolve.ts';
 
@@ -19,6 +19,11 @@ export const orgsSitesListCommand = defineCommand({
 		...listFlagDefs,
 	},
 	async run(ctx): Promise<void> {
+		const options = parseListOptions(ctx.args);
+		if (!options) {
+			process.exitCode = 1;
+			return;
+		}
 		const client = await getSdkClient();
 		const org = await resolveOrg(client, ctx.args.org as string | undefined);
 		if (!org) {
@@ -26,7 +31,6 @@ export const orgsSitesListCommand = defineCommand({
 			return;
 		}
 		const orgClient = client.org(org.uuid);
-		const options = buildListOptions(ctx.args);
 		try {
 			const sites = await orgClient.sites(options as ListOrgSitesOptions);
 			printJson({
