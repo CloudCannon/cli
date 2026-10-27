@@ -67,7 +67,7 @@
 		"@cloudcannon/sdk": "0.0.13",
 		"chokidar": "5.0.0",
 		"citty": "0.2.2",
-		"ignore": "7.0.13",
+		"ignore": "7.0.14",
 		"yaml": "2.9.1"
 	}
 }
