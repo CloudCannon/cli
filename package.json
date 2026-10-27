@@ -65,7 +65,7 @@
 		"@cloudcannon/configuration-types": "0.0.66",
 		"@cloudcannon/gadget": "0.0.36",
 		"@cloudcannon/sdk": "0.0.13",
-		"chokidar": "5.0.0",
+		"chokidar": "6.0.0",
 		"citty": "0.2.2",
 		"ignore": "7.0.14",
 		"yaml": "2.9.1"
