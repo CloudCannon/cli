@@ -7,7 +7,12 @@ import process from 'node:process';
 import { Readable } from 'node:stream';
 import chokidar, { type FSWatcher } from 'chokidar';
 import { text } from '../configure/utility.ts';
-import { TEMPLATE_SUBSTITUTIONS, TEMPLATES_DIR } from './constants.ts';
+import {
+	type DevServerManifest,
+	getDevServerManifest,
+	TEMPLATE_SUBSTITUTIONS,
+	TEMPLATES_DIR,
+} from './constants.ts';
 import {
 	getContentType,
 	getFileInfo,
@@ -390,7 +395,11 @@ async function handleGetRoute(url: URL, cwd: string, outputPath: string): Promis
 		try {
 			userName = userInfo().username?.trim();
 		} catch {}
-		return new Response(JSON.stringify({ sourceFiles, outputDir, siteName, userName }), {
+		let manifest: DevServerManifest | undefined;
+		try {
+			manifest = await getDevServerManifest();
+		} catch {}
+		return new Response(JSON.stringify({ sourceFiles, outputDir, siteName, userName, manifest }), {
 			headers: { 'Content-Type': 'application/json' },
 		});
 	}
