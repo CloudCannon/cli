@@ -11,15 +11,17 @@ const DEV_SERVER_PREFIX: string =
 
 const DEV_SERVER_MANIFEST_URL: string = `${DEV_SERVER_ORIGIN}/manifests/${DEV_SERVER_PREFIX.replace(/^\//, '')}.json`;
 
-let manifest: Promise<{ [key: string]: string }> | undefined;
-async function getDevServerManifest(): Promise<{ [key: string]: string }> {
+export type DevServerManifest = { [key: string]: string };
+
+let manifest: Promise<DevServerManifest> | undefined;
+export async function getDevServerManifest(): Promise<DevServerManifest> {
 	if (!manifest) {
 		manifest = (async () => {
 			const response = await fetch(DEV_SERVER_MANIFEST_URL);
 			if (!response.ok) {
 				throw new Error(`Request failed with status ${response.status}`);
 			}
-			return response.json() as Promise<{ [key: string]: string }>;
+			return response.json() as Promise<DevServerManifest>;
 		})();
 	}
 	return manifest;
