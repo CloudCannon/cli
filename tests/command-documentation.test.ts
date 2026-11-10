@@ -73,10 +73,10 @@ describe('documentCommand', () => {
 		assert.equal(migrate.description, 'Migrate CloudCannon resources.');
 
 		const migration = migrate.subCommands?.find(
-			(command) => command.name === 'migrateRedirectSitesToSubdomains'
+			(command) => command.name === 'convert-redirect-sites-to-subdomains'
 		);
 		assert.ok(migration);
-		assert.equal(migration.fullName, 'cloudcannon migrate migrateRedirectSitesToSubdomains');
+		assert.equal(migration.fullName, 'cloudcannon migrate convert-redirect-sites-to-subdomains');
 		assert.equal(
 			migration.description,
 			'Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains.'
