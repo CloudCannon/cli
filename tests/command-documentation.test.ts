@@ -64,6 +64,32 @@ describe('documentCommand', () => {
 		assert.equal(outputPath.required, true);
 	});
 
+	it('documents the migrate command and its subcommand', async () => {
+		const docs = await documentCommand(main);
+
+		const migrate = docs.subCommands?.find((command) => command.name === 'migrate');
+		assert.ok(migrate);
+		assert.equal(migrate.fullName, 'cloudcannon migrate');
+		assert.equal(migrate.description, 'Migrate CloudCannon resources.');
+
+		const migration = migrate.subCommands?.find(
+			(command) => command.name === 'migrateRedirectSitesToSubdomains'
+		);
+		assert.ok(migration);
+		assert.equal(migration.fullName, 'cloudcannon migrate migrateRedirectSitesToSubdomains');
+		assert.equal(
+			migration.description,
+			'Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains.'
+		);
+
+		const orgArg = migration.options?.find((arg) => arg.name === 'org');
+		assert.ok(orgArg);
+		assert.equal(orgArg.type, 'string');
+		assert.equal(orgArg.required, false);
+		assert.equal(orgArg.valueHint, 'name|id|uuid');
+		assert.equal(orgArg.description, 'The Organization name, ID, or UUID');
+	});
+
 	it('renders usage as a short single line', async () => {
 		const docs = await documentCommand(main);
 

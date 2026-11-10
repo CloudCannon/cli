@@ -1,0 +1,29 @@
+name: cloudcannon migrate --help
+
+steps:
+  - ref: ../core/run-cli.toolproof.yml
+  - I run "npm -s run cloudcannon -- migrate --help | sed 's/[[:space:]]*$//'"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Migrate CloudCannon resources. (cloudcannon migrate v0.0.0)
+      ╎
+      ╎USAGE cloudcannon migrate migrateRedirectSitesToSubdomains
+      ╎
+      ╎COMMANDS
+      ╎
+      ╎  migrateRedirectSitesToSubdomains    Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains.
+      ╎
+      ╎Use cloudcannon migrate <command> --help for more information about a command.
+      ╎
+  - I run "npm -s run cloudcannon -- migrate migrateRedirectSitesToSubdomains --help | sed 's/[[:space:]]*$//'"
+  - snapshot: stdout
+    snapshot_content: |-
+      ╎Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains. (migrate migrateRedirectSitesToSubdomains)
+      ╎
+      ╎USAGE migrate migrateRedirectSitesToSubdomains [OPTIONS]
+      ╎
+      ╎OPTIONS
+      ╎
+      ╎  --org=<name|id|uuid>    The Organization name, ID, or UUID
+      ╎
+      ╎

@@ -141,7 +141,7 @@ export function decodeUserAccessKey(encodedAccessKey: string): UserAccessKey | u
 
 export async function saveUserAccessKey(accessKey: UserAccessKey): Promise<void> {
 	if (dataDir) {
-		await writeFile(join(dataDir, 'auth.json'), JSON.stringify(accessKey));
+		await writeFile(join(dataDir, 'auth.json'), JSON.stringify(accessKey), { mode: 600 });
 	} else {
 		process.exitCode = 1;
 		console.error('Failed to find data directory. Unable to log in');
