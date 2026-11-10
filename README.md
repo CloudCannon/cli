@@ -100,9 +100,9 @@ cloudcannon login --access-key-id <id> --access-key-secret <secret>
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--access-key-id <string>` | Access key ID for non-interactive login |
+| Flag                           | Description                                 |
+| ------------------------------ | ------------------------------------------- |
+| `--access-key-id <string>`     | Access key ID for non-interactive login     |
 | `--access-key-secret <string>` | Access key secret for non-interactive login |
 
 ---
@@ -128,20 +128,20 @@ cloudcannon configure generate ./my-site
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--auto` | Non-interactive, accept all suggestions | `false` |
-| `--dry-run` | Print output without writing files | `false` |
-| `--format <yaml\|json>` | Output format | `yaml` |
-| `--output <path>` | Custom output file path | |
-| `--ssg <name>` | Override SSG detection | |
-| `--source <path>` | Override source folder | |
-| `--mode <hosted\|headless>` | Mode for initial site settings | `hosted` |
-| `--initial-site-settings` | Also generate `.cloudcannon/initial-site-settings.json` | `false` |
-| `--initial-site-settings-only` | Only generate `.cloudcannon/initial-site-settings.json` | `false` |
-| `--install-command <cmd>` | Override detected install command | |
-| `--build-command <cmd>` | Override detected build command | |
-| `--output-path <path>` | Override detected output path | |
+| Flag                           | Description                                             | Default  |
+| ------------------------------ | ------------------------------------------------------- | -------- |
+| `--auto`                       | Non-interactive, accept all suggestions                 | `false`  |
+| `--dry-run`                    | Print output without writing files                      | `false`  |
+| `--format <yaml\|json>`        | Output format                                           | `yaml`   |
+| `--output <path>`              | Custom output file path                                 |          |
+| `--ssg <name>`                 | Override SSG detection                                  |          |
+| `--source <path>`              | Override source folder                                  |          |
+| `--mode <hosted\|headless>`    | Mode for initial site settings                          | `hosted` |
+| `--initial-site-settings`      | Also generate `.cloudcannon/initial-site-settings.json` | `false`  |
+| `--initial-site-settings-only` | Only generate `.cloudcannon/initial-site-settings.json` | `false`  |
+| `--install-command <cmd>`      | Override detected install command                       |          |
+| `--build-command <cmd>`        | Override detected build command                         |          |
+| `--output-path <path>`         | Override detected output path                           |          |
 
 ---
 
@@ -169,8 +169,8 @@ cloudcannon configure detect-source ./my-site --ssg jekyll
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag           | Description            |
+| -------------- | ---------------------- |
 | `--ssg <name>` | Override SSG detection |
 
 ---
@@ -186,9 +186,9 @@ cloudcannon configure detect-collections ./my-site --ssg astro
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--ssg <name>` | Override SSG detection |
+| Flag              | Description            |
+| ----------------- | ---------------------- |
+| `--ssg <name>`    | Override SSG detection |
 | `--source <path>` | Override source folder |
 
 ---
@@ -204,9 +204,9 @@ cloudcannon configure detect-build-commands ./my-site --ssg hugo
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--ssg <name>` | Override SSG detection |
+| Flag              | Description            |
+| ----------------- | ---------------------- |
+| `--ssg <name>`    | Override SSG detection |
 | `--source <path>` | Override source folder |
 
 ---
@@ -232,13 +232,13 @@ cat cloudcannon.config.yml | cloudcannon validate --stdin --configuration
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--configuration` | Validate only the CloudCannon configuration file and any split configuration files |
-| `--initial-site-settings` | Validate only `.cloudcannon/initial-site-settings.json` |
-| `--routing` | Validate only `.cloudcannon/routing.json` |
-| `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search |
-| `--stdin` | Read from stdin instead of files on disk |
+| Flag                          | Description                                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| `--configuration`             | Validate only the CloudCannon configuration file and any split configuration files |
+| `--initial-site-settings`     | Validate only `.cloudcannon/initial-site-settings.json`                            |
+| `--routing`                   | Validate only `.cloudcannon/routing.json`                                          |
+| `--configuration-path <path>` | Path to the CloudCannon configuration file, overrides `path` search                |
+| `--stdin`                     | Read from stdin instead of files on disk                                           |
 
 ---
 
@@ -255,13 +255,13 @@ cloudcannon dev ./_site --port 3000
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--host <host>` | The IP address for the dev server to listen on | `127.0.0.1` |
-| `--port <port>` | Port to run the dev server on | `10101` |
-| `--live-sync` / `--no-live-sync` | Push disk file changes to the app | `true` |
-| `--app-sync` / `--no-app-sync` | Accept app-initiated file writes (uploads, moves, deletes) to disk | `true` |
-| `--verbose` | Log every request (method, path, status, duration) | `false` |
+| Flag                             | Description                                                        | Default     |
+| -------------------------------- | ------------------------------------------------------------------ | ----------- |
+| `--host <host>`                  | The IP address for the dev server to listen on                     | `127.0.0.1` |
+| `--port <port>`                  | Port to run the dev server on                                      | `10101`     |
+| `--live-sync` / `--no-live-sync` | Push disk file changes to the app                                  | `true`      |
+| `--app-sync` / `--no-app-sync`   | Accept app-initiated file writes (uploads, moves, deletes) to disk | `true`      |
+| `--verbose`                      | Log every request (method, path, status, duration)                 | `false`     |
 
 ---
 
@@ -275,12 +275,12 @@ cloudcannon orgs list
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--page <n>` | Page number to fetch |
-| `--items <n>` | Number of items per page |
-| `--sort-by <field>` | Field name to sort by |
-| `--sort-direction <ASC\|DESC>` | Sort direction |
+| Flag                             | Description                                  |
+| -------------------------------- | -------------------------------------------- |
+| `--page <n>`                     | Page number to fetch                         |
+| `--items <n>`                    | Number of items per page                     |
+| `--sort-by <field>`              | Field name to sort by                        |
+| `--sort-direction <ASC\|DESC>`   | Sort direction                               |
 | `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
 
 ---
@@ -296,8 +296,8 @@ cloudcannon orgs get
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                     | Description                        |
+| ------------------------ | ---------------------------------- |
 | `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
 
 ---
@@ -313,13 +313,13 @@ cloudcannon orgs sites list
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
-| `--page <n>` | Page number to fetch |
-| `--items <n>` | Number of items per page |
-| `--sort-by <field>` | Field name to sort by |
-| `--sort-direction <ASC\|DESC>` | Sort direction |
+| Flag                             | Description                                  |
+| -------------------------------- | -------------------------------------------- |
+| `--org <name\|id\|uuid>`         | The organization name, ID, or UUID           |
+| `--page <n>`                     | Page number to fetch                         |
+| `--items <n>`                    | Number of items per page                     |
+| `--sort-by <field>`              | Field name to sort by                        |
+| `--sort-direction <ASC\|DESC>`   | Sort direction                               |
 | `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
 
 ---
@@ -335,13 +335,13 @@ cloudcannon orgs inboxes list
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
-| `--page <n>` | Page number to fetch |
-| `--items <n>` | Number of items per page |
-| `--sort-by <field>` | Field name to sort by |
-| `--sort-direction <ASC\|DESC>` | Sort direction |
+| Flag                             | Description                                  |
+| -------------------------------- | -------------------------------------------- |
+| `--org <name\|id\|uuid>`         | The organization name, ID, or UUID           |
+| `--page <n>`                     | Page number to fetch                         |
+| `--items <n>`                    | Number of items per page                     |
+| `--sort-by <field>`              | Field name to sort by                        |
+| `--sort-direction <ASC\|DESC>`   | Sort direction                               |
 | `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
 
 ---
@@ -372,10 +372,10 @@ Run without all required fields to get interactive prompts for the missing piece
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                     | Description                        |
+| ------------------------ | ---------------------------------- |
 | `--org <name\|id\|uuid>` | The organization name, ID, or UUID |
-| `--name <string>` | The site name |
+| `--name <string>`        | The site name                      |
 
 Supported git hosts: `github.com`, `gitlab.com`, `bitbucket.org`.
 
@@ -391,8 +391,8 @@ cloudcannon sites get --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -407,8 +407,8 @@ cloudcannon sites rebuild --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -423,23 +423,23 @@ cloudcannon sites update-build-config --site my-site --ssg hugo
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
-| `--ssg <name>` | Static site generator name |
-| `--building-locked` / `--no-building-locked` | Lock the site from building |
-| `--default-locale <locale>` | Default locale for i18n |
-| `--install-command <cmd>` | Override install command |
-| `--build-command <cmd>` | Override build command |
-| `--output-path <path>` | Override output path |
-| `--preserved-paths <paths>` | Comma-separated preserved paths |
-| `--hugo-version <version>` | Hugo version |
-| `--node-version <version>` | Node version |
-| `--ruby-version <version>` | Ruby version |
-| `--deno-version <version>` | Deno version |
-| `--preserve-output` / `--no-preserve-output` | Preserve previous output |
-| `--include-git` / `--no-include-git` | Include git history in build |
-| `--environment-variables <key=value>` | Comma-separated environment variables |
+| Flag                                         | Description                                   |
+| -------------------------------------------- | --------------------------------------------- |
+| `--site <name\|id\|uuid\|domain>`            | The site name, ID, UUID, or domain (required) |
+| `--ssg <name>`                               | Static site generator name                    |
+| `--building-locked` / `--no-building-locked` | Lock the site from building                   |
+| `--default-locale <locale>`                  | Default locale for i18n                       |
+| `--install-command <cmd>`                    | Override install command                      |
+| `--build-command <cmd>`                      | Override build command                        |
+| `--output-path <path>`                       | Override output path                          |
+| `--preserved-paths <paths>`                  | Comma-separated preserved paths               |
+| `--hugo-version <version>`                   | Hugo version                                  |
+| `--node-version <version>`                   | Node version                                  |
+| `--ruby-version <version>`                   | Ruby version                                  |
+| `--deno-version <version>`                   | Deno version                                  |
+| `--preserve-output` / `--no-preserve-output` | Preserve previous output                      |
+| `--include-git` / `--no-include-git`         | Include git history in build                  |
+| `--environment-variables <key=value>`        | Comma-separated environment variables         |
 
 `--environment-variables` accepts a comma-separated list of `key=value` pairs:
 
@@ -471,8 +471,8 @@ cloudcannon sites files list --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -488,10 +488,10 @@ cloudcannon sites files get --site my-site index.html --output ./local-index.htm
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
-| `--output <path>` | Path to save the file to. If not provided then the file is printed to STDOUT |
+| Flag                              | Description                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required)                                |
+| `--output <path>`                 | Path to save the file to. If not provided then the file is printed to STDOUT |
 
 ---
 
@@ -506,11 +506,11 @@ cloudcannon sites files upload --site my-site ./local-file.html /uploaded-file.h
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
-| `--type <mime>` | MIME type of the file | |
-| `--allow-overwrite` | Overwrite the destination if it already exists | `false` |
+| Flag                              | Description                                    | Default |
+| --------------------------------- | ---------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required)  |
+| `--type <mime>`                   | MIME type of the file                          |         |
+| `--allow-overwrite`               | Overwrite the destination if it already exists | `false` |
 
 ---
 
@@ -525,10 +525,10 @@ cloudcannon sites files move --site my-site content/old.md content/new.md --allo
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
-| `--allow-overwrite` | Overwrite the destination if it already exists | `false` |
+| Flag                              | Description                                    | Default |
+| --------------------------------- | ---------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required)  |         |
+| `--allow-overwrite`               | Overwrite the destination if it already exists | `false` |
 
 ---
 
@@ -543,10 +543,10 @@ cloudcannon sites files clone --site my-site content/post.md content/post-copy.m
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
-| `--allow-overwrite` | Overwrite the destination if it already exists | `false` |
+| Flag                              | Description                                    | Default |
+| --------------------------------- | ---------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required)  |         |
+| `--allow-overwrite`               | Overwrite the destination if it already exists | `false` |
 
 ---
 
@@ -561,10 +561,10 @@ cloudcannon sites files delete --site my-site content/a.md content/b.md --discar
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
-| `--discard-unsaved` | Discard any unsaved edits to the files | `false` |
+| Flag                              | Description                                   | Default |
+| --------------------------------- | --------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |         |
+| `--discard-unsaved`               | Discard any unsaved edits to the files        | `false` |
 
 ---
 
@@ -579,9 +579,9 @@ cloudcannon sites files restore --site my-site content/a.md content/b.md
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| Flag                              | Description                                   | Default |
+| --------------------------------- | --------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |         |
 
 ---
 
@@ -596,9 +596,9 @@ cloudcannon sites files discard --site my-site content/a.md content/b.md
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
+| Flag                              | Description                                   | Default |
+| --------------------------------- | --------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |         |
 
 ---
 
@@ -613,10 +613,10 @@ cloudcannon sites files list-edits --site my-site --verbose
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
-| `--verbose` | Print the full objects returned by the API | `false` |
+| Flag                              | Description                                   | Default |
+| --------------------------------- | --------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |         |
+| `--verbose`                       | Print the full objects returned by the API    | `false` |
 
 ---
 
@@ -631,11 +631,11 @@ cloudcannon sites files commit --site my-site content/a.md content/b.md --messag
 
 **Flags**
 
-| Flag | Description | Default |
-|---|---|---|
-| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) | |
-| `--all` | Commit all files in the editing session | `false` |
-| `--message <msg>` | Commit message | |
+| Flag                              | Description                                   | Default |
+| --------------------------------- | --------------------------------------------- | ------- |
+| `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |         |
+| `--all`                           | Commit all files in the editing session       | `false` |
+| `--message <msg>`                 | Commit message                                |         |
 
 ---
 
@@ -649,14 +649,14 @@ cloudcannon sites builds list --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
-| `--page <n>` | Page number to fetch |
-| `--items <n>` | Number of items per page |
-| `--sort-by <field>` | Field name to sort by |
-| `--sort-direction <ASC\|DESC>` | Sort direction |
-| `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
+| `--page <n>`                      | Page number to fetch                          |
+| `--items <n>`                     | Number of items per page                      |
+| `--sort-by <field>`               | Field name to sort by                         |
+| `--sort-direction <ASC\|DESC>`    | Sort direction                                |
+| `--filter <key=value,key=value>`  | Comma-separated key=value pairs to filter by  |
 
 ---
 
@@ -670,8 +670,8 @@ cloudcannon sites print-last-build --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -686,8 +686,8 @@ cloudcannon sites print-last-failed-build --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -702,8 +702,8 @@ cloudcannon sites print-last-sync --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -718,8 +718,8 @@ cloudcannon sites print-last-failed-sync --site my-site
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag                              | Description                                   |
+| --------------------------------- | --------------------------------------------- |
 | `--site <name\|id\|uuid\|domain>` | The site name, ID, UUID, or domain (required) |
 
 ---
@@ -734,8 +734,8 @@ cloudcannon builds print-logs --build <uuid>
 
 **Flags**
 
-| Flag | Description |
-|---|---|
+| Flag             | Description               |
+| ---------------- | ------------------------- |
 | `--build <uuid>` | The build UUID (required) |
 
 ---
@@ -750,13 +750,13 @@ cloudcannon inboxes submissions list --inbox my-inbox
 
 **Flags**
 
-| Flag | Description |
-|---|---|
-| `--inbox <name\|id\|key\|uuid>` | The inbox name, ID, key, or UUID (required) |
-| `--page <n>` | Page number to fetch |
-| `--items <n>` | Number of items per page |
-| `--sort-by <field>` | Field name to sort by |
-| `--sort-direction <ASC\|DESC>` | Sort direction |
+| Flag                             | Description                                  |
+| -------------------------------- | -------------------------------------------- |
+| `--inbox <name\|id\|key\|uuid>`  | The inbox name, ID, key, or UUID (required)  |
+| `--page <n>`                     | Page number to fetch                         |
+| `--items <n>`                    | Number of items per page                     |
+| `--sort-by <field>`              | Field name to sort by                        |
+| `--sort-direction <ASC\|DESC>`   | Sort direction                               |
 | `--filter <key=value,key=value>` | Comma-separated key=value pairs to filter by |
 
 ---
