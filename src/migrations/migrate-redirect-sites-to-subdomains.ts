@@ -5,10 +5,38 @@ import { defineCommand } from 'citty';
 import { exitOnCancel, listAllPages, promptOrg, text as styleText } from '../configure/utility.ts';
 import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 
-function fromMatchesAllRoutes(glob: string): boolean {
+function fromMatchesAllRoutes(glob: unknown): boolean {
+	if (typeof glob !== 'string') {
+		return false;
+	}
+
 	const normalized = glob.replace(/^\//, '');
 
 	return !!normalized.match(/^\(\.\*\??\)$/);
+}
+
+function getValidRedirectLocation(to: unknown): string | undefined {
+	if (typeof to !== 'string') {
+		return;
+	}
+
+	let toURL: URL;
+	try {
+		toURL = new URL(to);
+	} catch {
+		return;
+	}
+	if (
+		toURL.pathname !== '/$1' ||
+		toURL.hash.length ||
+		toURL.search.length ||
+		toURL.username.length ||
+		toURL.password.length ||
+		toURL.port.length
+	) {
+		return;
+	}
+	return toURL.host;
 }
 
 type RedirectCode = 301 | 302 | 307 | 308 | undefined;
@@ -67,18 +95,18 @@ async function siteRedirectLocation(
 	const siteLabel = site.domain_name ?? site.uuid;
 	try {
 		const fileResp = await siteClient.getFile('.cloudcannon/routing.json').catch((resp) => {
-            if (resp.status !== 404) {
-                console.error(
-                    styleText.secondary(
-                        `${siteLabel}: could not read .cloudcannon/routing.json. (${resp.status})`
-                    )
-                );
-            }
-            return;
-        });
-        if (!fileResp?.ok) {
-            return;
-        }
+			if (resp.status !== 404) {
+				console.error(
+					styleText.secondary(
+						`${siteLabel}: could not read .cloudcannon/routing.json. (${resp.status})`
+					)
+				);
+			}
+			return;
+		});
+		if (!fileResp?.ok) {
+			return;
+		}
 		const routingFile: unknown = await fileResp.json();
 		if (!routingFile || typeof routingFile !== 'object') {
 			return;
@@ -90,39 +118,33 @@ async function siteRedirectLocation(
 		) {
 			return;
 		}
-		if (!('routes' in routingFile) || !Array.isArray(routingFile.routes)) {
+		if (
+			!('routes' in routingFile) ||
+			!Array.isArray(routingFile.routes) ||
+			routingFile.routes.length !== 1
+		) {
 			return;
 		}
-		const routes = routingFile.routes;
-		if (routes.length !== 1) {
-			return;
-		}
-		const route = routes[0];
+		const route = routingFile.routes[0];
 		if (!route || typeof route !== 'object') {
 			return;
 		}
 		const { from, to, status, substitutions } = route as Record<string, unknown>;
 		if (
-			typeof from !== 'string' ||
 			!fromMatchesAllRoutes(from) ||
-			typeof to !== 'string' ||
 			substitutions === false ||
 			(typeof status === 'number' && !REDIRECT_STATUSES.includes(status))
 		) {
 			return;
 		}
-		let toURL: URL;
-		try {
-			toURL = new URL(to);
-		} catch {
+		const toUrl = getValidRedirectLocation(to);
+		if (!toUrl) {
 			return;
 		}
-		if (toURL.pathname !== '/$1') {
-			return;
-		}
+
 		const statusCode =
 			typeof status === 'number' ? (status as Exclude<RedirectCode, undefined>) : undefined;
-		return { to: toURL.host, status: statusCode };
+		return { to: toUrl, status: statusCode };
 	} catch (err: unknown) {
 		console.error(
 			styleText.secondary(`${siteLabel}: ${err instanceof Error ? err.message : String(err)}`)
@@ -158,12 +180,19 @@ const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 
 		const domains = await listAllPages((page) =>
 			orgClient.domains({ page, filters: { uses_dns: false } })
-		);
+		).catch((e) => {
+			console.error(styleText.bad('An error occurred while searching your Domains.'));
+			handleAPIError(e);
+			process.exit(1);
+		});
 
-		spinner.message('Fetching Sites');
 		const sites = await listAllPages((page) =>
 			orgClient.sites({ page, filters: { has_domain_name: true, has_subpath: false } })
-		);
+		).catch((e) => {
+			console.error(styleText.bad('An error occurred while searching your Sites.'));
+			handleAPIError(e);
+			process.exit(1);
+		});
 
 		const migrationItems: MigrationItem[] = [];
 
@@ -217,7 +246,11 @@ const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 			}
 			if (subdomain.sites && subdomain.sites.length > 1) {
 				process.exitCode = 1;
-				console.error(styleText.bad(`${domainName} has multiple Sites attached and could not be automatically migrated.`));
+				console.error(
+					styleText.bad(
+						`${domainName} has multiple Sites attached and could not be automatically migrated.`
+					)
+				);
 				continue;
 			}
 			try {
@@ -232,8 +265,8 @@ const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 				);
 			} catch (err: unknown) {
 				process.exitCode = 1;
-				handleAPIError(err);
 				console.error(styleText.bad(`Failed to convert ${domainName}.`));
+				handleAPIError(err);
 			}
 		}
 	},
