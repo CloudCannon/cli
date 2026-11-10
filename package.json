@@ -41,7 +41,7 @@
 	},
 	"author": "CloudCannon <support@cloudcannon.com>",
 	"devDependencies": {
-		"@biomejs/biome": "2.6.5",
+		"@biomejs/biome": "2.6.6",
 		"@types/node": "26.6.6",
 		"toolproof": "0.20.0",
 		"typescript": "7.0.2"
