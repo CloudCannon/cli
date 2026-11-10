@@ -154,7 +154,7 @@ async function siteRedirectLocation(
 
 const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 	meta: {
-		name: 'migrateRedirectSitesToSubdomains',
+		name: 'convert-redirect-sites-to-subdomains',
 		description:
 			'Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains.',
 	},

@@ -7,6 +7,6 @@ export const migrateCommand = defineCommand({
 		description: 'Migrate CloudCannon resources.',
 	},
 	subCommands: {
-		migrateRedirectSitesToSubdomains: migrateRedirectSitesToSubdomainsCommand,
+		'convert-redirect-sites-to-subdomains': migrateRedirectSitesToSubdomainsCommand,
 	},
 });
