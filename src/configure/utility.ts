@@ -1,15 +1,59 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { styleText } from 'node:util';
-import { cancel, isCancel } from '@clack/prompts';
+import { cancel, isCancel, select } from '@clack/prompts';
 import type { SsgKey } from '@cloudcannon/configuration-types';
 import { ssgs } from '@cloudcannon/gadget';
+import type CloudCannonClient from '@cloudcannon/sdk';
+import type { Org, PaginatedResponse } from '@cloudcannon/sdk';
 import { stringify as stringifyYaml } from 'yaml';
+import { resolveOrg } from '../orgs/resolve.ts';
+import { handleAPIError } from '../sdk-client.ts';
 
 export type Mode = 'hosted' | 'headless';
 export type Format = 'yaml' | 'json';
 
 const ssgValues = Object.values(ssgs);
+
+export async function promptOrg(
+	client: CloudCannonClient,
+	prefilled?: string
+): Promise<Org | undefined> {
+	const resolved = await resolveOrg(client, prefilled);
+	if (resolved) {
+		return resolved;
+	}
+
+	if (typeof prefilled === 'string') {
+		process.exitCode = 1;
+		return;
+	}
+
+	try {
+		const orgs = await client.orgs();
+		if (orgs.items.length === 0) {
+			console.error('No Organizations found for this account.');
+			return;
+		}
+
+		const options = orgs.items.map((org) => ({
+			value: org.uuid,
+			label: org.name ?? org.uuid,
+		}));
+
+		const choice = await select({
+			message: 'Select an Organization:',
+			options,
+		});
+		exitOnCancel(choice);
+
+		const selected = orgs.items.find((org) => org.uuid === choice);
+		return selected;
+	} catch (err: unknown) {
+		handleAPIError(err);
+		return;
+	}
+}
 
 export function detectSsg(filePaths: string[]): { ssg: SsgKey; scores: Record<SsgKey, number> } {
 	const scores: Record<SsgKey, number> = {
@@ -160,4 +204,19 @@ export function exitOnCancel<T>(value: T): asserts value is Exclude<T, symbol> {
 		cancel('Operation canceled.');
 		process.exit(0);
 	}
+}
+
+export async function listAllPages<T>(
+	fetchPage: (page: number) => Promise<PaginatedResponse<T>>
+): Promise<T[]> {
+	const items: T[] = [];
+	let page = 1;
+	let totalPages = 1;
+	do {
+		const response = await fetchPage(page);
+		items.push(...response.items);
+		totalPages = response.total_pages ?? page;
+		page++;
+	} while (page <= totalPages);
+	return items;
 }

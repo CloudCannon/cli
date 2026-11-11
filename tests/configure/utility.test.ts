@@ -5,6 +5,7 @@ import {
 	checkMode,
 	checkSsg,
 	extensionFromFormat,
+	listAllPages,
 	stringify,
 } from '../../src/configure/utility.ts';
 
@@ -73,5 +74,42 @@ describe('stringify', () => {
 	it('outputs valid YAML', () => {
 		const result = stringify({ foo: 'bar' }, 'yaml');
 		assert.equal(result, 'foo: bar\n');
+	});
+});
+
+describe('listAllPages', () => {
+	it('aggregates items across all pages', async () => {
+		const pages = new Map<number, { items: string[]; total_pages?: number }>([
+			[1, { items: ['a', 'b'], total_pages: 3 }],
+			[2, { items: ['c'], total_pages: 3 }],
+			[3, { items: ['d', 'e'], total_pages: 3 }],
+		]);
+		const requestedPages: number[] = [];
+
+		const items = await listAllPages(async (page) => {
+			requestedPages.push(page);
+			return pages.get(page) ?? { items: [] };
+		});
+
+		assert.deepEqual(items, ['a', 'b', 'c', 'd', 'e']);
+		assert.deepEqual(requestedPages, [1, 2, 3]);
+	});
+
+	it('stops after the first page when total_pages is missing', async () => {
+		let calls = 0;
+
+		const items = await listAllPages(async () => {
+			calls++;
+			return { items: ['a'] };
+		});
+
+		assert.deepEqual(items, ['a']);
+		assert.equal(calls, 1);
+	});
+
+	it('returns an empty list for an empty first page', async () => {
+		const items = await listAllPages(async () => ({ items: [] }));
+
+		assert.deepEqual(items, []);
 	});
 });

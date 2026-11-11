@@ -2,11 +2,9 @@ import { execFile } from 'node:child_process';
 import { basename } from 'node:path';
 import { promisify } from 'node:util';
 import * as p from '@clack/prompts';
-import type CloudCannonClient from '@cloudcannon/sdk';
-import type { Org, Provider } from '@cloudcannon/sdk';
+import type { Provider } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
-import { exitOnCancel, text } from '../configure/utility.ts';
-import { resolveOrg } from '../orgs/resolve.ts';
+import { exitOnCancel, promptOrg, text } from '../configure/utility.ts';
 import { getSdkClient, handleAPIError } from '../sdk-client.ts';
 
 const execFileAsync = promisify(execFile);
@@ -73,43 +71,6 @@ async function getLocalGitBranch(): Promise<string | undefined> {
 		return stdout.trim() || undefined;
 	} catch {
 		return undefined;
-	}
-}
-
-async function promptOrg(client: CloudCannonClient, prefilled?: string): Promise<Org | undefined> {
-	const resolved = await resolveOrg(client, prefilled);
-	if (resolved) {
-		return resolved;
-	}
-
-	if (typeof prefilled === 'string') {
-		process.exitCode = 1;
-		return;
-	}
-
-	try {
-		const orgs = await client.orgs();
-		if (orgs.items.length === 0) {
-			console.error('No Organizations found for this account.');
-			return;
-		}
-
-		const options = orgs.items.map((org) => ({
-			value: org.uuid,
-			label: org.name ?? org.uuid,
-		}));
-
-		const choice = await p.select({
-			message: 'Select an Organization:',
-			options,
-		});
-		exitOnCancel(choice);
-
-		const selected = orgs.items.find((org) => org.uuid === choice);
-		return selected;
-	} catch (err: unknown) {
-		handleAPIError(err);
-		return;
 	}
 }
 

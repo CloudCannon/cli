@@ -7,6 +7,7 @@ import { devCommand } from './dev.ts';
 import { inboxesCommand } from './inboxes.ts';
 import { loginCommand } from './login.ts';
 import { logoutCommand } from './logout.ts';
+import { migrateCommand } from './migrate.ts';
 import { orgsCommand } from './orgs.ts';
 import { sitesCommand } from './sites.ts';
 
@@ -21,10 +22,11 @@ export const main = defineCommand({
 		configure: configureCommand,
 		dev: devCommand,
 		inboxes: inboxesCommand,
-		orgs: orgsCommand,
-		sites: sitesCommand,
 		login: loginCommand,
 		logout: logoutCommand,
+		migrate: migrateCommand,
+		orgs: orgsCommand,
+		sites: sitesCommand,
 		validate: validateCommand,
 	},
 });
