@@ -15,7 +15,6 @@ steps:
       ╎
       ╎Use cloudcannon migrate <command> --help for more information about a command.
       ╎
-      ╎
   - I run "npm -s run cloudcannon -- migrate convert-redirect-sites-to-subdomains --help | sed 's/[[:space:]]*$//'"
   - snapshot: stdout
     snapshot_content: |-
@@ -26,4 +25,5 @@ steps:
       ╎OPTIONS
       ╎
       ╎  --org=<name|id|uuid>    The Organization name, ID, or UUID
+      ╎
       ╎
