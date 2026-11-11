@@ -40,14 +40,16 @@ function getValidRedirectLocation(to: unknown): string | undefined {
 }
 
 type RedirectCode = 301 | 302 | 307 | 308 | undefined;
+function statusIsSupportedRedirect(status: unknown): status is RedirectCode {
+	return typeof status === 'number' && [301, 302, 307, 308].includes(status);
+}
+
 interface MigrationItem {
 	site: Site;
 	domain: BaseDomain;
 	redirectLocation: string;
 	redirectStatus: RedirectCode;
 }
-
-const REDIRECT_STATUSES: readonly number[] = [301, 302, 307, 308];
 
 function siteBelongsToBaseDomain(site: Site, baseDomain: string): boolean {
 	const domainName = site.domain_name?.toLowerCase();
@@ -130,10 +132,11 @@ async function siteRedirectLocation(
 			return;
 		}
 		const { from, to, status, substitutions } = route as Record<string, unknown>;
+		const routeStatus = Number(status);
 		if (
 			!fromMatchesAllRoutes(from) ||
 			substitutions === false ||
-			(typeof status === 'number' && !REDIRECT_STATUSES.includes(status))
+			!statusIsSupportedRedirect(routeStatus)
 		) {
 			return;
 		}
@@ -141,10 +144,7 @@ async function siteRedirectLocation(
 		if (!toUrl) {
 			return;
 		}
-
-		const statusCode =
-			typeof status === 'number' ? (status as Exclude<RedirectCode, undefined>) : undefined;
-		return { to: toUrl, status: statusCode };
+		return { to: toUrl, status: routeStatus };
 	} catch (err: unknown) {
 		console.error(
 			styleText.secondary(`${siteLabel}: ${err instanceof Error ? err.message : String(err)}`)
@@ -230,30 +230,30 @@ const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 
 		for (const item of confirmedItems) {
 			const domainName = item.site.domain_name;
-			if (!domainName) {
-				continue;
-			}
-			const domainClient = client.domain(item.domain.uuid);
-			const subdomain = (
-				await domainClient.getSubdomains({
-					filters: { search: domainName, serving_mode: 'site' },
-				})
-			).items.find((sub) => sub.domain_name === domainName);
-			if (!subdomain) {
-				process.exitCode = 1;
-				console.error(styleText.bad(`Could not find a Site Subdomain for ${domainName}.`));
-				continue;
-			}
-			if (subdomain.sites && subdomain.sites.length > 1) {
-				process.exitCode = 1;
-				console.error(
-					styleText.bad(
-						`${domainName} has multiple Sites attached and could not be automatically migrated.`
-					)
-				);
-				continue;
-			}
 			try {
+				if (!domainName) {
+					continue;
+				}
+				const domainClient = client.domain(item.domain.uuid);
+				const subdomain = (
+					await domainClient.getSubdomains({
+						filters: { search: domainName, serving_mode: 'site' },
+					})
+				).items.find((sub) => sub.domain_name === domainName);
+				if (!subdomain) {
+					process.exitCode = 1;
+					console.error(styleText.bad(`Could not find a Site Subdomain for ${domainName}.`));
+					continue;
+				}
+				if (subdomain.sites && subdomain.sites.length > 1) {
+					process.exitCode = 1;
+					console.error(
+						styleText.bad(
+							`${domainName} has multiple Sites attached and could not be automatically migrated.`
+						)
+					);
+					continue;
+				}
 				await domainClient.subdomain(subdomain.uuid).changeToRedirect({
 					redirect_target: item.redirectLocation,
 					redirect_status: item.redirectStatus,
