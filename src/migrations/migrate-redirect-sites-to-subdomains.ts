@@ -155,12 +155,12 @@ async function siteRedirectLocation(
 	}
 }
 
-const cautionaryText = "We encourage you to double-check the results before confirming, to ensure no unintentional changes are made."
-const description = (
-`In November 2026, CloudCannon introduced a new way to redirect all traffic from one host to another. This command scans an Organization for Sites with Custom Domains using .cloudcannon/routing.json to redirect all traffic. It then offers to change the serving mode for each of those Subdomains, so that it redirects to the same host with this new strategy.
+const cautionaryText =
+	'We encourage you to double-check the results before confirming, to ensure no unintentional changes are made.';
+const description = `In November 2026, CloudCannon introduced a new way to redirect all traffic from one host to another. This command scans an Organization for Sites with Custom Domains using .cloudcannon/routing.json to redirect all traffic. It then offers to change the serving mode for each of those Subdomains, so that it redirects to the same host with this new strategy.
 
 ${cautionaryText}
-`);
+`;
 
 const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 	meta: {
@@ -224,7 +224,9 @@ const migrateRedirectSitesToSubdomainsCommand = defineCommand({
 				});
 			}
 		}
-		spinner.stop(`Found ${migrationItems.length} Subdomain${migrationItems.length !== 1 ? 's' : ''} that could be migrated.`);
+		spinner.stop(
+			`Found ${migrationItems.length} Subdomain${migrationItems.length !== 1 ? 's' : ''} that could be migrated.`
+		);
 
 		if (migrationItems.length === 0) {
 			console.log(
