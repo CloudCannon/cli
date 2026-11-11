@@ -2,7 +2,7 @@ name: cloudcannon migrate --help
 
 steps:
   - ref: ../core/run-cli.toolproof.yml
-  - I run "npm -s run cloudcannon -- miggrate --help | sed 's/[[:space:]]*$//'"
+  - I run "npm -s run cloudcannon -- migrate --help | sed 's/[[:space:]]*$//'"
   - snapshot: stdout
     snapshot_content: |-
       ╎Migrate CloudCannon resources. (cloudcannon migrate v0.0.0)
