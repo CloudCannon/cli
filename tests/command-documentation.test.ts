@@ -78,8 +78,8 @@ describe('documentCommand', () => {
 		assert.ok(migration);
 		assert.equal(migration.fullName, 'cloudcannon migrate convert-redirect-sites-to-subdomains');
 		assert.equal(
-			migration.description,
-			'Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains.'
+			migration.description?.replace(/\s+/g, ' '),
+			'In November 2026, CloudCannon introduced a new way to redirect all traffic from one host to another. This command scans an Organization for Sites with Custom Domains using .cloudcannon/routing.json to redirect all traffic. It then offers to change the serving mode for each of those Subdomains, so that it redirects to the same host with this new strategy. We encourage you to double-check the results before confirming, to ensure no unintentional changes are made. '
 		);
 
 		const orgArg = migration.options?.find((arg) => arg.name === 'org');

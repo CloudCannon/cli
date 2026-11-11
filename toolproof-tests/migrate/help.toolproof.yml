@@ -11,14 +11,20 @@ steps:
       ╎
       ╎COMMANDS
       ╎
-      ╎  convert-redirect-sites-to-subdomains    Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains.
+      ╎  convert-redirect-sites-to-subdomains    In November 2026, CloudCannon introduced a new way to redirect all traffic from one host to another. This command scans an Organization for Sites with Custom Domains using .cloudcannon/routing.json to redirect all traffic. It then offers to change the serving mode for each of those Subdomains, so that it redirects to the same host with this new strategy.
+      ╎
+      ╎We encourage you to double-check the results before confirming, to ensure no unintentional changes are made.
+      ╎
       ╎
       ╎Use cloudcannon migrate <command> --help for more information about a command.
       ╎
   - I run "npm -s run cloudcannon -- migrate convert-redirect-sites-to-subdomains --help | sed 's/[[:space:]]*$//'"
   - snapshot: stdout
     snapshot_content: |-
-      ╎Convert Site Subdomains whose routing.json redirects all traffic into Redirect Subdomains. (migrate convert-redirect-sites-to-subdomains)
+      ╎In November 2026, CloudCannon introduced a new way to redirect all traffic from one host to another. This command scans an Organization for Sites with Custom Domains using .cloudcannon/routing.json to redirect all traffic. It then offers to change the serving mode for each of those Subdomains, so that it redirects to the same host with this new strategy.
+      ╎
+      ╎We encourage you to double-check the results before confirming, to ensure no unintentional changes are made.
+      ╎ (migrate convert-redirect-sites-to-subdomains)
       ╎
       ╎USAGE migrate convert-redirect-sites-to-subdomains [OPTIONS]
       ╎
