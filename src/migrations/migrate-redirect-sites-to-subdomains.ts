@@ -41,7 +41,7 @@ function getValidRedirectLocation(to: unknown): string | undefined {
 
 type RedirectCode = 301 | 302 | 307 | 308 | undefined;
 function statusIsSupportedRedirect(status: unknown): status is RedirectCode {
-	return typeof status === 'number' && [301, 302, 307, 308].includes(status);
+	return (typeof status === 'number' && [301, 302, 307, 308].includes(status)) || status === undefined;
 }
 
 interface MigrationItem {
@@ -131,11 +131,12 @@ async function siteRedirectLocation(
 		if (!route || typeof route !== 'object') {
 			return;
 		}
-		const { from, to, status, substitutions } = route as Record<string, unknown>;
-		const routeStatus = Number(status);
+		const { from, to, status, substitutions, forced } = route as Record<string, unknown>;
+		const routeStatus = Number(status) || undefined;
 		if (
 			!fromMatchesAllRoutes(from) ||
 			substitutions === false ||
+			forced === false ||
 			!statusIsSupportedRedirect(routeStatus)
 		) {
 			return;
