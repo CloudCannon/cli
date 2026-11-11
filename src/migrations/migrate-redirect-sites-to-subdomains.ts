@@ -41,7 +41,9 @@ function getValidRedirectLocation(to: unknown): string | undefined {
 
 type RedirectCode = 301 | 302 | 307 | 308 | undefined;
 function statusIsSupportedRedirect(status: unknown): status is RedirectCode {
-	return (typeof status === 'number' && [301, 302, 307, 308].includes(status)) || status === undefined;
+	return (
+		(typeof status === 'number' && [301, 302, 307, 308].includes(status)) || status === undefined
+	);
 }
 
 interface MigrationItem {
