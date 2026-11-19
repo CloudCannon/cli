@@ -12,6 +12,7 @@ import {
 	sitesPrintLastSyncCommand,
 } from './sites/print-last.ts';
 import { resolveSiteUuid } from './sites/resolve.ts';
+import { sitesStatusCommand } from './sites/status.ts';
 
 export const sitesListCommand = defineCommand({
 	meta: {
@@ -284,6 +285,7 @@ export const sitesCommand = defineCommand({
 		'update-build-config': sitesUpdateBuildConfigCommand,
 		files: sitesFilesCommand,
 		builds: sitesBuildsCommand,
+		status: sitesStatusCommand,
 		'print-last-build': sitesPrintLastBuildCommand,
 		'print-last-failed-build': sitesPrintLastFailedBuildCommand,
 		'print-last-sync': sitesPrintLastSyncCommand,
