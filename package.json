@@ -59,15 +59,15 @@
 	},
 	"license": "ISC",
 	"dependencies": {
-		"@bomb.sh/tab": "0.0.22",
+		"@bomb.sh/tab": "0.0.23",
 		"@clack/prompts": "1.9.0",
 		"@cloudcannon/configuration-loader": "0.0.15",
-		"@cloudcannon/configuration-types": "0.0.68",
+		"@cloudcannon/configuration-types": "0.0.69",
 		"@cloudcannon/gadget": "0.0.36",
 		"@cloudcannon/sdk": "0.0.14",
 		"chokidar": "6.0.0",
 		"citty": "0.2.2",
-		"ignore": "7.0.14",
+		"ignore": "7.0.16",
 		"yaml": "2.9.1"
 	}
 }
