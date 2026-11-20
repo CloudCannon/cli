@@ -55,6 +55,27 @@ if (dataDir) {
 	await mkdir(dataDir, { recursive: true });
 }
 
+const SENSITIVE_KEY = /api[-_]?key|authorization|secret|password|token/i;
+
+// Only ever applied to what the CLI sent, never to what the API sent back: a 422 names
+// the field and explains why, and an agent needs that text to correct itself.
+function redact(value: unknown): unknown {
+	if (Array.isArray(value)) {
+		return value.map(redact);
+	}
+
+	if (value && typeof value === 'object') {
+		return Object.fromEntries(
+			Object.entries(value).map(([key, entry]) => [
+				key,
+				SENSITIVE_KEY.test(key) ? '[redacted]' : redact(entry),
+			])
+		);
+	}
+
+	return value;
+}
+
 export function handleAPIError(err: unknown): void {
 	if (err instanceof AuthenticationError) {
 		console.error(
@@ -62,7 +83,7 @@ export function handleAPIError(err: unknown): void {
 		);
 
 		const details: { authHeaders: Record<string, string>; errors?: unknown; options?: unknown } = {
-			authHeaders: err.authHeaders,
+			authHeaders: redact(err.authHeaders) as Record<string, string>,
 		};
 
 		if (err.errors) {
@@ -70,7 +91,7 @@ export function handleAPIError(err: unknown): void {
 		}
 
 		if (err.options) {
-			details.options = err.options;
+			details.options = redact(err.options);
 		}
 
 		printErrorJson(details);
@@ -91,10 +112,16 @@ export function handleAPIError(err: unknown): void {
 		}
 
 		if (err.options) {
-			details.options = err.options;
+			details.options = redact(err.options);
 		}
 
 		printErrorJson(details);
+
+		if (err.status === 403) {
+			console.error(
+				'A 403 can mean the record does not exist, as well as that your access key cannot reach it.'
+			);
+		}
 	} else {
 		throw err;
 	}
@@ -176,7 +203,7 @@ export async function getSdkClient(): Promise<CloudCannonClient> {
 	} else if (apiKey) {
 		options = { key: apiKey, client };
 	} else {
-		console.log(
+		console.error(
 			`You must log in to run this command. Either run ${text.em('cloudcannon login')} to authorize with your CloudCannon account, or provide an API key through the CLOUDCANNON_API_KEY environment variable.`
 		);
 		process.exit(1);

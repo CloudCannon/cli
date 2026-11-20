@@ -1,9 +1,9 @@
 import type { ListInboxSubmissionsOptions } from '@cloudcannon/sdk';
 import { defineCommand } from 'citty';
 import { printJson } from '../configure/utility.ts';
-import { buildListOptions, listFlagDefs } from '../list-options.ts';
+import { listFlagDefs, parseListOptions } from '../list-options.ts';
 import { getSdkClient, handleAPIError } from '../sdk-client.ts';
-import { resolveInboxUuid } from './resolve.ts';
+import { inboxArg, resolveInboxUuid } from './resolve.ts';
 
 export const inboxesSubmissionsListCommand = defineCommand({
 	meta: {
@@ -11,15 +11,15 @@ export const inboxesSubmissionsListCommand = defineCommand({
 		description: 'List submissions for an inbox.',
 	},
 	args: {
-		inbox: {
-			type: 'string',
-			description: 'The inbox name, ID, key, or UUID',
-			valueHint: 'name|id|key|uuid',
-			required: true,
-		},
+		...inboxArg,
 		...listFlagDefs,
 	},
 	async run(ctx): Promise<void> {
+		const options = parseListOptions(ctx.args);
+		if (!options) {
+			process.exitCode = 1;
+			return;
+		}
 		const client = await getSdkClient();
 		const inboxUuid = await resolveInboxUuid(client, ctx.args.inbox);
 		if (!inboxUuid) {
@@ -27,7 +27,6 @@ export const inboxesSubmissionsListCommand = defineCommand({
 			return;
 		}
 		const inboxClient = client.inbox(inboxUuid);
-		const options = buildListOptions(ctx.args);
 		try {
 			const submissions = await inboxClient.getSubmissions(options as ListInboxSubmissionsOptions);
 			printJson({
