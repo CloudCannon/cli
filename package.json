@@ -61,7 +61,7 @@
 	"dependencies": {
 		"@bomb.sh/tab": "0.0.23",
 		"@clack/prompts": "1.9.0",
-		"@cloudcannon/configuration-loader": "0.0.15",
+		"@cloudcannon/configuration-loader": "0.0.16",
 		"@cloudcannon/configuration-types": "0.0.69",
 		"@cloudcannon/gadget": "0.0.36",
 		"@cloudcannon/sdk": "0.0.14",
